@@ -1,5 +1,6 @@
 """
 Util functions that needed a better home
+This is a mess... Needs to be cleaned up.
 """
 import os
 from collections import defaultdict

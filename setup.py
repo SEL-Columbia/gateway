@@ -10,6 +10,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 requires = [
     'dispatch',
     'fa.jquery',
+    'distribute',
     'pyramid_formalchemy',
     'pyramid_handlers',
     'python-dateutil',

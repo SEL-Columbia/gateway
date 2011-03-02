@@ -102,39 +102,12 @@
 <div class="widget-header">Manage and send SMS Messages</div>
 <div class="widget-content">
 
-<a  href="${request.application_url}/sms/index?limit=100"> Check all SMS
-  messages</a> 
-
-
-<form method="POST" id=""
-      action="${request.application_url}/send_message">
-
-  <table>    
-    <tr>
-      <td><label>Message delivery type</label></td>
-      <td>
-        <select name="delivery-type"> 
-          <option value="KannelOutgoingMessage">Kannel</option> 
-          <option value="OutgoingMessage">Netbook</option>
-        </select>               
-      </td>
-    </tr>
-    <tr>
-      <td><label>Phone Number</label></td>
-      <td><input type="text" name="number"value="" /></td>
-    </tr> 
-    <tr>
-      <td> <label>Message body</label></td>
-      <td><textarea name="text" id="" rows="10" cols="30"></textarea></td>
-    </tr>
-    <tr> 
-      <td> </td>
-      <td><input class="button" type="submit" name="" value="Send Test
-      Message" /> </td>
-    </tr> 
-
-  </table>
-</form>
+<ul> 
+  <li> <a  href="${request.application_url}/sms/index?limit=100"> Check all
+  SMS messages</a> </li>
+  <li> <a href="${request.application_url}/alerts/make"> Send an
+  alert or test message</a></li>
+</ul>
 </div> 
 </div>
 
@@ -142,23 +115,9 @@
 <div id="manage-system-logs" class="widget">
   <div class="widget-header" >Manage and view system logs</div>
   <div class="widget-content">
-    <table >
-      <tr>
-        <th>Date recorded</th>
-        <th>Text</th>
-      </tr>
-      % for log in system_logs[:20]:
-      <tr>
-        <td>${log.created}</td>
-        <td>${log.text}</td>     
-      </tr>
-      % endfor 
-      
-    </table>
+    ${logs.render()}
   </div>
 </div>
-
-
 
 % else: 
 % endif

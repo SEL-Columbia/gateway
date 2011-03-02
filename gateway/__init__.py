@@ -90,7 +90,9 @@ def main(global_config, **settings):
     config.add_route('graph',
                      '/graph/{class}/{id}',
                      view='gateway.handlers.GraphView')
-
+    config.add_handler('alerts',
+                       '/alerts/{action}',
+                       'gateway.handlers:AlertHandler')
     config.add_handler('dashboard', '/',
                        'gateway.handlers:Dashboard',
                        action='index')
@@ -120,6 +122,7 @@ def main(global_config, **settings):
                        handler='gateway.handlers:AccountHandler')
     config.add_handler('token', 'token/:action/:id',
                        handler='gateway.handlers:TokenHandler')
+
     config.add_subscriber('gateway.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
     config.include('pyramid_formalchemy')

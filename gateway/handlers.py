@@ -178,6 +178,16 @@ class GraphView(RestView):
         else:
             return Response("Class not supported")
 
+class AlertHandler(object):
+    """
+    """
+    def __init__(self, request):
+        self.request = request
+
+    @action(renderer='alerts/make.mako', permission='view')
+    def make(self):
+        return {}
+
 class Dashboard(object):
     """
     Home page for the gateway
@@ -187,7 +197,7 @@ class Dashboard(object):
         self.breadcrumbs = breadcrumbs[:]
         self.session = DBSession()
 
-    @action(renderer='index.mako', permission="view")
+    @action(renderer='index.mako', permission='view')
     def index(self):
         meters = Grid(Meter, self.session.query(Meter).all())
         meters.configure(readonly=True, exclude=meters._get_fields()[:2])
@@ -195,15 +205,21 @@ class Dashboard(object):
                       Field('Name',
                             value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
                                                                      ,item.name)))
+
         interfaces = Grid(CommunicationInterface,
                           self.session.query(CommunicationInterface).all())
-        interfaces.configure(readonly=True)
+        interfaces.configure(readonly=True, exclude=[interfaces._get_fields()[0]])
+        interfaces.append(Field('Name',
+                                value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
+                                                                         ,item.name)))
+
+        logs = Grid(SystemLog, self.session.query(SystemLog).order_by(desc(SystemLog.created)).all())
+        logs.configure(readonly=True)
         return {
             'interfaces': interfaces,
             'logged_in': authenticated_userid(self.request),
             'tokenBatchs': self.session.query(TokenBatch).all(),
-            'system_logs': self.session.query(SystemLog).order_by(
-                desc(SystemLog.created)).all(),
+            'logs': logs,
             'meters': meters,
             'breadcrumbs': self.breadcrumbs }
 
