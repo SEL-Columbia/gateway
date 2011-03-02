@@ -128,31 +128,7 @@ ${headers.ggRaphael(request)}
 </table>
 </form>
 </div> 
-
-<table class="circuits">
-  <tr>
-    <th>Circuit db id</th>
-    <th>Circuit id</th>
-    <th>Account</th>
-    <th>Account language</th>
-    <th>Account phone</th>
-    <th>Energy max</th> 
-    <th>Power max</th>
-  </tr>
-  
-    % for circuit in meter.get_circuits(): 
-  <tr>
-    <td>${circuit.id}</td>
-    <td><a href="${request.application_url}/circuit/index/${circuit.id}">${circuit.ip_address}</a></td>
-    <td>${circuit.pin}</td>
-    <td>${circuit.account.lang}</td>
-    <td>${circuit.account.phone}</td>
-    <td>${circuit.energy_max}</td>
-    <td>${circuit.power_max}</td>
-  </tr> 
-    % endfor 
-
-</table>
+${grid.render()}
 <hr /> 
 
 </%def> 
