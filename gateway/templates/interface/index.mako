@@ -13,6 +13,9 @@
       </tr>
       % endfor 
     </table>
+    <a 
+       href="${request.application_url}/edit/${type(interface).__name__}/${interface.id}">
+      Edit</a> |
     <a href="${request.application_url}/interface/remove/${interface.id}">
       Remove</a>
 </%def>

@@ -9,6 +9,9 @@
 
 <%def name="content()"> 
    <br />
-   <p>${cls.__doc__}</p>
-   ${form.render()}
+   <form method="POST" id="" 
+         action="${request.application_url}/add/${cls}">
+     ${fs.render()}
+     <input type="submit" name="submit" value="Add new ${cls.__name__}" />
+   </form>
 </%def>

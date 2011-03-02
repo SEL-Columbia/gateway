@@ -23,7 +23,7 @@
   <div class="widget-header">Manage meters</div>
   <div class="widget-content">
   <p><a class="button" 
-        href="${request.application_url}/add_meter"> 
+        href="${request.application_url}/add/Meter"> 
       Add a new meter</a></p>
   <table>
     <tr>
@@ -49,10 +49,10 @@
   <div class="widget-header">Manage Interfaces</div>
   <div class="widget-content">
   <p><a class="button"
-        href="${request.application_url}/add?class=KannelInterface">
+        href="${request.application_url}/add/KannelInterface">
       Add kannel interface</a></p>
   <p><a class="button"
-        href="${request.application_url}/add?class=NetbookInterface">
+        href="${request.application_url}/add/NetbookInterface">
       Add netbook interface</a></p>  
   <hr />
   <table>
