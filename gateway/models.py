@@ -57,7 +57,7 @@ class CommunicationInterface(Base):
     provider = Column(String)
     location = Column(String)
 
-    def __init__(self, name, provider, location):
+    def __init__(self, name=None, provider=None, location=None):
         self.name = name
         self.provider = provider
         self.location = location
@@ -85,8 +85,8 @@ class KannelInterface(CommunicationInterface):
     username = Column(String)
     password = Column(String)
 
-    def __init__(self, name, location, host, port,
-                 provider, username, password):
+    def __init__(self, name=None, location=None, host=None, port=None,
+                 provider=None, username=None, password=None):
         CommunicationInterface.__init__(self, name, provider, location)
         self.host = host
         self.port = port
@@ -140,7 +140,7 @@ class NetbookInterface(CommunicationInterface):
     id = Column(Integer, ForeignKey('communication_interface.id'),
                 primary_key=True)
 
-    def __init__(self, name, provider, location):
+    def __init__(self, name=None, provider=None, location=None):
         CommunicationInterface.__init__(self, name, provider, location)
 
     def sendMessage(self, number, text, incoming):
@@ -189,8 +189,9 @@ class Meter(Base):
 
     slug = Column(String)
 
-    def __init__(self, name, phone, location, battery, status,
-                 panel_capacity, communication_interface_id):
+    def __init__(self, name=None, phone=None, location=None,
+                 battery=None, status=None,panel_capacity=None,
+                 communication_interface_id=None):
         self.uuid = str(uuid.uuid4())
         self.name = name
         self.phone = phone
@@ -198,8 +199,9 @@ class Meter(Base):
         self.date = get_now()
         self.battery = battery
         self.communication_interface_id = communication_interface_id
-        self.panel_capacity = panel_capacity
-        self.slug = Meter.slugify(name)
+        self.panel_capacity = panel_capacity        
+        if name is not None:
+            self.slug = Meter.slugify(name)
 
     def getMessageType(self, job=False):
         """
@@ -242,13 +244,13 @@ class Meter(Base):
         return slug.replace(' ', '-')
 
     def getUrl(self):
-        return "/meter/index/%s" % self.slug
+        return "/meter/index/%s" % self.id
 
     def edit_url(self):
-        return "/meter/edit/%s" % self.slug
+        return "/edit/Meter/%s" % self.id
 
     def remove_url(self):
-        return "meter/remove/%s" % self.slug
+        return "meter/remove/%s" % self.id
 
     def __str__(self):
         return "Meter %s" % self.name
@@ -297,8 +299,9 @@ class Circuit(Base):
                         backref='circuit',
                         primaryjoin=account_id == Account.id)
 
-    def __init__(self, meter, account, pin,
-                 energy_max, power_max, ip_address, status=1, credit=0):
+    def __init__(self, meter=None, account=None, pin=None,
+                 energy_max=None, power_max=None,
+                 ip_address=None, status=1, credit=0):
         self.date = get_now()
         self.uuid = str(uuid.uuid4())
         self.pin = pin
@@ -358,7 +361,7 @@ class Circuit(Base):
         return "/circuit/index/%s" % self.id
 
     def edit_url(self):
-        return "/circuit/edit/%s" % self.id
+        return "/edit/Circuit/%s" % self.id
 
     def remove_url(self):
         return "/circuit/remove/%s" % self.id
@@ -394,7 +397,7 @@ class Message(Base):
     number = Column(String)
     uuid = Column(String)
 
-    def __init__(self, number, uuid, sent=False):
+    def __init__(self, number=None, uuid=None, sent=False):
         self.date = get_now()
         self.sent = sent
         self.number = number
@@ -452,8 +455,8 @@ class IncomingMessage(Message):
         lazy=False,
         primaryjoin=communication_interface_id == CommunicationInterface.id)
 
-    def __init__(self, number, text, uuid,
-                 communication_interface,
+    def __init__(self, number=None, text=None, uuid=None,
+                 communication_interface=None,
                  sent=True):
         Message.__init__(self, number, uuid)
         self.text = text
@@ -469,7 +472,7 @@ class OutgoingMessage(Message):
     text = Column(String)
     incoming = Column(String, nullable=True)
 
-    def __init__(self, number, text, incoming=None):
+    def __init__(self, number=None, text=None, incoming=None):
         Message.__init__(self, number, str(uuid.uuid4()))
         self.text = text
         self.incoming = incoming
@@ -486,7 +489,7 @@ class KannelOutgoingMessage(Message):
     text = Column(String)
     incoming = Column(String, nullable=True)
 
-    def __init__(self, number, text, incoming=None):
+    def __init__(self, number=None, text=None, incoming=None):
         Message.__init__(self, number, str(uuid.uuid4()))
         self.text = text
         self.incoming = incoming
@@ -526,7 +529,7 @@ class Token(Base):
     batch  = relation(TokenBatch, lazy=False,
                       primaryjoin=batch_id == TokenBatch.id)
 
-    def __init__(self, token, batch, value, state="new"):
+    def __init__(self, token=None, batch=None, value=None, state="new"):
         self.created = datetime.datetime.now()
         self.token = token
         self.value = value
@@ -560,7 +563,7 @@ class Alert(Base):
     circuit = relation(Circuit, lazy=False,
                        primaryjoin=circuit_id == Circuit.id)
 
-    def __init__(self, text, circuit, message):
+    def __init__(self, text=None, circuit=None, message=None):
         self.date = get_now()
         self.circuit = circuit
         self.message = message
@@ -577,7 +580,7 @@ class Log(Base):
     circuit = relation(Circuit, lazy=False,
                        primaryjoin=circuit_id == Circuit.id)
 
-    def __init__(self, date, circuit):
+    def __init__(self, date=None, circuit=None):
         self.date = date
         self.uuid = str(uuid.uuid4())
         self.circuit = circuit
@@ -590,7 +593,7 @@ class SystemLog(Base):
     text = Column(String)
     created = Column(String)
 
-    def __init__(self, text):
+    def __init__(self, text=None):
         self.uuid = str(uuid.uuid4())
         self.text = text
         self.created = get_now()
@@ -615,8 +618,8 @@ class PrimaryLog(Log):
     credit = Column(Float, nullable=True)
     status = Column(Integer)
 
-    def __init__(self, date, circuit, watthours,
-                 use_time, status, credit=0):
+    def __init__(self, date=None, circuit=None, watthours=None,
+                 use_time=None, status=None, credit=0):
         Log.__init__(self, date, circuit)
         self.circuit = circuit
         self.watthours = watthours
@@ -649,7 +652,7 @@ class Job(Base):
     circuit = relation(Circuit,
                        lazy=False, primaryjoin=circuit_id == Circuit.id)
 
-    def __init__(self, circuit, state=True):
+    def __init__(self, circuit=None, state=True):
         self.uuid = str(uuid.uuid4())
         self.start = get_now()
         self.circuit = circuit
@@ -684,7 +687,7 @@ class AddCredit(Job):
     id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
     credit = Column(Integer)
 
-    def __init__(self, credit, circuit):
+    def __init__(self, credit=None, circuit=None):
         Job.__init__(self, circuit)
         self.credit = credit
 
@@ -700,7 +703,7 @@ class TurnOff(Job):
     description = "This job turns off the circuit on the remote meter"
     id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
 
-    def __init__(self, circuit):
+    def __init__(self, circuit=None):
         Job.__init__(self, circuit)
 
     def __str__(self):
@@ -713,7 +716,7 @@ class TurnOn(Job):
     description = "This job turns on the circuit off the remote meter"
     id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
 
-    def __init__(self, circuit):
+    def __init__(self, circuit=None):
         Job.__init__(self, circuit)
 
     def __str__(self):
@@ -727,7 +730,7 @@ class Mping(Job):
     description = "This job turns on the circuit off the remote meter"
     id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
 
-    def __init__(self, meter):
+    def __init__(self, meter=None):
         Job.__init__(self, self.getMain(meter))
 
     def getMain(self, meter):
@@ -744,7 +747,7 @@ class Cping(Job):
     description = "This job turns on the circuit off the remote meter"
     id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
 
-    def __init__(self, circuit):
+    def __init__(self, circuit=None):
         Job.__init__(self, circuit)
 
     def __str__(self):
@@ -765,7 +768,7 @@ class JobMessage(Message):
     incoming = Column(String)
     text = Column(String)
 
-    def __init__(self, job, incoming=""):
+    def __init__(self, job=None, incoming=""):
         Message.__init__(self, job.circuit.meter.phone, str(uuid.uuid4()))
         self.uuid = str(uuid.uuid4())
         self.job = job
@@ -789,7 +792,7 @@ class KannelJobMessage(Message):
     incoming = Column(String)
     text = Column(String)
 
-    def __init__(self, job, incoming=""):
+    def __init__(self, job=None, incoming=""):
         Message.__init__(self, job.circuit.meter.phone, str(uuid.uuid4()))
         self.uuid = str(uuid.uuid4())
         self.job = job
