@@ -141,11 +141,11 @@ class GraphView(RestView):
         self.session = DBSession()
         self.cls = self.look_up_class()
         self.instance = self.look_up_instance()
-        self.column = self.request.params['column']
+        self.column = self.request.params.get('column',None)
         self.figsize = tuple(map(lambda item: int(item),
                                  self.request.params.get('figsize',
                                                          "1,2").split(",")))
-
+        self.columns = self.request.params.get('columns',None)
 
     def get_circuit_logs(self, circuit):
         return self.session.query(PrimaryLog).filter_by(circuit=circuit)
@@ -153,7 +153,9 @@ class GraphView(RestView):
     def graphCircuit(self):
         fig = Figure(figsize=self.figsize)
         canvas = FigureCanvasAgg(fig)
-        ax = fig.add_subplot(111, title="%s graph for %s" % (self.column, self.instance))
+        ax = fig.add_subplot(111,
+                             title='%s graph for %s' % (FieldSet.prettify(
+                                 self.column), self.instance))
         logs = self.get_circuit_logs(self.instance)            
         x = [date2num(log.date) for log in logs]
         y = [getattr(log,self.column) for log in logs]
@@ -189,7 +191,10 @@ class Dashboard(object):
     def index(self):
         meters = Grid(Meter, self.session.query(Meter).all())
         meters.configure(readonly=True, exclude=meters._get_fields()[:2])
-        meters.insert(meters._get_fields()[2],Field('Name', value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),item.name)))
+        meters.insert(meters._get_fields()[2],
+                      Field('Name',
+                            value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
+                                                                     ,item.name)))
         interfaces = Grid(CommunicationInterface,
                           self.session.query(CommunicationInterface).all())
         interfaces.configure(readonly=True)
@@ -321,10 +326,6 @@ class InterfaceHandler(object):
 
     def save_and_parse_message(self, origin, text, id=None):
         """
-        Function to save incoming message based on relay type. Takes the
-        message class, the numner, the body of the message and a
-        session. Optional argument is the messages id. Parses the message
-        and return the message object.
         """
         if id is None:
             id = str(uuid.uuid4())
