@@ -121,7 +121,19 @@ class KannelInterface(CommunicationInterface):
         session.add(msg)
         session.flush()
         self.sendData(msg)
+        return msg
 
+    def sendTest(self):
+        session = DBSession()
+        text = '_[%s]' % uuid.uuid4()
+        msg = KannelOutgoingMessage(
+            number,
+            text)
+        session.add(msg)
+        session.flush()
+        self.sendData(msg)
+
+        
     def sendJob(self, job, incoming=None):
         session = DBSession()
         msg = KannelJobMessage(job,
@@ -144,7 +156,7 @@ class NetbookInterface(CommunicationInterface):
     def __init__(self, name=None, provider=None, location=None):
         CommunicationInterface.__init__(self, name, provider, location)
 
-    def sendMessage(self, number, text, incoming):
+    def sendMessage(self, number, text, incoming=None):
         session = DBSession()
         msg = OutgoingMessage(number,
                         text,

@@ -187,9 +187,21 @@ class AlertHandler(object):
         self.request = request
         self.session = DBSession()
 
-    @action(renderer='alerts/make.mako', permission='view')
-    def make(self):        
+    @action(renderer='alerts/make.mako', permission='admin')
+    def make(self):
         return {'interfaces':self.session.query(CommunicationInterface).all()}
+
+    @action(permission="admin")
+    def send_test(self):
+        interface = self.session\
+                    .query(CommunicationInterface)\
+                    .get(self.request.params['interface'])
+        number = self.request.params['number']
+        text = self.request.params['text']
+        msg = interface.sendMessage(number,text)
+        return HTTPFound(location="%s/message/index/%s" %
+                         (self.request.application_url,msg.uuid))
+    
 
 class Dashboard(object):
     """
