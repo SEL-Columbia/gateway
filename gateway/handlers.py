@@ -341,8 +341,7 @@ class InterfaceHandler(object):
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Interface overview'})
-        testmessage = FieldSet(TestMesssage,session=self.session),
-        import ipdb; ipdb.set_trace()
+        testmessage = FieldSet(TestMesssage,session=self.session)
         return {'interface': self.interface,
                 'breadcrumbs': breadcrumbs,
                 'testmessage': testmessage,
