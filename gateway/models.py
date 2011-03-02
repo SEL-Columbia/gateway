@@ -158,10 +158,7 @@ class NetbookInterface(CommunicationInterface):
                          incoming=incoming)
         session.add(msg)
         session.flush()
-        
-
-        pass
-
+        return msg
 
 class Meter(Base):
     """
@@ -326,7 +323,7 @@ class Circuit(Base):
         return session.query(PrimaryLog).\
             filter_by(circuit=self).order_by(PrimaryLog.id.desc())
 
-    def genericJob(self, cls, incoming=""):
+    def genericJob(self, cls, incoming="", request=None):
         session = DBSession()
         interface = self.meter.communication_interface
         job = cls(self)
@@ -335,14 +332,14 @@ class Circuit(Base):
         interface.sendJob(job,
                           incoming=incoming)
 
-    def turnOn(self, incoming=""):
-        self.genericJob(TurnOn, incoming)
+    def turnOn(self, incoming="", request=None):
+        self.genericJob(TurnOn, incoming, request)
 
-    def turnOff(self, incoming=""):
-        self.genericJob(TurnOff, incoming)
+    def turnOff(self, incoming="", request=None):
+        self.genericJob(TurnOff, incoming, request=request)
 
-    def ping(self):
-        self.genericJob(Cping)
+    def ping(self, request=None):
+        self.genericJob(Cping, request=request)
 
     def get_rich_status(self):
         if self.status == 0:
