@@ -13,7 +13,7 @@ ${headers.ggRaphael(request)}
 <script type="text/javascript">
   $(function() { 
      loadPage({"url": "${request.application_url}",
-               "meter" : "${meter.slug}"
+               "meter" : ""
               }); 
   });
 </script>
@@ -56,7 +56,7 @@ ${headers.ggRaphael(request)}
             <a href="${request.application_url}/${meter.remove_url()}">
               Remove Meter</a>
           </li>
-          <li><a href="${request.application_url}/meter/ping/${meter.slug}"> 
+          <li><a href="${request.application_url}/meter/ping/${meter.id}"> 
               Ping Meter</a>
           </li>
         </ul>
@@ -85,7 +85,7 @@ ${headers.ggRaphael(request)}
 
 <div id="addCircuit" class="small-form" style="display: none">
   <form method="POST" id=""
-        action="${request.application_url}/meter/add_circuit/${meter.slug}">    
+        action="${request.application_url}/meter/add_circuit/${meter.id}">    
   <table>
     <tr>
       <td><label>Account language</label></td>

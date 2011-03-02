@@ -25,49 +25,20 @@
   <p><a class="button" 
         href="${request.application_url}/add/Meter"> 
       Add a new meter</a></p>
-  <table>
-    <tr>
-      <th>Meter name</th>
-      <th>Meter location</th>
-      <th>Number of circuits</th>
-    </tr>
-    <hr />
-    % for meter in meters:
-  <tr>
-    <td><a href="${meter.getUrl()}">${meter.name}</a></td>
-    <td>${meter.location}</td>
-    <td>${str(len(meter.get_circuits()))}</td>
-  </tr>
-  % endfor
-</table>
-  
-  </ul>
+  ${meters.render()}
  </div>
 </div>
 
 <div id="manage-interface" class="widget">
   <div class="widget-header">Manage Interfaces</div>
   <div class="widget-content">
-  <p><a class="button"
-        href="${request.application_url}/add/KannelInterface">
-      Add kannel interface</a></p>
-  <p><a class="button"
-        href="${request.application_url}/add/NetbookInterface">
-      Add netbook interface</a></p>  
-  <hr />
-  <table>
-    <tr>
-      <th>Name</th>
-      <th>Location</th>
-    </tr>
-    % for interface in interfaces:
-    <tr>
-      <td><a href="${interface.getUrl()}">${interface.name}</a></td>
-      <td>${interface.location}</td>
-    </tr>
-    % endfor
-  </table>
-
+    <p><a class="button"
+            href="${request.application_url}/add/KannelInterface">
+        Add kannel interface</a>
+      <a class="button"
+         href="${request.application_url}/add/NetbookInterface">
+        Add netbook interface</a></p>
+  ${interfaces.render()}
   </div>
 </div>
 

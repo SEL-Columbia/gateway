@@ -171,8 +171,8 @@ class Meter(Base):
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String)
-    phone = Column(String)
     name = Column(String)
+    phone = Column(String)
     location = Column(String)
     status = Column(Boolean)
     date = Column(DateTime)
@@ -187,8 +187,6 @@ class Meter(Base):
         lazy=False,
         primaryjoin=communication_interface_id == CommunicationInterface.id)
 
-    slug = Column(String)
-
     def __init__(self, name=None, phone=None, location=None,
                  battery=None, status=None,panel_capacity=None,
                  communication_interface_id=None):
@@ -199,9 +197,7 @@ class Meter(Base):
         self.date = get_now()
         self.battery = battery
         self.communication_interface_id = communication_interface_id
-        self.panel_capacity = panel_capacity        
-        if name is not None:
-            self.slug = Meter.slugify(name)
+        self.panel_capacity = panel_capacity
 
     def getMessageType(self, job=False):
         """

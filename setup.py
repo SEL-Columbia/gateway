@@ -11,7 +11,6 @@ requires = [
     'dispatch',
     'fa.jquery',
     'pyramid_formalchemy',
-    'deform',
     'pyramid_handlers',
     'python-dateutil',
     'psycopg2',

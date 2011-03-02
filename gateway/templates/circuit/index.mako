@@ -64,6 +64,8 @@
           </form>
         </li>
       </ul>
+      <img 
+         src="${request.application_url}/graph/Circuit/${circuit.id}?column=credit&figsize=6,3" class="" alt="" />
       </div>
     </td>
   </tr>

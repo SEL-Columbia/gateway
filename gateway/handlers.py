@@ -7,17 +7,27 @@ from urlparse import parse_qs
 import uuid
 import cStringIO
 import simplejson
+
 from dateutil import parser
 from webob import Response
 from webob.exc import HTTPFound
+
 from pyramid_handlers import action
 from pyramid.security import authenticated_userid
 from pyramid.security import remember
 from pyramid.security import forget
+
 from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
-from formalchemy.tables import *
+
+from matplotlib import pyplot
+from matplotlib.figure import Figure
+from matplotlib.dates import date2num
+from matplotlib.dates import DateFormatter
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+import numpy 
+
 from gateway import dispatcher
 from gateway import models
 from gateway.models import DBSession
@@ -40,7 +50,6 @@ from gateway.utils import get_fields
 from gateway.utils import model_from_request
 from gateway.utils import make_table_header
 from gateway.utils import make_table_data
-from gateway.form import TokenBatchSchema
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
@@ -72,8 +81,10 @@ class RestView(object):
         except:
             return Response("Unable to locate resource")
 
+    def look_up_instance(self):
+        if self.cls is not None:
+            return self.session.query(self.cls).get(self.request.matchdict['id'])
 
-    
 class AddClass(RestView):
     """
     An genertic view that allows for adding models to our system.
@@ -105,8 +116,7 @@ class EditModel(RestView):
         self.request = request
         self.session = DBSession()
         self.cls = self.look_up_class()
-        self.instance = self.session.query(self.cls).\
-                        get(self.request.matchdict['id'])
+        self.instance = self.look_up_instance()
 
     def get(self):
         fs = FieldSet(self.instance)
@@ -126,6 +136,45 @@ class EditModel(RestView):
 class GraphView(RestView):
     """
     """    
+    def __init__(self, request):
+        self.request = request
+        self.session = DBSession()
+        self.cls = self.look_up_class()
+        self.instance = self.look_up_instance()
+        self.column = self.request.params['column']
+        self.figsize = tuple(map(lambda item: int(item),
+                                 self.request.params.get('figsize',
+                                                         "1,2").split(",")))
+
+
+    def get_circuit_logs(self, circuit):
+        return self.session.query(PrimaryLog).filter_by(circuit=circuit)
+
+    def graphCircuit(self):
+        fig = Figure(figsize=self.figsize)
+        canvas = FigureCanvasAgg(fig)
+        ax = fig.add_subplot(111, title="%s graph for %s" % (self.column, self.instance))
+        logs = self.get_circuit_logs(self.instance)            
+        x = [date2num(log.date) for log in logs]
+        y = [getattr(log,self.column) for log in logs]
+        ax.plot_date(x,y,linestyle='-')
+        ax.xaxis.set_major_formatter(DateFormatter('%b'))
+        output = cStringIO.StringIO()
+        canvas.print_figure(output)        
+        return Response(
+            body=output.getvalue(),
+            content_type='image/png')
+
+    def graphMeter(self):
+        return Response()
+
+    def get(self):
+        if isinstance(self.instance, Circuit):
+            return self.graphCircuit()
+        elif isinstance(self.instance, Meter):
+            return self.graphMeter()
+        else:
+            return Response("Class not supported")
 
 class Dashboard(object):
     """
@@ -138,14 +187,19 @@ class Dashboard(object):
 
     @action(renderer='index.mako', permission="view")
     def index(self):
-        system_logs = self.session.query(SystemLog).\
-            order_by(desc(SystemLog.created)).all()
+        meters = Grid(Meter, self.session.query(Meter).all())
+        meters.configure(readonly=True, exclude=meters._get_fields()[:2])
+        meters.insert(meters._get_fields()[2],Field('Name', value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),item.name)))
+        interfaces = Grid(CommunicationInterface,
+                          self.session.query(CommunicationInterface).all())
+        interfaces.configure(readonly=True)
         return {
-            'interfaces': self.session.query(CommunicationInterface).all(),
+            'interfaces': interfaces,
             'logged_in': authenticated_userid(self.request),
             'tokenBatchs': self.session.query(TokenBatch).all(),
-            'system_logs': system_logs,
-            'meters': self.session.query(Meter),
+            'system_logs': self.session.query(SystemLog).order_by(
+                desc(SystemLog.created)).all(),
+            'meters': meters,
             'breadcrumbs': self.breadcrumbs }
 
     @action(renderer="dashboard.mako", permission="admin")
@@ -306,6 +360,10 @@ class MeterHandler(object):
 
     @action(renderer="meter/index.mako", permission="admin")
     def index(self):
+        """
+        Main view for meter overview. Also includes circuit gird and
+        some graphs
+        """
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({"text": "Meter Overview"})
         grid = Grid(Circuit, self.meter.get_circuits())
@@ -313,9 +371,10 @@ class MeterHandler(object):
         # But I am calling a private method... FIXME
         excludes  = []
         excludes.extend(grid._get_fields()[:3]) # remove the first three columns
-        excludes.append(grid._get_fields()[-2]) # remove the meter column
+        excludes.append(grid._get_fields()[-2]) 
         grid.configure(readonly=True, exclude=excludes)
-        grid.append(Field('Pin', value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),item.pin)))
+        grid.insert(grid._get_fields()[3],Field('Account Number',
+                                                value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),item.pin)))
         return {
             'grid': grid,
             "logged_in": authenticated_userid(self.request),
@@ -325,6 +384,9 @@ class MeterHandler(object):
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
+        """
+        A view that allows users to add an circuit to an 
+        """
         params = self.request.params
         pin = params.get("pin")
         if len(pin) == 0:
@@ -344,30 +406,12 @@ class MeterHandler(object):
         return HTTPFound(location="%s%s" % (
                 self.request.application_url, self.meter.getUrl()))
 
-    @action(renderer="meter/build_graph.mako", permission="admin")
-    def build_graph(self):
-        return {
-            "logged_in": authenticated_userid(self.request),
-            "meter": self.meter }
-
-    @action(renderer="meter/show_graph.mako", permission="admin")
-    def show_graph(self):
-        #needs to be implemented
-        return {}
-
-    @action(permission="admin")
-    def logs(self):
-        days = int(self.request.params.get('days', 10))
-        date = datetime.now()
-        logs = find_meter_logs(meter=self.meter,
-                               date=date, session=self.session,
-                               days=days)
-        return Response(
-            simplejson.dumps(logs),
-            content_type='application/json')
-
     @action(permission="admin")
     def remove(self):
+        """
+        Allows users to remove an meter.
+        FIXME does not seem to be working!.
+        """
         self.session.delete(self.meter)
         [self.session.delete(x)
          for x in self.session.query(Circuit).filter_by(meter=self.meter)]
@@ -378,8 +422,8 @@ class MeterHandler(object):
         job = Mping(self.meter)
         self.session.add(job)
         self.session.flush()
-        msgClass = self.meter.getMessageType(job=True)
-        self.session.add(msgClass(job, self.meter.phone, incoming=""))
+        interface = self.meter.communication_interface
+        interface.sendJob(job)
         return HTTPFound(location=self.meter.getUrl())
 
 
