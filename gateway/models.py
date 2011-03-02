@@ -764,7 +764,7 @@ class Mping(Job):
         return meter.get_circuits()[0]
 
     def __str__(self):
-        return "job=mping&jobid=%s" % self.id
+        return "job=mping&jobid=%s;" % self.id
 
 
 class Cping(Job):
@@ -778,7 +778,7 @@ class Cping(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=cping&jobid=%s&cid=%s" % (self.id, self.circuit.ip_address)
+        return "job=cping&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
 
 
 class JobMessage(Message):
