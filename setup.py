@@ -13,7 +13,6 @@ requires = [
     'pyramid_formalchemy',
     'pyramid_handlers',
     'python-dateutil',
-    'psycopg2',
     'simplejson',
     'pyramid',
     'pyramid_beaker',
