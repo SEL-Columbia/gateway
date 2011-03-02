@@ -15,6 +15,8 @@ from pyramid.security import authenticated_userid
 from pyramid.security import remember
 from pyramid.security import forget
 from sqlalchemy import or_, desc
+from formalchemy import FieldSet, Field
+from formalchemy import Grid
 from deform import Form
 from gateway import dispatcher
 from gateway import models
@@ -38,11 +40,76 @@ from gateway.utils import get_fields
 from gateway.utils import model_from_request
 from gateway.utils import make_table_header
 from gateway.utils import make_table_data
-from gateway.utils import find_meter_logs
-from gateway.form import form_route
 from gateway.form import TokenBatchSchema
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
+
+
+class RestView(object):
+    """
+    Abstract class to make doing views easier.
+    """
+    def __init__(self, request):
+        self.request = request
+
+    def __call__(self):
+        method = self.request.method.lower()
+        if hasattr(self, method):
+            func = getattr(self, method)
+            return func()
+        else:
+            raise NameError("Method not supported")
+
+class AddClass(RestView):
+    """
+    An genertic view that allows for adding models to our system.
+    """
+    def __init__(self, request):
+        self.request = request
+        self.session = DBSession()
+        try:
+            self.cls = getattr(models, self.request.matchdict.get('class'))
+        except:
+            return Response("Unable to locate resource")
+    def get(self):
+        fs = FieldSet(self.cls,session=self.session)
+        return {'fs': fs, 'cls': self.cls}
+    def post(self):
+        fs = FieldSet(self.cls, session=self.session).\
+             bind(self.cls(),data=self.request.POST)
+        if fs.validate():
+            fs.sync()
+            self.session.flush()
+            return HTTPFound(location=fs.model.getUrl())
+        else:
+            return {'fs': fs, 'cls' : self.cls}
+
+class EditModel(RestView):
+    """
+    A view that allows models to be edited.  Takes the class name as a
+    string parameter and returns the correct html form.
+    """    
+    def __init__(self,request ):
+        self.request = request
+        self.session = DBSession()
+        self.cls = getattr(models, self.request.matchdict['class'])
+        self.instance = self.session.query(self.cls).\
+                        get(self.request.matchdict['id'])
+
+    def get(self):
+        fs = FieldSet(self.instance)
+        return {'fs': fs,
+                'instance': self.instance,
+                'cls': self.cls}
+
+    def post(self):
+        fs = FieldSet(self.instance,
+                      data=self.request.POST)
+        if fs.validate():
+            fs.sync()
+            self.session.flush()
+            return HTTPFound(location=fs.model.getUrl())
+        
 
 
 class Dashboard(object):
@@ -75,35 +142,10 @@ class Dashboard(object):
     @action(renderer="dashboard.mako", permission="admin")
     def dashboard(self):
         return {
-            "logged_in": authenticated_userid(self.request),
-            }
-
-    @action(renderer="meter/add.mako", permission="admin")
-    def add_meter(self):
-        breadcrumbs = self.breadcrumbs
-        breadcrumbs.append({"text": "Add a new meter"})
-        return form_route(self,
-                          Meter,
-                          buttons=['add_meter', 'Add new circuit'],
-                          exludes=['slug',
-                                   'uuid',
-                                   'date'],
-                          breadcrumbs=breadcrumbs)
-
-    @action(renderer='add_interface.mako', permission='admin')
-    def add(self):
-        _type = self.request.params.get('class')
-        cls = getattr(models, _type)
-        breadcrumbs = self.breadcrumbs[:]
-        breadcrumbs.append({'text': 'Add a new %s ' % _type})
-        return form_route(self,
-                          cls,
-                          buttons=['submit', 'Add new %s' % _type],
-                          breadcrumbs=breadcrumbs)
+            "logged_in": authenticated_userid(self.request)}
 
     @action(permission="admin")
     def add_tokens(self):
-        self.request.params
         batch = TokenBatch()
         self.session.add(batch)
         amount = self.request.params.get("amount", 100)
@@ -250,7 +292,7 @@ class MeterHandler(object):
         self.request = request
         self.session  = DBSession()
         self.meter = self.session.query(Meter).\
-                     filter_by(slug=self.request.matchdict['slug']).one()
+                     get(self.request.matchdict['id'])
         self.breadcrumbs = breadcrumbs[:]
 
     @action(renderer="meter/index.mako", permission="admin")
@@ -287,12 +329,6 @@ class MeterHandler(object):
         return HTTPFound(location="%s%s" % (
                 self.request.application_url, self.meter.getUrl()))
 
-    @action(renderer="meter/edit.mako", permission="admin")
-    def edit(self):
-        return {
-            "fields": get_fields(self.meter),
-            "meter": self.meter }
-
     @action(renderer="meter/build_graph.mako", permission="admin")
     def build_graph(self):
         return {
@@ -314,15 +350,6 @@ class MeterHandler(object):
         return Response(
             simplejson.dumps(logs),
             content_type='application/json')
-
-    @action(permission="admin")
-    def update(self):
-        meter = model_from_request(self.request,
-                                   self.meter)
-        self.session.merge(meter)
-        return HTTPFound(
-            location="%s%s" % (self.request.application_url,
-                               self.meter.getUrl()))
 
     @action(permission="admin")
     def remove(self):
@@ -367,28 +394,6 @@ class CircuitHandler(object):
             "jobs": self.circuit.get_jobs(),
             "fields": get_fields(self.circuit),
             "circuit": self.circuit }
-
-    @action(renderer="circuit/edit.mako", permission="admin")
-    def edit(self):
-        breadcrumbs = self.breadcrumbs
-        breadcrumbs.extend([
-                    {"text": "Meter Overview", "url": self.meter.getUrl()},
-                    {"text": "Circuit Overview", "url": self.circuit.url()},
-                    {"text": "Circuit Edit"}])
-        return {
-            "logged_in": authenticated_userid(self.request),
-            "breadcrumbs": breadcrumbs,
-            "fields": get_fields(self.circuit),
-            "circuit": self.circuit }
-
-    @action(permission="admin")
-    def update(self):
-        circuit = model_from_request(
-            self.request, self.circuit)
-        self.session.merge(circuit)
-        return HTTPFound(
-            location="%s%s" % (self.request.application_url,
-                           self.circuit.getUrl()))
 
     @action(permission="admin")
     def turn_off(self):

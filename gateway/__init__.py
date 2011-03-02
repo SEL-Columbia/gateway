@@ -77,6 +77,16 @@ def main(global_config, **settings):
     config.add_static_view('static', 'gateway:static/')
     config.add_static_view('deform-static', 'deform:static')
 
+    config.add_route('add',
+                     '/add/{class}',
+                     renderer='add_interface.mako',
+                     permission='admin',
+                     view='gateway.handlers.AddClass')
+    config.add_route('edit',
+                     '/edit/{class}/{id}',
+                     renderer='edit.mako',
+                     permission='admin',
+                     view='gateway.handlers.EditModel',)
     config.add_handler('dashboard', '/',
                        'gateway.handlers:Dashboard',
                        action='index')
@@ -90,7 +100,7 @@ def main(global_config, **settings):
                        handler='gateway.sys:ExportLoadHandler')
     config.add_handler('users', 'user/:action',
                       handler='gateway.handlers:UserHandler')
-    config.add_handler('meter', 'meter/:action/:slug',
+    config.add_handler('meter', 'meter/:action/:id',
                        handler='gateway.handlers:MeterHandler')
     config.add_handler('circuit', 'circuit/:action/:id',
                        handler='gateway.handlers:CircuitHandler')
@@ -108,5 +118,10 @@ def main(global_config, **settings):
                        handler='gateway.handlers:TokenHandler')
     config.add_subscriber('gateway.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
+    config.include('pyramid_formalchemy')
+    config.include('fa.jquery')
+    config.formalchemy_admin('admin',
+                             package='gateway',
+                             view='fa.jquery.pyramid.ModelView')
     config.end()
     return config.make_wsgi_app()
