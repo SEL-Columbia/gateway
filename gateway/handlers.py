@@ -17,7 +17,7 @@ from pyramid.security import forget
 from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
-from deform import Form
+from formalchemy.tables import *
 from gateway import dispatcher
 from gateway import models
 from gateway.models import DBSession
@@ -44,6 +44,7 @@ from gateway.form import TokenBatchSchema
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
+    
 
 class RestView(object):
     """
@@ -60,6 +61,19 @@ class RestView(object):
         else:
             raise NameError("Method not supported")
 
+    def look_up_class(self, module=models):
+        """
+        Looks up a class from a request.
+        Returns the class.
+        """
+        try:
+            cls = getattr(module, self.request.matchdict.get('class'))
+            return cls
+        except:
+            return Response("Unable to locate resource")
+
+
+    
 class AddClass(RestView):
     """
     An genertic view that allows for adding models to our system.
@@ -67,10 +81,8 @@ class AddClass(RestView):
     def __init__(self, request):
         self.request = request
         self.session = DBSession()
-        try:
-            self.cls = getattr(models, self.request.matchdict.get('class'))
-        except:
-            return Response("Unable to locate resource")
+        self.cls = self.look_up_class()
+
     def get(self):
         fs = FieldSet(self.cls,session=self.session)
         return {'fs': fs, 'cls': self.cls}
@@ -92,7 +104,7 @@ class EditModel(RestView):
     def __init__(self,request ):
         self.request = request
         self.session = DBSession()
-        self.cls = getattr(models, self.request.matchdict['class'])
+        self.cls = self.look_up_class()
         self.instance = self.session.query(self.cls).\
                         get(self.request.matchdict['id'])
 
@@ -111,6 +123,9 @@ class EditModel(RestView):
             return HTTPFound(location=fs.model.getUrl())
         
 
+class GraphView(RestView):
+    """
+    """    
 
 class Dashboard(object):
     """
@@ -123,20 +138,14 @@ class Dashboard(object):
 
     @action(renderer='index.mako', permission="view")
     def index(self):
-        batchSchema = TokenBatchSchema()
-        batchForm = Form(batchSchema, buttons=('Add tokens',))
-        meters = self.session.query(Meter)
-        interfaces = self.session.query(CommunicationInterface).all()
-        tokenBatchs = self.session.query(TokenBatch).all()
         system_logs = self.session.query(SystemLog).\
             order_by(desc(SystemLog.created)).all()
         return {
-            'batchForm': batchForm,
-            'interfaces': interfaces,
+            'interfaces': self.session.query(CommunicationInterface).all(),
             'logged_in': authenticated_userid(self.request),
-            'tokenBatchs': tokenBatchs,
+            'tokenBatchs': self.session.query(TokenBatch).all(),
             'system_logs': system_logs,
-            'meters': meters,
+            'meters': self.session.query(Meter),
             'breadcrumbs': self.breadcrumbs }
 
     @action(renderer="dashboard.mako", permission="admin")
@@ -299,12 +308,18 @@ class MeterHandler(object):
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({"text": "Meter Overview"})
-        circuit_data = make_table_data(self.meter.get_circuits())
+        grid = Grid(Circuit, self.meter.get_circuits())
+        # This was the best way to exclude fields from the grid.    
+        # But I am calling a private method... FIXME
+        excludes  = []
+        excludes.extend(grid._get_fields()[:3]) # remove the first three columns
+        excludes.append(grid._get_fields()[-2]) # remove the meter column
+        grid.configure(readonly=True, exclude=excludes)
+        grid.append(Field('Pin', value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),item.pin)))
         return {
+            'grid': grid,
             "logged_in": authenticated_userid(self.request),
             "meter": self.meter,
-            "circuit_header": make_table_header(Circuit),
-            "circuit_data": circuit_data,
             "fields": get_fields(self.meter),
             "breadcrumbs": breadcrumbs }
 
@@ -388,10 +403,15 @@ class CircuitHandler(object):
         breadcrumbs.extend([
                     {"text": "Meter Overview", "url": self.meter.getUrl()},
                     {"text": "Circuit Overview"}])
+        jobs = Grid(Job, self.circuit.get_jobs())
+        jobs.configure(readonly=True, exclude=[jobs._get_fields()[0]])
+        logs = Grid(PrimaryLog, self.circuit.get_logs())
+        logs.configure(readonly=True, exclude=[logs._get_fields()[1]])
         return {
             "logged_in": authenticated_userid(self.request),
             "breadcrumbs": breadcrumbs,
-            "jobs": self.circuit.get_jobs(),
+            "jobs": jobs,
+            "logs" : logs,
             "fields": get_fields(self.circuit),
             "circuit": self.circuit }
 

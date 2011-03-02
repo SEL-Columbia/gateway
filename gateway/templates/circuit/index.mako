@@ -74,57 +74,8 @@
 <a 
    href="${request.application_url}/circuit/remove_jobs/${circuit.id}">
    Clear job queue</a>
-<table class="jobs">
-  <tr>
-    <th>Job id</th>
-    <th>Job description</th>
-    <th>Job type</th> 
-    <th>Job start time</th>
-    <th>Job end time</th>
-    <th>Job message</th>
-  </tr>
-    % for job in jobs: 
-     % if job.state == True:
-        <tr class="active"> 
-     % else:
-        <tr class="not-active">
-     % endif 
-    <td><a href="${request.application_url}/${job.url()}">${job.id}</a></td>
-    <td>${job.description}</td>
-    <td>${job._type} </td>
-    <td>${str(job.state)}</td>
-    <td>${job.start}</td>
-    % if job.end: 
-       <td>${job.end}</td>
-    % else: 
-       <td></td>
-    % endif 
-       % if len(job.job_message) >= 1:   
-         <td></td>
-       % endif
-  </tr> 
-  % endfor 
-</table>
+${jobs.render()}
 <hr /> 
 <h4>All of the logs associated with circuit</h4>
-<table border="0">
-  <tr>
-    <th>Log id</th>
-    <th>Log uuid</th>
-    <th>Log date</th>
-    <th>Log credit</th>
-    <th>Circuit state</th>
-  </tr>
-  % for log in circuit.get_logs(): 
-    <tr>
-      <td>${log.id}</td>
-      <td> ${log.uuid} </td> 
-      <td>${log.date.ctime()}</td>
-      <td>${log.credit}</td>
-      <td>${log.status}</td>
-    </tr>
-  % endfor 
-</table>
-
-
+${logs.render()}
 </%def> 

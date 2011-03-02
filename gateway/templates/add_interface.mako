@@ -8,7 +8,7 @@
 </%def>
 
 <%def name="content()"> 
-   <br />
+   <h3>Add a new ${cls.__name__}</h3>
    <form method="POST" id="" 
          action="${request.application_url}/add/${cls}">
      ${fs.render()}

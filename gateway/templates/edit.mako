@@ -8,6 +8,7 @@
 </%def>
 
 <%def name="content()"> 
+   <h3>Editing <span class="underline">${str(instance)}</span> </h3>
    <form method="POST" id="" 
          action="${request.application_url}/edit/${cls.__name__}/${instance.id}">
      ${fs.render()}
