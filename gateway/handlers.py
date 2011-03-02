@@ -160,7 +160,8 @@ class GraphView(RestView):
         x = [date2num(log.date) for log in logs]
         y = [getattr(log,self.column) for log in logs]
         ax.plot_date(x,y,linestyle='-')
-        ax.xaxis.set_major_formatter(DateFormatter('%b'))
+        ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
+        ax.set_xlabel('Date')
         output = cStringIO.StringIO()
         canvas.print_figure(output)        
         return Response(
@@ -183,10 +184,11 @@ class AlertHandler(object):
     """
     def __init__(self, request):
         self.request = request
-
+        self.session = DBSession()
     @action(renderer='alerts/make.mako', permission='view')
     def make(self):
-        return {}
+        
+        return {'interfaces':self.session.query(CommunicationInterface).all()}
 
 class Dashboard(object):
     """
