@@ -56,6 +56,7 @@ class CommunicationInterface(Base):
     name = Column(String)
     provider = Column(String)
     location = Column(String)
+    phone = Column(String)
 
     def __init__(self, name=None, provider=None, location=None):
         self.name = name
@@ -323,7 +324,7 @@ class Circuit(Base):
         return session.query(PrimaryLog).\
             filter_by(circuit=self).order_by(PrimaryLog.id.desc())
 
-    def genericJob(self, cls, incoming="", request=None):
+    def genericJob(self, cls, incoming=""):
         session = DBSession()
         interface = self.meter.communication_interface
         job = cls(self)
@@ -332,14 +333,14 @@ class Circuit(Base):
         interface.sendJob(job,
                           incoming=incoming)
 
-    def turnOn(self, incoming="", request=None):
-        self.genericJob(TurnOn, incoming, request)
+    def turnOn(self, incoming=""):
+        self.genericJob(TurnOn, incoming)
 
-    def turnOff(self, incoming="", request=None):
-        self.genericJob(TurnOff, incoming, request=request)
+    def turnOff(self, incoming=""):
+        self.genericJob(TurnOff, incoming)
 
     def ping(self, request=None):
-        self.genericJob(Cping, request=request)
+        self.genericJob(Cping)
 
     def get_rich_status(self):
         if self.status == 0:
@@ -395,7 +396,7 @@ class Message(Base):
         self.sent = sent
         self.number = number
         self.uuid = uuid
-
+        
     def url(self):
         return "message/index/%s" % self.uuid
 
@@ -433,6 +434,27 @@ class Message(Base):
         return
 
 
+class TestMesssage(Message):
+    """
+    Message for testing communication interfaces
+    """
+    __tablename__ = "test_message"
+    __mapper_args__ = {'polymorphic_identity': 'test_message'}
+    id = Column(Integer, ForeignKey('message.id'), primary_key=True)
+    text = Column(String)    
+    communication_interface_id = Column(
+        Integer,
+        ForeignKey('communication_interface.id'))
+    communication_interface = relation(
+        CommunicationInterface,
+        lazy=False,
+        primaryjoin=communication_interface_id == CommunicationInterface.id)
+    
+    def __init__(self, text=None,number=None, communication_interface=None):
+        Message.__init__(self,number=number,uuid = uuid.uuid4())
+        self.communication_interface = communication_interface                     
+    
+      
 class IncomingMessage(Message):
     """
     """

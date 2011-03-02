@@ -45,6 +45,7 @@ from gateway.models import OutgoingMessage
 from gateway.models import SystemLog
 from gateway.models import Mping
 from gateway.models import CommunicationInterface
+from gateway.models import TestMesssage
 from gateway.security import USERS
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
@@ -181,13 +182,13 @@ class GraphView(RestView):
 
 class AlertHandler(object):
     """
-    """
+    """        
     def __init__(self, request):
         self.request = request
         self.session = DBSession()
+
     @action(renderer='alerts/make.mako', permission='view')
-    def make(self):
-        
+    def make(self):        
         return {'interfaces':self.session.query(CommunicationInterface).all()}
 
 class Dashboard(object):
@@ -211,11 +212,14 @@ class Dashboard(object):
         interfaces = Grid(CommunicationInterface,
                           self.session.query(CommunicationInterface).all())
         interfaces.configure(readonly=True, exclude=[interfaces._get_fields()[0]])
-        interfaces.append(Field('Name',
-                                value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
-                                                                         ,item.name)))
+        interfaces.append(
+            Field('Name',
+                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
+                                                           ,item.name)))
 
-        logs = Grid(SystemLog, self.session.query(SystemLog).order_by(desc(SystemLog.created)).all())
+        logs = Grid(SystemLog,
+                    self.session.query(SystemLog)\
+                    .order_by(desc(SystemLog.created)).all())
         logs.configure(readonly=True)
         return {
             'interfaces': interfaces,
@@ -337,8 +341,11 @@ class InterfaceHandler(object):
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Interface overview'})
+        testmessage = FieldSet(TestMesssage,session=self.session),
+        import ipdb; ipdb.set_trace()
         return {'interface': self.interface,
                 'breadcrumbs': breadcrumbs,
+                'testmessage': testmessage,
                 'fields': get_fields(self.interface),
                 'logged_in': authenticated_userid(self.request)}
 
@@ -392,8 +399,10 @@ class MeterHandler(object):
         excludes.extend(grid._get_fields()[:3]) # remove the first three columns
         excludes.append(grid._get_fields()[-2]) 
         grid.configure(readonly=True, exclude=excludes)
-        grid.insert(grid._get_fields()[3],Field('Account Number',
-                                                value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),item.pin)))
+        grid.insert(grid._get_fields()[3],
+                    Field('Account Number',
+                          value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),
+                                                                    item.pin)))
         return {
             'grid': grid,
             "logged_in": authenticated_userid(self.request),

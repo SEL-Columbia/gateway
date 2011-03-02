@@ -106,18 +106,18 @@ def add_credit(message):
             session.merge(circuit)
 
 
-def turn_circuit_on(message, **kwargs):
+def turn_circuit_on(message):
     """Allows the consumer to turn their account on."""
     circuit = get_circuit(message)
     if circuit:
-        circuit.turnOn(incoming=message.uuid, request=request)
+        circuit.turnOn(incoming=message.uuid)
 
 
-def turn_circuit_off(message, request):
+def turn_circuit_off(message):
     """ Creates a new job called turn_off """
     circuit = get_circuit(message)
     if circuit:
-        circuit.turnOff(incoming=message.uuid, request=request)
+        circuit.turnOff(incoming=message.uuid,)
 
 
 def set_primary_lang(message, *kwargs):

@@ -18,4 +18,9 @@
       Edit</a> |
     <a href="${request.application_url}/interface/remove/${interface.id}">
       Remove</a>
+    <hr />
+    <form method="POST" id="" action="/test_message">
+      ${testmessage.render()}
+    </form>
+
 </%def>
