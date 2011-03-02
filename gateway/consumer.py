@@ -23,7 +23,7 @@ def get_circuit(message):
         interface = message.communication_interface
         interface.sendMessage(
             message.number,
-            make_message_body("no-circuit.txt", lang=message.langauge),
+            make_message_body("no-circuit.txt",lang=message.langauge),
             incoming=message.uuid)
         return False
 
@@ -54,9 +54,9 @@ def get_balance(message):
         interface.sendMessage(
             message.number,
             make_message_body("bal.txt",
-                         lang=langauge,
-                         account=circuit.pin,
-                         credit=circuit.credit),
+                              lang=langauge,
+                              account=circuit.pin,
+                              credit=circuit.credit),
             incoming=message.uuid)
 
 
@@ -68,9 +68,10 @@ def set_primary_contact(message):
         interface = circuit.meter.communication_interface
         new_number = message.text.split(delimiter)[2]
         old_number = circuit.account.phone
-        messageBody = make_message_body("tel.txt", lang=message.langauge,
-                                   old_number=old_number,
-                                   new_number=new_number)
+        messageBody = make_message_body("tel.txt",
+                                        lang=message.langauge,
+                                        old_number=old_number,
+                                        new_number=new_number)
         interface.sendMessage(
             message.number,
             messageBody,
@@ -85,7 +86,7 @@ def set_primary_contact(message):
         session.merge(account)
 
 
-def add_credit(message, lang="en"):
+def add_credit(message):
     """Allows consumer to add credit to their account.
     Sends an outgoing message to the consumer.
     """
@@ -105,26 +106,26 @@ def add_credit(message, lang="en"):
             session.merge(circuit)
 
 
-def turn_circuit_on(message):
+def turn_circuit_on(message, **kwargs):
     """Allows the consumer to turn their account on."""
     circuit = get_circuit(message)
     if circuit:
-        circuit.turnOn(incoming=message.uuid)
+        circuit.turnOn(incoming=message.uuid, request=request)
 
 
-def turn_circuit_off(message, lang="fr"):
+def turn_circuit_off(message, request):
     """ Creates a new job called turn_off """
     circuit = get_circuit(message)
     if circuit:
-        circuit.turnOff(incoming=message.uuid)
+        circuit.turnOff(incoming=message.uuid, request=request)
 
 
-def set_primary_lang(message):
+def set_primary_lang(message, *kwargs):
     """ Allows consumer to set their account lang
     """
 
 
-def use_history(message, lang="en"):
+def use_history(message, **kwargs):
     """
     Calculates use based on last 30 days of account activity
     """
