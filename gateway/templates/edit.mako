@@ -1,0 +1,16 @@
+<%inherit file="base.mako"/>
+
+<%namespace name="headers" file="headers.mako"/>
+
+<%def name="header()">
+   <title>Dashboard SharedSolar Gateway</title>
+   ${headers.deformStyles(request)}
+</%def>
+
+<%def name="content()"> 
+   <form method="POST" id="" 
+         action="${request.application_url}/edit/${cls.__name__}/${instance.id}">
+     ${fs.render()}
+     <input type="submit" name="submit" value="Update ${cls.__name__}" />
+   </form>
+</%def>
