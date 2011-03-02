@@ -6,10 +6,7 @@ from collections import defaultdict
 from mako.template import Template
 from datetime import timedelta
 from gateway.models import PrimaryLog
-
-
-baseTemplate = "%s/gateway/templates/messages" % os.getcwd()
-
+from pyramid.threadlocal import get_current_registry
 
 def nice_print(model):
     """Function for printing  """
@@ -90,11 +87,14 @@ class Widget(object):
                 return []
 
 
-def make_message_body(template="error.txt", lang="fr", **kwargs):
+def make_message_body(template='error.txt', lang='fr',**kwargs):
     """Builds a template based on name and langauge with kwargs passed
     to the template..  Returns a template object
     """
-    templateName = "%s/%s/%s" % (baseTemplate, lang, template)
+    registry = get_current_registry()
+    mako_dirs = registry.settings['mako.directories']
+    templateName = '%s/messages/%s/%s' % (mako_dirs,
+                                          lang, template)
     template = Template(filename=templateName).render(**kwargs)
     return template
 
@@ -128,7 +128,7 @@ def make_table_data(models):
     return data
 
 
-def find_meter_logs(meter=None, date=None, session=None, days=30):
+def find_meter_logs(meter, date=None, session=None, days=30):
     """
     Meter, Date, DBSession
     Returns all logs within 30 days of a given date
