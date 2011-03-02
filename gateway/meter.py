@@ -21,6 +21,7 @@ def make_delete(msgDict, session):
     """
     Responses to a delete messsage from the meter.
     """
+    originMsg = None
     session.add(SystemLog("%s" % msgDict))
     job = session.query(Job).get(msgDict["jobid"])
     if job:
@@ -31,7 +32,7 @@ def make_delete(msgDict, session):
         try:
             originMsg = session.query(IncomingMessage).\
                         filter_by(uuid=incoming_uuid).first()
-        except Excetion, e:
+        except Exception, e:
             print(e)
         circuit = job.circuit
         interface = circuit.meter.communication_interface
