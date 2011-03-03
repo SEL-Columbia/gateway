@@ -428,7 +428,7 @@ class MeterHandler(object):
         some graphs
         """
         breadcrumbs = self.breadcrumbs[:]
-        breadcrumbs.append({'text': 'Meters', 'url': '/manage/meters'})
+        breadcrumbs.append({'text': 'Meters', 'url': '/manage/show?class=Meter'})
         breadcrumbs.append({"text": "Meter Overview"})
         grid = Grid(Circuit, self.meter.get_circuits())
         # This was the best way to exclude fields from the grid.    
