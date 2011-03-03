@@ -54,7 +54,17 @@ from gateway.utils import make_table_data
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
+class Index(object):
+    """
+    Index class to the / url. Very simple.
+    """
     
+    def __init__(self, request):
+        self.request = request
+        self.breadcrumbs = breadcrumbs[:]
+    def __call__(self):
+        return { 'logged_in': authenticated_userid(self.request),
+                 'breadcrumbs': self.breadcrumbs} 
 
 class RestView(object):
     """
@@ -94,10 +104,15 @@ class AddClass(RestView):
         self.request = request
         self.session = DBSession()
         self.cls = self.look_up_class()
+        self.breadcrumbs = breadcrumbs[:]
+        self.breadcrumbs.append({'text': 'Add a new %s' % self.cls.__name__})
 
     def get(self):
         fs = FieldSet(self.cls,session=self.session)
-        return {'fs': fs, 'cls': self.cls}
+        return {
+            'breadcrumbs' : self.breadcrumbs,
+            'fs': fs, 'cls': self.cls}
+
     def post(self):
         fs = FieldSet(self.cls, session=self.session).\
              bind(self.cls(),data=self.request.POST)
@@ -214,20 +229,6 @@ class Dashboard(object):
 
     @action(renderer='index.mako', permission='view')
     def index(self):
-        meters = Grid(Meter, self.session.query(Meter).all())
-        meters.configure(readonly=True, exclude=meters._get_fields()[:2])
-        meters.insert(meters._get_fields()[2],
-                      Field('Name',
-                            value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
-                                                                     ,item.name)))
-
-        interfaces = Grid(CommunicationInterface,
-                          self.session.query(CommunicationInterface).all())
-        interfaces.configure(readonly=True, exclude=[interfaces._get_fields()[0]])
-        interfaces.append(
-            Field('Name',
-                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
-                                                           ,item.name)))
 
         logs = Grid(SystemLog,
                     self.session.query(SystemLog)\
@@ -295,6 +296,7 @@ class ManageHandler(object):
     """
     def __init__(self, request):
         self.request = request
+        self.session = DBSession()
         self.breadcrumbs = breadcrumbs[:]
 
     @action(renderer='manage/index.mako')
@@ -303,6 +305,30 @@ class ManageHandler(object):
             'logged_in': authenticated_userid(self.request),
             'breadcrumbs': self.breadcrumbs }
 
+    def makeGrid(self, cls):
+        breadcrumbs = self.breadcrumbs[:]
+        breadcrumbs.append({'text': "%ss" % cls.__name__})
+        grid = Grid(cls,self.session.query(cls).all())
+        grid.configure(readonly=True, exclude=grid._get_fields()[:2])
+        grid.append(
+            Field('Name',
+                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
+                                                           ,str(item))))
+        return {'grid': grid,
+                'cls' : cls,
+                'breadcrumbs': breadcrumbs}
+    @action(renderer='manage/genertic.mako',permission='admin')
+    def show(self):
+        cls = getattr(models,self.request.params['class'])
+        return self.makeGrid(cls)
+
+    @action(permission='admin',renderer='manage/interfaces.mako')
+    def tokens(self):
+        return Response()
+    
+    @action(permission='admin',renderer='manage/pricing-models.mako')
+    def pricing_models(self):
+        return Response()
 
 class UserHandler(object):
 
@@ -402,6 +428,7 @@ class MeterHandler(object):
         some graphs
         """
         breadcrumbs = self.breadcrumbs[:]
+        breadcrumbs.append({'text': 'Meters', 'url': '/manage/meters'})
         breadcrumbs.append({"text": "Meter Overview"})
         grid = Grid(Circuit, self.meter.get_circuits())
         # This was the best way to exclude fields from the grid.    
@@ -454,7 +481,7 @@ class MeterHandler(object):
         self.session.delete(self.meter)
         [self.session.delete(x)
          for x in self.session.query(Circuit).filter_by(meter=self.meter)]
-        return HTTPFound(location="/")
+        return HTTPFound(location="/manage/show?class=Meter")
 
     @action(permission="admin")
     def ping(self):

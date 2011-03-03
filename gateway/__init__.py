@@ -79,7 +79,7 @@ def main(global_config, **settings):
 
     config.add_route('add',
                      '/add/{class}',
-                     renderer='add_interface.mako',
+                     renderer='add.mako',
                      permission='admin',
                      view='gateway.handlers.AddClass')
     config.add_route('edit',
@@ -90,10 +90,14 @@ def main(global_config, **settings):
     config.add_route('graph',
                      '/graph/{class}/{id}',
                      view='gateway.handlers.GraphView')
+    config.add_route('index',
+                     '/',
+                     renderer='index.mako',
+                     view='gateway.handlers.Index')
     config.add_handler('alerts',
                        '/alerts/{action}',
                        'gateway.handlers:AlertHandler')
-    config.add_handler('dashboard', '/',
+    config.add_handler('dashboard', '/dashboard',
                        'gateway.handlers:Dashboard',
                        action='index')
     config.add_handler('main', '/:action',
@@ -102,7 +106,7 @@ def main(global_config, **settings):
                        handler='gateway.handlers:ManageHandler')
     config.add_handler('interfaces', '/interface/:action/:id',
                        handler='gateway.handlers:InterfaceHandler'),
-    config.add_handler('export-load', 'sys/:action',
+    config.add_handler('export-load', 'system/:action',
                        handler='gateway.sys:ExportLoadHandler')
     config.add_handler('users', 'user/:action',
                       handler='gateway.handlers:UserHandler')

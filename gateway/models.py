@@ -35,8 +35,7 @@ class RootFactory(object):
                 (Allow, 'group:admins', 'admin') ]
 
     def __init__(self, request):
-        pass
-
+        self.request = request
 
 def get_now():
     return datetime.datetime.now()

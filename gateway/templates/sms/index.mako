@@ -11,8 +11,7 @@
    <title>SMS logs</title>
 
    <style type="text/css" media="screen">
-     a { color: #004276;
-         font-weight: bold; }      
+     a { color: #004276; }      
    </style>   
    <script type="text/javascript">
      $(function() {

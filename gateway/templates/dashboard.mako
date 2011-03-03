@@ -1,62 +1,125 @@
 <%inherit file="base.mako"/>
-<%namespace name="headers" file="headers.mako"/>
 
 <%def name="header()">
    <title>Dashboard SharedSolar Gateway</title>
-   <style type="text/css" media="screen">
-     .widget { margin: 10px; } 
-     .widget-header { padding: 5px } 
-     .widget-header .ui-icon { float: right; }
-     .widget-content { padding: 10px; } 
-     .ui-sortable-placeholder { border: 1px dotted black; visibility:
-     visible !important; height: 50px !important; }     
-     .ui-sortable-placeholder * { visibility: hidden; }
-   </style>
 
-   
-   <script type="text/javascript" 
-           src="${request.application_url}/static/site/dashboard.js">
-   </script>
-   
    <script type="text/javascript">
      $(function() { 
-        LoadPage({}); 
+        $('.button').button(); 
+        $('.widgets').setWidget('.widget');
      }); 
-     
+
    </script>
 
 </%def>
 
 <%def name="content()">
-<div class="widgets">
 
-  <div id="meter-status" class="widget">
-    <div class="widget-header">Meter Status</div>
-    <div class="widget-content">      
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae pretium libero. Sed ac purus sapien. Nam at lorem nec nisl ultrices posuere in eu dolor. Etiam ornare, velit in porta convallis, est nibh tempor ante, quis ultrices turpis sapien et risus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi molestie felis nec odio tempus sed gravida neque lobortis. Etiam pretium nulla tortor, ac fringilla nibh. In ac leo sem. Integer tincidunt mi quis orci malesuada at commodo sapien vestibulum. Sed ipsum elit, consequat a rhoncus et, blandit vel metus. Aenean sagittis vulputate metus nec tincidunt. Fusce aliquet pellentesque malesuada. Ut ac nibh lectus, vitae posuere lorem. 
-    </div>
-  </div>
 
-  <div id="meter-power-chart" class="widget">
-    <div class="widget-header">Meter power chart</div>
-    <div class="widget-content">      
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae pretium libero. Sed ac purus sapien. Nam at lorem nec nisl ultrices posuere in eu dolor. Etiam ornare, velit in porta convallis, est nibh tempor ante, quis ultrices turpis sapien et risus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi molestie felis nec odio tempus sed gravida neque lobortis. Etiam pretium nulla tortor, ac fringilla nibh. In ac leo sem. Integer tincidunt mi quis orci malesuada at commodo sapien vestibulum. Sed ipsum elit, consequat a rhoncus et, blandit vel metus. Aenean sagittis vulputate metus nec tincidunt. Fusce aliquet pellentesque malesuada. Ut ac nibh lectus, vitae posuere lorem. 
-    </div>
-  </div>
+% if logged_in:
+<div class="widgets"> 
 
-  <div id="communication-logs" class="widget">
-    <div class="widget-header">Communication logs</div>
-    <div class="widget-content">      
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae pretium libero. Sed ac purus sapien. Nam at lorem nec nisl ultrices posuere in eu dolor. Etiam ornare, velit in porta convallis, est nibh tempor ante, quis ultrices turpis sapien et risus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi molestie felis nec odio tempus sed gravida neque lobortis. Etiam pretium nulla tortor, ac fringilla nibh. In ac leo sem. Integer tincidunt mi quis orci malesuada at commodo sapien vestibulum. Sed ipsum elit, consequat a rhoncus et, blandit vel metus. Aenean sagittis vulputate metus nec tincidunt. Fusce aliquet pellentesque malesuada. Ut ac nibh lectus, vitae posuere lorem. 
-    </div>
-  </div>
+<div id="manage-meter" class="widget">
+  <div class="widget-header">Manage meters</div>
+  <div class="widget-content">
+  <p><a class="button" 
+        href="${request.application_url}/add/Meter"> 
+      Add a new meter</a></p>
+  ${meters.render()}
+ </div>
+</div>
 
-  <div id="alarms" class="widget">
-    <div class="widget-header">Alarms</div>
-    <div class="widget-content">      
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae pretium libero. Sed ac purus sapien. Nam at lorem nec nisl ultrices posuere in eu dolor. Etiam ornare, velit in porta convallis, est nibh tempor ante, quis ultrices turpis sapien et risus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi molestie felis nec odio tempus sed gravida neque lobortis. Etiam pretium nulla tortor, ac fringilla nibh. In ac leo sem. Integer tincidunt mi quis orci malesuada at commodo sapien vestibulum. Sed ipsum elit, consequat a rhoncus et, blandit vel metus. Aenean sagittis vulputate metus nec tincidunt. Fusce aliquet pellentesque malesuada. Ut ac nibh lectus, vitae posuere lorem. 
-    </div>
+<div id="manage-messages" class="widget">
+<div class="widget-header">Manage and send SMS Messages</div>
+<div class="widget-content">
+
+<a class="button"
+      href="${request.application_url}/sms/index?limit=100"> Check all
+      SMS messages</a> </li>
+<a class="button" href="${request.application_url}/alerts/make"> Send an
+      alert or test message</a>
+</div> 
+</div>
+
+
+<div id="manage-interface" class="widget">
+  <div class="widget-header">Manage Interfaces</div>
+  <div class="widget-content">
+    <p><a class="button"
+            href="${request.application_url}/add/KannelInterface">
+        Add kannel interface</a>
+      <a class="button"
+         href="${request.application_url}/add/NetbookInterface">
+        Add netbook interface</a></p>
+  ${interfaces.render()}
   </div>
 </div>
 
+<div id="manage-token" class="widget"> 
+  <div class="widget-header">Manage tokens</div>
+  <div class="widget-content">
+  <form method="POST" id=""
+        action="${request.application_url}/add_tokens">
+    <table>
+      <tr>
+        <td class="hint">Number of tokens to be create</td>
+        <td><input type="text" name="amount" value="" /></td>
+      </tr>
+      <tr>
+        <td class="hint">Value for each token</td>
+        <td><input type="text" name="value" value="" /></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input class="button" 
+                   type="submit" 
+                   name="" 
+                   value="Add token" /></td>
+      </tr>
+    </table>
+  </form>
+  <h4>Upload tokens from csv</h4>
+  <form method="POST" id=""
+        enctype="multipart/form-data"
+        action="${request.application_url}/upload_tokens">
+    <input type="file" name="csv" value="" />
+    <input class="button" 
+           type="submit" 
+           name="submit" 
+           value="Upload tokens from csv" />
+  </form>
+  <h4>Existing token batches</h4>
+  <table>    
+    <tr>
+      <th>Batch uuid</th>
+      <th>Batch id</th>
+      <th>Batch created on</th>
+      <th>Number of tokens in batch</th>
+      <th></th>
+    </tr>
+  % for batch in tokenBatchs:   
+    <tr>
+      <td><a href="${batch.getUrl()}">${batch.uuid}</a></td>
+      <td>${str(batch.id)}</td>
+      <td>${batch.created.ctime()}</td>
+      <td>${str(batch.get_tokens().count())}</td>
+      <td><a href="${request.application_url}/token/export_batch/${batch.uuid}">
+          Export batch to CSV</a></td>
+    </tr>
+  % endfor 
+  </table>
+</div>
+</div>
+
+<div id="manage-system-logs" class="widget">
+  <div class="widget-header" >Manage and view system logs</div>
+  <div class="widget-content">
+    ${logs.render()}
+  </div>
+</div>
+
+% else: 
+% endif
+
+</div>
 </%def>

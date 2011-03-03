@@ -32,6 +32,7 @@ def findTable(possible):
 class ExportLoadHandler(object):
     def __init__(self,request):
         self.request = request
+        self.breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
     @action(renderer="sys/index.mako")
     def index(self):
@@ -57,12 +58,16 @@ class ExportLoadHandler(object):
 
     @action(renderer="sys/download.mako",permission="admin")
     def download(self):
+        breadcrumbs = self. breadcrumbs[:]
+        breadcrumbs.append({'text': 'Download data'})
         tables = []
         members = inspect.getmembers(models)
         for member in members:
             table = findTable(member)
             if table:
                 tables.append(table)
-        return {"tables" : tables}
+        return {
+            'breadcrumbs': breadcrumbs,
+            'tables' : tables}
 
 

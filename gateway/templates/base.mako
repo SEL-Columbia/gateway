@@ -13,6 +13,7 @@
       </div>
       <div class="navigation">
         <ul class="menu">
+          <li> <a href="#">Dashboard</a></li>
           <li class="here"><a href="/">Manage</a></li>
           <li><a href="#">Monitor</a></li>
         </ul>
