@@ -7,6 +7,8 @@ from urlparse import parse_qs
 import uuid
 import cStringIO
 import simplejson
+from datetime import timedelta
+from datetime import datetime
 
 from dateutil import parser
 from webob import Response
@@ -153,6 +155,8 @@ class GraphView(RestView):
     """
     """    
     def __init__(self, request):
+        self.now = datetime.now()
+        self.days30 = timedelta(days=30)
         self.request = request
         self.session = DBSession()
         self.cls = self.look_up_class()
@@ -162,9 +166,21 @@ class GraphView(RestView):
                                  self.request.params.get('figsize',
                                                          "1,2").split(",")))
         self.columns = self.request.params.get('columns',None)
-
+        self.start = self.request.params.get('start',None)
+        self.end = self.request.params.get('end',None)
+        if self.end is not None:
+            self.end = parser.parse(self.end)
+        if self.end is None:
+            self.end = self.now
+        if self.start is not None:
+            self.start = parser.parse(self.start)            
+        if self.start is None:
+            self.start = self.end - self.days30
+         
     def get_circuit_logs(self, circuit):
-        return self.session.query(PrimaryLog).filter_by(circuit=circuit)
+        return self.session.query(PrimaryLog).filter_by(circuit=circuit)\
+               .filter(PrimaryLog.created > self.start)\
+               .filter(PrimaryLog.created < self.end)
 
     def graphCircuit(self):
         fig = Figure(figsize=self.figsize)
@@ -177,6 +193,7 @@ class GraphView(RestView):
         y = [getattr(log,self.column) for log in logs]
         ax.plot_date(x,y,linestyle='-')
         ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
+        ax.set_ylim(ymin=0)
         fig.autofmt_xdate()
         ax.set_xlabel('Date')
         output = cStringIO.StringIO()
