@@ -2,6 +2,12 @@
 
 <%def name="header()">
   <title>Send Alerts</title>
+  <script type="text/javascript">
+    $(function() { 
+       $(".button").button();
+    });
+  </script>
+
 </%def>
 
 <%def name="content()">
@@ -42,7 +48,7 @@
      <tr>
        <td></td>
        <td>
-         <input type="submit" name="submit" value="Send Message" />
+         <input class="button" type="submit" name="submit" value="Send Message" />
        </td>
      </tr>
    </table>

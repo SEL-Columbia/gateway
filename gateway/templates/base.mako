@@ -17,7 +17,7 @@
           <li><a href="#">Monitor</a></li>
         </ul>
       </div>
-        <ol class="breadcrumbs">
+        <ol class="breadcrumbs ui-widget-header ui-corner-all">
 
         % if breadcrumbs:
             % for crumb in breadcrumbs: 
@@ -30,7 +30,6 @@
             % endfor 
         % endif 
 
-        </ol>
         <div id="auth">
         % if logged_in: 
               <a href="${request.application_url}/user/logout">Log out</a>
@@ -38,6 +37,8 @@
               <a href="${request.application_url}/user/login">Log in</a>
        % endif 
         </div>
+
+        </ol>
         <div class="content">
           ${self.content()}
         </div>

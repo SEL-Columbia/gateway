@@ -29,6 +29,19 @@
  </div>
 </div>
 
+<div id="manage-messages" class="widget">
+<div class="widget-header">Manage and send SMS Messages</div>
+<div class="widget-content">
+
+<a class="button"
+      href="${request.application_url}/sms/index?limit=100"> Check all
+      SMS messages</a> </li>
+<a class="button" href="${request.application_url}/alerts/make"> Send an
+      alert or test message</a>
+</div> 
+</div>
+
+
 <div id="manage-interface" class="widget">
   <div class="widget-header">Manage Interfaces</div>
   <div class="widget-content">
@@ -97,20 +110,6 @@
   </table>
 </div>
 </div>
-
-<div id="manage-messages" class="widget">
-<div class="widget-header">Manage and send SMS Messages</div>
-<div class="widget-content">
-
-<ul> 
-  <li> <a  href="${request.application_url}/sms/index?limit=100"> Check all
-  SMS messages</a> </li>
-  <li> <a href="${request.application_url}/alerts/make"> Send an
-  alert or test message</a></li>
-</ul>
-</div> 
-</div>
-
 
 <div id="manage-system-logs" class="widget">
   <div class="widget-header" >Manage and view system logs</div>

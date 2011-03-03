@@ -231,7 +231,7 @@ class Dashboard(object):
 
         logs = Grid(SystemLog,
                     self.session.query(SystemLog)\
-                    .order_by(desc(SystemLog.created)).all())
+                    .order_by(desc(SystemLog.created)).limit(10))
         logs.configure(readonly=True)
         return {
             'interfaces': interfaces,
