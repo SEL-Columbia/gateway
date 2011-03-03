@@ -552,30 +552,6 @@ class CircuitHandler(object):
             location="%s%s" % (self.request.application_url,
                                 self.circuit.getUrl()))
 
-    @action(renderer="circuit/build_graph.mako", permission="admin")
-    def build_graph(self):
-        return {
-            "logged_in": authenticated_userid(self.request),
-            "circuit": self.circuit }
-
-    @action(renderer="circuit/show_graph.mako", permission="admin")
-    def show_graph(self):
-        query = self.session.query(PrimaryLog)
-        params = self.request.params
-        # parse the date from the request
-        origin = parser.parse(params["from"])
-        to = parser.parse(params["to"])
-        yaxis = params["yaxis"]
-        logs = [x for x in query.all() if x.created > origin]
-        logs = [x for x in logs if x.created < to]
-        return {
-            "logged_in": authenticated_userid(self.request),
-            "data": [{"time": str(x.created.ctime()),
-                      "value": x.get_property(yaxis)} for x in logs ],
-            "y_units": simplejson.dumps(params["yaxis"]),
-            "origin": simplejson.dumps(params["from"]),
-            "to": simplejson.dumps(params["to"])}
-
     @action()
     def jobs(self):
         return Response([x.toJSON() for x in self.circuit.get_jobs()])
