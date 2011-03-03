@@ -13,6 +13,7 @@
        action="${request.application_url}/alerts/send_test">
    <table>
      <tr>
+       <td><label>Target communication interface</lable></td>
        <td>
        <select name="interface">
          % for interface in interfaces:
@@ -23,16 +24,23 @@
       </tr>
      <tr>
        <td>
+         <label>Target phone number</label>
+       </td>
+       <td>
        <input type="text" name="number" value="" />
        </td>
      </tr>
      <tr>
+       <td>
+         <label>Message body</label>
+       </td>
        <td>
          <textarea name="text" rows="4" cols="20" >
          </textarea>
        </td>
      </tr>
      <tr>
+       <td></td>
        <td>
          <input type="submit" name="submit" value="Send Message" />
        </td>
