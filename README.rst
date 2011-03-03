@@ -17,8 +17,7 @@ Requirements::
 
 #. Create a virtual env.:: 
 
-  virtualenv gateway-env
-  cd gateway-env
+  virtualenv gateway-env && cd gateway-env
 
 #. Check out the gateway.::
 
