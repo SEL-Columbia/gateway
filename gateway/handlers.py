@@ -177,6 +177,7 @@ class GraphView(RestView):
         y = [getattr(log,self.column) for log in logs]
         ax.plot_date(x,y,linestyle='-')
         ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
+        fig.autofmt_xdate()
         ax.set_xlabel('Date')
         output = cStringIO.StringIO()
         canvas.print_figure(output)        
