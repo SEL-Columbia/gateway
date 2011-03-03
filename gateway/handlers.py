@@ -201,10 +201,15 @@ class AlertHandler(object):
     def __init__(self, request):
         self.request = request
         self.session = DBSession()
+        self.breadcrumbs = breadcrumbs[:]
 
     @action(renderer='alerts/make.mako', permission='admin')
     def make(self):
-        return {'interfaces':self.session.query(CommunicationInterface).all()}
+        breadcrumbs = self.breadcrumbs[:]
+        breadcrumbs.append({'text': 'Send Alerts'})        
+        return {
+            'breadcrumbs': breadcrumbs,
+            'interfaces':self.session.query(CommunicationInterface).all()}
 
     @action(permission="admin")
     def send_test(self):
@@ -309,9 +314,9 @@ class ManageHandler(object):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': "%ss" % cls.__name__})
         grid = Grid(cls,self.session.query(cls).all())
-        grid.configure(readonly=True, exclude=grid._get_fields()[:2])
-        grid.append(
-            Field('Name',
+        grid.configure(readonly=True, exclude=[grid._get_fields()[0]])
+        grid.insert(grid._get_fields()[1],
+            Field('%s overview page' % cls.__name__,
                   value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
                                                            ,str(item))))
         return {'grid': grid,

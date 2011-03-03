@@ -10,19 +10,30 @@
 </%def>
 
 <%def name="content()">
-
-<ul class="index-list">
-  <li><a href="/manage/show?class=Meter">Meters</a></li>
-  <li><a href="/manage/show?class=CommunicationInterface">
-      Communication Interfaces</a></li>
-  <li><a href="/manage/show?class=TokenBatch">Tokens</a></li>
-  <li><a href="/manage/pricing_models">Pricing Models</a></li>
-</ul>
-
-
-<ul class="index-list">
-  <li><a href="/alerts/make">Manual alerts and test messages</a></li>
-  <li><a href="/sms/index?limit=100">Check all SMS messages</a></li>
-  <li><a href="/system/download">Download data tables</a></li>
-</ul>
+<table>
+  <tr>
+    <td>
+      <ul class="index-list">
+        <li><a href="${a_url}/manage/show?class=Meter">Meters</a></li>
+        <li><a href="${a_url}/manage/show?class=Circuit">Circuits</a></li>
+        <ul>
+          <li><a href="${a_url}/manage/show?class=KannelInterface">
+              Communication Kannel</a></li>
+          <li><a href="${a_url}/manage/show?class=NetbookInterface">
+              Communication Netbook</a></li>       
+        </ul> 
+        <li><a href="${a_url}/manage/show?class=TokenBatch">Tokens</a></li>
+        <li><a href="${a_url}/manage/show?class=SystemLog">System Logs</a></li>
+        <li><a href="${a_url}/manage/pricing_models">Pricing Models</a></li>
+      </ul>
+    </td>
+    <td>
+      <ul class="index-list">
+        <li><a href="${a_url}/alerts/make">Manual alerts and test messages</a></li>
+        <li><a href="${a_url}/sms/index?limit=100">Check all SMS messages</a></li>
+        <li><a href="${a_url}/system/download">Download data tables</a></li>
+      </ul>
+    </td>
+  </tr>
+</table>
 </%def>

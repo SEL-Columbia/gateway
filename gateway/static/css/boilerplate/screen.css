@@ -189,8 +189,7 @@ code { background: white;
 
 .index-list li { 
     list-style: none;
-    font-size: 15px;
     padding: 5px;
 }
 .center-table table { 
-    margin: 0px auto; } 
+    margin: 10px auto; } 

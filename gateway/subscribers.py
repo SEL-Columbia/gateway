@@ -12,6 +12,7 @@ def add_renderer_globals(event):
     globs = {
         'url': route_url,
         'h':None,
+        'a_url': request.application_url
         }
     if request is not None:
         tmpl_context = request.tmpl_context

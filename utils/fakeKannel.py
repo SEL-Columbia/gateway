@@ -41,6 +41,7 @@ class SendDelete(Thread):
         print('Runing thread')
         while True:
             msg = messages.get()
+            print(msg.text)
             if msg:
                 if msg.text.startswith('job'):
                     print('sending delete to meter')
@@ -58,9 +59,7 @@ class Message(object):
 
 
 def sendMessage(request):
-    print('------------------------------')
     msg = Message(request)
-    print(msg)
     messages.put(msg)
     return Response()
 

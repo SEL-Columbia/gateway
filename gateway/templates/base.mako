@@ -15,7 +15,6 @@
         <ul class="menu">
           <li> <a href="#">Dashboard</a></li>
           <li class="here"><a href="/">Manage</a></li>
-          <li><a href="#">Monitor</a></li>
         </ul>
       </div>
         <ol class="breadcrumbs ui-widget-header ui-corner-all">

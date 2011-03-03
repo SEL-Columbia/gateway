@@ -37,6 +37,7 @@ class RootFactory(object):
     def __init__(self, request):
         self.request = request
 
+
 def get_now():
     return datetime.datetime.now()
 
@@ -67,6 +68,9 @@ class CommunicationInterface(Base):
 
     def __str__(self):
         return "Communication Interface %s" % self.name
+
+    def getUrl(self):
+        return "/interface/index/%s" % self.id
 
 
 class KannelInterface(CommunicationInterface):
@@ -624,6 +628,8 @@ class SystemLog(Base):
         self.text = text
         self.created = get_now()
 
+    def getUrl(self):
+        return ""
 
 class SystemAlert(object):
     """
@@ -654,16 +660,9 @@ class PrimaryLog(Log):
         self.created = get_now()
         self.status = status
 
-    def get_property(self, string):
-        if string == "credit":
-            return self.credit
-        elif string == "watt":
-            return self.watthours
-        elif string == "power":
-            return self.use_time
-        else:
-            raise NameError("Unable to find Property")
 
+    def getUrl(self):
+        return ""
 
 class Job(Base):
     __tablename__ = "jobs"
