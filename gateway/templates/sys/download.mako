@@ -5,44 +5,44 @@
 </%def>
 
 <%def name="content()">
-<ul> 
-  <!-- Hard coded links in html bad !-->
-    <li><a href="${request.application_url}/sys/export?model=Account">Download
-        Account</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Turnoff">Download
-        Turnoff</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Jobs">Download
-        Jobs</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Log">Download
-        Log</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=SystemLog">Download
-        System Log</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=OutgoingMessage">Download
-        Outgoing Message</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Alert">Download
-        Alert</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=JobMessage">Download
-        Job Message</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Token">Download
-        Token</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=TokenBatch">Download
-        Tokenbatch</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Meter">Download
-        Meter</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Circuit">Download
-        Circuit</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=AddCredit">Download
-        AddCredit</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=IncomingMessage">Download
-        Incoming Message</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=Message">Download
-        Message</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=PrimaryLog">Download
-        Primary Log</a></li> 
-    <li><a href="${request.application_url}/sys/export?model=TurnOn">Download
-        Turnon</a></li> 
- 
-</ul> 
+<h2>Export database tables</h2>
 
+<form method="POST" id=""
+      action="${request.application_url}/sys/export">
+  <table>
+    <tr>
+      <td><label>Database table</label></td>
+      <td>
+        <select name="model">
+          % for table in tables:
+          <option value="${table.__name__}"> ${table.__name__}</option>
+          %endfor
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td><label>Export type</label></td>
+      <td>
+        <select name="format">
+          <option value="csv"> CSV</option>
+        </select>
+      </td>        
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <input type="submit" name="" value="Export data" />
+      </td>
+    </tr>
+  </table>
+</form>
+<hr />
+<h3>Documentation</h3>
+<p>It is possible to download the info via command line. For example
+  using curl one could download all of the jobs.</p>
+
+<code>
+curl -XGET ${request.application_url}/sys/export?model=Jobs
+</code>
 
 </%def>
