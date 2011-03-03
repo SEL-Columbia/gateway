@@ -1,0 +1,5 @@
+<%!
+  import datetime
+%>
+Votre compte d'electricite  ${account} a ete desactive en raison de
+fonds insuffisants, du $ {datetime.datetime.now().ctime ()}.
