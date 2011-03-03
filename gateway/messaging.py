@@ -63,7 +63,7 @@ def parse_meter_message(message):
                             "make_" + messageDict["job"])(messageDict,
                                                          circuit,
                                                          session)
-                elif messageDict['job'] == "alerts":
+                elif messageDict['job'] == "alert":
                     getattr(meter_funcs,
                             "make_" + messageDict["alert"])(messageDict,
                                                            circuit,
