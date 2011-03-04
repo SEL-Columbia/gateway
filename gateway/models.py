@@ -541,7 +541,7 @@ class TokenBatch(Base):
     def getUrl(self):
         return "token/show_batch/%s" % self.uuid
 
-    def get_tokens(self):
+    def getTokens(self):
         session = DBSession()
         return session.query(Token).filter_by(batch=self)
 

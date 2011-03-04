@@ -65,8 +65,7 @@ class Index(object):
         self.request = request
         self.breadcrumbs = breadcrumbs[:]
     def __call__(self):
-        return { 'logged_in': authenticated_userid(self.request),
-                 'breadcrumbs': self.breadcrumbs} 
+        return {'breadcrumbs': self.breadcrumbs} 
 
 class RestView(object):
     """
@@ -135,10 +134,14 @@ class EditModel(RestView):
         self.session = DBSession()
         self.cls = self.look_up_class()
         self.instance = self.look_up_instance()
+        self.breadcrumbs = breadcrumbs[:]
+        self.breadcrumbs.append({'text': 'Edit %s' % self.instance})
+
 
     def get(self):
         fs = FieldSet(self.instance)
         return {'fs': fs,
+                'breadcrumbs': self.breadcrumbs[:],
                 'instance': self.instance,
                 'cls': self.cls}
 
@@ -259,8 +262,6 @@ class Dashboard(object):
         logs.configure(readonly=True)
         return {
             'interfaces': interfaces,
-            'logged_in': authenticated_userid(self.request),
-            'tokenBatchs': self.session.query(TokenBatch).all(),
             'logs': logs,
             'meters': meters,
             'breadcrumbs': self.breadcrumbs }
@@ -270,48 +271,6 @@ class Dashboard(object):
         return {
             "logged_in": authenticated_userid(self.request)}
 
-    @action(permission="admin")
-    def add_tokens(self):
-        batch = TokenBatch()
-        self.session.add(batch)
-        amount = self.request.params.get("amount", 100)
-        value = int(self.request.params.get("value", 10))
-        for number in xrange(0, int(amount)):
-            self.session.add(Token(
-                    token=Token.get_random(),
-                    value=value,
-                    batch=batch))
-        return HTTPFound(location=self.request.application_url)
-
-    @action(permission="admin")
-    def upload_tokens(self):
-        csvReader = csv.reader(self.request.params['csv'].file, delimiter=',')
-        batch = TokenBatch()
-        self.session.add(batch)
-        header = csvReader.next()
-        for line in csvReader:
-            self.session.add(Token(
-                    token=line[1],
-                    value=line[2],
-                    batch=batch))
-        return HTTPFound(location=self.request.application_url)
-
-    @action()
-    def system_logs(self):
-        return Response(
-            simplejson.dumps(
-                [x.text for x in self.session.query(SystemLog).all()]))
-
-    @action(permission="admin")
-    def send_message(self):
-        params = self.request.params
-        msgClass = getattr(models, params['delivery-type'])
-        msg = msgClass(
-                number=params.get("number"),
-                text=params.get("text"))
-        self.session.add(msg)
-        self.session.flush()
-        return HTTPFound(location=self.request.application_url)
 
 
 class ManageHandler(object):
@@ -325,7 +284,6 @@ class ManageHandler(object):
     @action(renderer='manage/index.mako')
     def index(self):
         return {
-            'logged_in': authenticated_userid(self.request),
             'breadcrumbs': self.breadcrumbs }
 
     def makeGrid(self, cls):
@@ -345,9 +303,51 @@ class ManageHandler(object):
         cls = getattr(models,self.request.params['class'])
         return self.makeGrid(cls)
 
-    @action(permission='admin',renderer='manage/interfaces.mako')
+    @action(permission='admin',renderer='manage/tokens.mako')
     def tokens(self):
-        return Response()
+        breadcrumbs = self.breadcrumbs[:]
+        breadcrumbs.append({'text': 'Manage Tokens'})
+        grid = Grid(TokenBatch, self.session.query(TokenBatch).all())
+        grid.configure(readonly=True,exclude=[grid._get_fields()[0]])
+        grid.append(Field('Number of token',
+                          value= lambda item: self.session.query(Token)\
+                          .filter_by(batch=item).count()))
+        grid.append(Field('Number of unused tokens',
+                          value = lambda item: self.session\
+                          .query(Token)\
+                          .filter_by(batch=item)\
+                          .filter_by(state='new').count()))
+                          
+        return {'breadcrumbs': breadcrumbs,
+                'grid': grid} 
+
+    @action(permission="admin")
+    def upload_tokens(self):
+        csvReader = csv.reader(self.request.params['csv'].file, delimiter=',')
+        batch = TokenBatch()
+        self.session.add(batch)
+        header = csvReader.next()
+        for line in csvReader:
+            self.session.add(Token(
+                    token=line[1],
+                    value=line[2],
+                    batch=batch))
+        return HTTPFound(location=self.request.application_url)
+
+    @action(permission="admin")
+    def add_tokens(self):
+        batch = TokenBatch()
+        self.session.add(batch)
+        amount = self.request.params.get("amount", 100)
+        value = int(self.request.params.get("value", 10))
+        for number in xrange(0, int(amount)):
+            self.session.add(Token(
+                    token=Token.get_random(),
+                    value=value,
+                    batch=batch))
+        return HTTPFound(
+            location='%s%s' % (self.request.application_url,'/manage/tokens'))
+
     
     @action(permission='admin',renderer='manage/pricing-models.mako')
     def pricing_models(self):
@@ -369,8 +369,9 @@ class UserHandler(object):
             password = self.request.params['password']
             if USERS.get(login) == password:
                 headers = remember(self.request, login)
-                return HTTPFound(location="/",
-                                 headers=headers)
+                return HTTPFound(
+                    location="%s%s" % (self.request.application_url, came_from),
+                    headers=headers)
             message = 'Failed login'
         return {
             'message': message,
@@ -406,8 +407,7 @@ class InterfaceHandler(object):
         return {'interface': self.interface,
                 'breadcrumbs': breadcrumbs,
                 'testmessage': testmessage,
-                'fields': get_fields(self.interface),
-                'logged_in': authenticated_userid(self.request)}
+                'fields': get_fields(self.interface)}
 
     def save_and_parse_message(self, origin, text, id=None):
         """
@@ -466,7 +466,6 @@ class MeterHandler(object):
                                                                     item.pin)))
         return {
             'grid': grid,
-            "logged_in": authenticated_userid(self.request),
             "meter": self.meter,
             "fields": get_fields(self.meter),
             "breadcrumbs": breadcrumbs }
@@ -763,7 +762,6 @@ class SMSHandler(object):
         messages = self.session.\
             query(Message).order_by(desc(Message.id)).limit(limit)
         return {
-            "logged_in": authenticated_userid(self.request),
             "limit": limit,
             "count": count,
             "messages": messages,

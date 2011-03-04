@@ -1,5 +1,6 @@
 from pyramid.threadlocal import get_current_request
 from pyramid.exceptions import ConfigurationError
+from pyramid.security import authenticated_userid
 from pyramid.url import route_url
 
 def add_renderer_globals(event):
@@ -12,7 +13,8 @@ def add_renderer_globals(event):
     globs = {
         'url': route_url,
         'h':None,
-        'a_url': request.application_url
+        'a_url': request.application_url,
+        'logged_in': authenticated_useridb(request)
         }
     if request is not None:
         tmpl_context = request.tmpl_context

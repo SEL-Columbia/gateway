@@ -32,9 +32,10 @@
 
         <div id="auth">
         % if logged_in: 
-              <a href="${request.application_url}/user/logout">Log out</a>
+              <a href="${a_url}/user/logout">Log out</a>
         % else: 
-              <a href="${request.application_url}/user/login">Log in</a>
+              <a href="${a_url}/user/login?came_from=${request.path}">
+                Log in</a>
        % endif 
         </div>
 

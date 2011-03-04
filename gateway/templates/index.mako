@@ -22,7 +22,7 @@
           <li><a href="${a_url}/manage/show?class=NetbookInterface">
               Communication Netbook</a></li>       
         </ul> 
-        <li><a href="${a_url}/manage/show?class=TokenBatch">Tokens</a></li>
+        <li><a href="${a_url}/manage/tokens">Tokens</a></li>
         <li><a href="${a_url}/manage/show?class=SystemLog">System Logs</a></li>
         <li><a href="${a_url}/manage/pricing_models">Pricing Models</a></li>
       </ul>

@@ -65,7 +65,7 @@
         </li>
       </ul>
       <img 
-         src="${request.application_url}/graph/Circuit/${circuit.id}?column=credit&figsize=7,3" class="" alt="" />
+         src="${request.application_url}/graph/Circuit/${circuit.id}?column=credit&figsize=7,4" class="" alt="" />
       <p>Graph by 
         <a href="#">Credit</a> | 
         <a href="#">Watt hours</a> |
