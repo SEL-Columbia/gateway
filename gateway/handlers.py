@@ -360,7 +360,7 @@ class UserHandler(object):
 
     @action(renderer="login.mako")
     def login(self):
-        came_from = self.request.params.get('came_from',)
+        came_from = self.request.params.get('came_from','/')
         message = ''
         login = ''
         password = ''
