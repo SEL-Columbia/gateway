@@ -14,7 +14,7 @@ def add_renderer_globals(event):
         'url': route_url,
         'h':None,
         'a_url': request.application_url,
-        'logged_in': authenticated_useridb(request)
+        'logged_in': authenticated_userid(request)
         }
     if request is not None:
         tmpl_context = request.tmpl_context
