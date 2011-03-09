@@ -183,7 +183,7 @@ class GraphView(RestView):
     def get_circuit_logs(self, circuit):
         return self.session.query(PrimaryLog).filter_by(circuit=circuit)\
                .filter(PrimaryLog.created > self.start)\
-               .filter(PrimaryLog.created < self.end)
+               .filter(PrimaryLog.created < self.end).order_by(PrimaryLog.date)
 
     def graphCircuit(self):
         fig = Figure(figsize=self.figsize)
