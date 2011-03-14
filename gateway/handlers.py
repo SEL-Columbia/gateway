@@ -657,20 +657,20 @@ class JobHandler(object):
     def __init__(self, request):
         self.request = request
 
-    @action()
+    @action(permission='view')
     def meter(self):
         session = DBSession()
         matchdict = self.request.matchdict
         meter = session.query(Meter).get(matchdict["id"])
         return Response("".join([str(x) for x in meter.getJobs()]))
 
-    @action()
+    @action(permission='view')
     def job(self):
         session = DBSession()
         job = session.query(Job).get(self.request.matchdict["id"])
         if self.request.method == "DELETE":
             job.state = False
-            job.end = datetime.datetime.now()
+            job.end = datetime.now()
             session.merge(job)
             return Response(job.toString())
         else:
