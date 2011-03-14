@@ -672,7 +672,7 @@ class JobHandler(object):
             job.state = False
             job.end = datetime.now()
             session.merge(job)
-            return Response(job.toString())
+            return Response(str(job))
         else:
             return Response(simplejson.dumps(job.toDict()))
 
