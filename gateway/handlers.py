@@ -657,7 +657,6 @@ class DeleteJobs(object):
         self.request = request
 
     def __call__(self):
-        import ipdb; ipdb.set_trace()
         jobids = simplejson.loads(self.request.body)
         print jobids
 
