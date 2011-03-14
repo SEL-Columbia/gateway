@@ -661,7 +661,7 @@ class JobHandler(object):
     def meter(self):
         session = DBSession()
         matchdict = self.request.matchdict
-        meter = session.query(Meter).filter_by(slug=matchdict["id"]).first()
+        meter = session.query(Meter).get(matchdict["id"])
         return Response("".join([str(x) for x in meter.getJobs()]))
 
     @action()
