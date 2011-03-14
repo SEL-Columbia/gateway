@@ -82,6 +82,12 @@ def main(global_config, **settings):
                      renderer='add.mako',
                      permission='admin',
                      view='gateway.handlers.AddClass')
+
+    config.add_route('delete',
+                     '/delete/jobs',
+                     permission='view',
+                     view='gateway.handlers.DeleteJobs')
+
     config.add_route('edit',
                      '/edit/{class}/{id}',
                      renderer='edit.mako',

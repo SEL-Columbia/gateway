@@ -652,6 +652,15 @@ class LoggingHandler(object):
         return Response(self.request)
 
 
+class DeleteJobs(object):    
+    def __init__(self, request):
+        self.request = request
+
+    def __call__(self):
+        import ipdb; ipdb.set_trace()
+        jobids = simplejson.loads(self.request.body)
+        print jobids
+
 class JobHandler(object):
 
     def __init__(self, request):
