@@ -114,7 +114,7 @@ def main(global_config, **settings):
                        handler='gateway.handlers:MeterHandler')
     config.add_handler('circuit', 'circuit/:action/:id',
                        handler='gateway.handlers:CircuitHandler')
-    config.add_handler('logs', 'logs/:action/:meter/:circuit/',
+    config.add_handler('logs', 'logs/:action/:meter/',
                        handler='gateway.handlers:LoggingHandler')
     config.add_handler('jobs', 'jobs/:action/:id/',
                        handler='gateway.handlers:JobHandler')

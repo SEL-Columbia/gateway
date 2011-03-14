@@ -665,6 +665,12 @@ class JobHandler(object):
         return Response("".join([str(x) for x in meter.getJobs()]))
 
     @action(permission='view')
+    def delete(self):
+        jobids = simplejson.loads(self.request.body)
+        print(jobids)
+        return Response('Hi Rajesh')
+
+    @action(permission='view')
     def job(self):
         session = DBSession()
         job = session.query(Job).get(self.request.matchdict["id"])
