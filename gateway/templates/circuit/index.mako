@@ -75,7 +75,7 @@
       </ul>
       <img 
          id="graph-image"
-         src="${a_url}/graph/Circuit/${circuit.id}?column=credit&figsize=7,4" />
+         src="${a_url}/graph/Circuit/${circuit.id}?column=watthours&figsize=7,4" />
 
       <p>Graph by
         <div class="graph-tools">

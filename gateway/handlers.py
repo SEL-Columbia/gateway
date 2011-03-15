@@ -185,6 +185,13 @@ class GraphView(RestView):
                .filter(PrimaryLog.created > self.start)\
                .filter(PrimaryLog.created < self.end).order_by(PrimaryLog.date)
 
+    def get_ylabel(self):
+        """
+        """
+        return {'credit': 'Credit',
+                'watthours': 'Energy (Wh)',
+                'use_time' : 'Time used (sec)'}[self.column]
+
     def graphCircuit(self):
         fig = Figure(figsize=self.figsize)
         canvas = FigureCanvasAgg(fig)
@@ -194,9 +201,11 @@ class GraphView(RestView):
         logs = self.get_circuit_logs(self.instance)            
         x = [date2num(log.date) for log in logs]
         y = [getattr(log,self.column) for log in logs]
-        ax.plot_date(x,y,linestyle='-')
+        ax.plot_date(x,y,'x-')
+        ax.set_ylabel(self.get_ylabel())
         ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
         ax.set_ylim(ymin=0)
+        ax.grid(True, linestyle='-', color='#e0e0e0')
         fig.autofmt_xdate()
         ax.set_xlabel('Date')
         output = cStringIO.StringIO()
