@@ -3,10 +3,19 @@
 <%def name="header()"> 
     <title>Circuit Page</title>
     <script type="text/javascript">
+      var graph, column, app, circuit;    
+      app = "${a_url}";
+      circuit = "${circuit.id}";
+      graph = $('#graph-image');
+
       $(function() { 
          $('.buttons li').button()
-      });
-      
+         $('.graph-tools a').click(function() { 
+           column = $(this).attr('id');
+           var url = app + "/graph/Circuit/" + circuit  + "?column=" + column +"&figsize=7,4";
+           $("#graph-image").attr('src', url);
+         })
+      });      
     </script>
 </%def> 
 
@@ -65,11 +74,15 @@
         </li>
       </ul>
       <img 
-         src="${request.application_url}/graph/Circuit/${circuit.id}?column=credit&figsize=7,4" class="" alt="" />
-      <p>Graph by 
-        <a href="#">Credit</a> | 
-        <a href="#">Watt hours</a> |
-        <a href="#">Use Time </a>
+         id="graph-image"
+         src="${a_url}/graph/Circuit/${circuit.id}?column=credit&figsize=7,4" />
+
+      <p>Graph by
+        <div class="graph-tools">
+          <a id="credit" href="#">Credit</a> | 
+          <a id="watthours" href="#">Watt hours</a> |
+          <a id="use_time" href="#">Use Time </a>
+        </div>
       </div>
     </td>
   </tr>
