@@ -5,8 +5,6 @@ from gateway.models import DBSession, Circuit
 from gateway.models import Meter, SystemLog
 from gateway import meter as meter_funcs
 
-session = DBSession()
-
 
 def clean_message(messageRaw):
     """  Does the basic cleaning of meter messages.
@@ -29,6 +27,7 @@ def findMeter(message):
     Takes a message object and returns either a meter or none.
     Looks up the meter based on the message's number.
     """
+    session = DBSession()
     meter = session.query(Meter).filter_by(phone=str(message.number)).first()
     if meter:
         return meter
@@ -37,6 +36,7 @@ def findMeter(message):
 
 
 def findCircuit(message, meter):
+    session = DBSession()
     circuit = session.query(Circuit).\
               filter_by(ip_address=message["cid"]).\
               filter_by(meter=meter).first()
@@ -48,8 +48,8 @@ def parse_meter_message(message):
     """ Parse message from the Meter. Takes a message object and returns
     nothing. Logs an exception if the message is unable to be parsed.
     """
+    session = DBSession()
     meter = findMeter(message)
-    messageBody = message.text.lower()
     if re.match("^\(.*\)$", message.text.lower()):
         messageDict = clean_message(message)
         if messageDict["job"] == "delete":
