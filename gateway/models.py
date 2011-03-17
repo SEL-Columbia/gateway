@@ -332,6 +332,12 @@ class Circuit(Base):
         return session.query(PrimaryLog).\
             filter_by(circuit=self).order_by(PrimaryLog.id.desc())
 
+    def getLastLog(self):
+        """
+        """
+        session = DBSession()
+        return session.query(PrimaryLog).filter_by(circuit=self).order_by(PrimaryLog.created.desc()).first()
+
     def genericJob(self, cls, incoming=""):
         session = DBSession()
         interface = self.meter.communication_interface

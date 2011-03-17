@@ -461,15 +461,16 @@ class MeterHandler(object):
         some graphs
         """
         breadcrumbs = self.breadcrumbs[:]
-        breadcrumbs.append({'text': 'Meters', 'url': '/manage/show?class=Meter'})
+        breadcrumbs.append({'text': 'Meters',
+                            'url': '/manage/show?class=Meter'})
         breadcrumbs.append({"text": "Meter Overview"})
         grid = Grid(Circuit, self.meter.get_circuits())
-        # This was the best way to exclude fields from the grid.    
-        # But I am calling a private method... FIXME
         excludes  = []
-        excludes.extend(grid._get_fields()[:3]) # remove the first three columns
-        excludes.append(grid._get_fields()[-2]) 
+        excludes.extend(grid._get_fields()[:3])
+        excludes.append(grid._get_fields()[-2])
         grid.configure(readonly=True, exclude=excludes)
+        grid.append(Field('Last Primary Log',
+                          value=lambda item: '%s' % item.getLastLog().created.ctime()))
         grid.insert(grid._get_fields()[3],
                     Field('Account Number',
                           value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),
@@ -486,15 +487,16 @@ class MeterHandler(object):
         d = collections.defaultdict(list)
         logs = self.meter.getLogs()
         for log in logs:
-            d[log.date].append(log.circuit.id)
-        for k,v in d.iteritems():
-            output.write("Date: %s logs: %s \n" % (k,v)) 
-        return Response(output.getvalue(), content_type="text/plain") 
+            d[log.date].append(log)
+        for k, v in d.iteritems():
+            output.write(
+                "date: %s logs: %s \n" % (k, map(lambda log: "%s" % log.id, v)))
+        return Response(output.getvalue(), content_type="text/plain")
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
         """
-        A view that allows users to add an circuit to an 
+        A view that allows users to add an circuit to an
         """
         params = self.request.params
         pin = params.get("pin")
