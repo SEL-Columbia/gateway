@@ -9,6 +9,7 @@ import cStringIO
 import simplejson
 from datetime import timedelta
 from datetime import datetime
+import collections
 
 from dateutil import parser
 from webob import Response
@@ -478,6 +479,17 @@ class MeterHandler(object):
             "meter": self.meter,
             "fields": get_fields(self.meter),
             "breadcrumbs": breadcrumbs }
+
+    @action(renderer='meter/messsage_graph.mako', permission='admin')
+    def message_graph(self):
+        output = cStringIO.StringIO()
+        d = collections.defaultdict(list)
+        logs = self.meter.getLogs()
+        for log in logs:
+            d[log.date].append(log.circuit.id)
+        for k,v in d.iteritems():
+            output.write("Date: %s logs: %s \n" % (k,v)) 
+        return Response(output.getvalue(), content_type="text/plain") 
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):

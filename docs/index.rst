@@ -6,6 +6,7 @@
 Welcome to Shared Solar 's documentation!
 =========================================
 
+
 Contents:
 
 .. toctree::

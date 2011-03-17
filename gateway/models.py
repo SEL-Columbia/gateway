@@ -6,6 +6,7 @@ import uuid
 import datetime
 import urllib2
 import urllib
+import itertools
 import transaction
 from sqlalchemy import create_engine
 from sqlalchemy import Column
@@ -212,25 +213,6 @@ class Meter(Base):
         self.communication_interface_id = communication_interface_id
         self.panel_capacity = panel_capacity
 
-    def getMessageType(self, job=False):
-        """
-        Issue, I need one place to look up what type of Job is going out.
-        """
-        error = 'Unsupported communication type'
-        if job:
-            if self.communication == 'netbook':
-                return JobMessage
-            elif self.communication == 'kannel':
-                return KannelJobMessage
-            else:
-                raise NameError(error)
-        else:
-            if self.communication == 'netbook':
-                return OutgoingMessage
-            elif self.communication == 'kannel':
-                return KannelOutgoingMessage
-            else:
-                raise NameError(error)
 
     def get_circuits(self):
         session = DBSession()
@@ -247,6 +229,17 @@ class Meter(Base):
                  filter_by(circuit=circuit).filter_by(state=True)]
         return l
 
+    def getLogs(self):
+        session = DBSession()
+        return list(itertools.chain(*map(lambda x: list(session.query(PrimaryLog)\
+                                                        .filter_by(circuit=x)), self.get_circuits())))
+
+    def getRawLogs(self):
+        session = DBSession()
+        logs = PrimaryLog.__mapper__.tables[0]
+        circuits = Circuit.__mapper__.tables[1]
+        
+        
     @staticmethod
     def slugify(name):
         slug = name.lower()
