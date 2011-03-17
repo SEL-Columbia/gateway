@@ -468,9 +468,13 @@ class MeterHandler(object):
         excludes  = []
         excludes.extend(grid._get_fields()[:3])
         excludes.append(grid._get_fields()[-2])
-        grid.configure(readonly=True, exclude=excludes)
-        grid.append(Field('Last Primary Log',
-                          value=lambda item: '%s' % item.getLastLog().created.ctime()))
+        grid.configure(readonly=True, exclude=excludes)        
+        grid.append(Field('Last Primary Log Gateway time',
+                          value=lambda item: '%s' % item\
+                          .getLastLog().created.ctime()))
+        grid.append(Field('Last Primary Log Meter time',
+                          value=lambda item: '%s' % item\
+                          .getLastLog().date.ctime()))
         grid.insert(grid._get_fields()[3],
                     Field('Account Number',
                           value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),
