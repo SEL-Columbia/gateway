@@ -298,15 +298,16 @@ class Circuit(Base):
     credit = Column(Float)
     account_id  = Column(Integer, ForeignKey('account.id'))
     account  = relation(Account, lazy=False,
+                        cascade="all,delete",
                         backref='circuit',
                         primaryjoin=account_id == Account.id)
 
-    def __init__(self, meter=None, account=None, pin=None,
+    def __init__(self, meter=None, account=None,
                  energy_max=None, power_max=None,
                  ip_address=None, status=1, credit=0):
         self.date = get_now()
         self.uuid = str(uuid.uuid4())
-        self.pin = pin
+        self.pin = self.get_pin()
         self.meter = meter
         self.energy_max = energy_max
         self.power_max = power_max
@@ -317,10 +318,8 @@ class Circuit(Base):
 
     @staticmethod
     def get_pin():
-        chars = "qwertyuipasdfghjkzxcvbnm"
         ints = "23456789"
-        return "%s%s" % ("".join(random.sample(chars, 3)),
-                      "".join(random.sample(ints, 3)))
+        return "".join(random.sample(ints, 6))
 
     def get_jobs(self):
         session = DBSession()
@@ -663,6 +662,16 @@ class PrimaryLog(Log):
     def getUrl(self):
         return ""
 
+    def __str__(self):
+        return 'job=pp&status=%s&ts=%s&cid=%s&tu=%s&mid=%s&wh=%s&cr=%s' % (self.status,
+                                                                           self.created.strftime("%Y%m%d%H%M"),
+                                                                           self.circuit.ip_address,
+                                                                           self.use_time,
+                                                                           self.circuit.meter.name,
+                                                                           self.watthours,
+                                                                           self.credit)
+
+
 class Job(Base):
     __tablename__ = "jobs"
     id = Column(Integer, primary_key=True)
@@ -674,6 +683,7 @@ class Job(Base):
     state = Column(Boolean)
     circuit_id = Column(Integer, ForeignKey('circuit.id'))
     circuit = relation(Circuit,
+                       cascade="all,delete",
                        lazy=False, primaryjoin=circuit_id == Circuit.id)
 
     def __init__(self, circuit=None, state=True):
@@ -716,7 +726,7 @@ class AddCredit(Job):
         self.credit = credit
 
     def __str__(self):
-        return "job=cr&jobid=%s&cid=%s&amt=%s;" % (self.id,
+        return "(job=cr&jobid=%s&cid=%s&amt=%s)" % (self.id,
                                                 self.circuit.ip_address,
                                                 float(self.credit))
 
@@ -731,7 +741,7 @@ class TurnOff(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=coff&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=coff&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class TurnOn(Job):
@@ -744,7 +754,7 @@ class TurnOn(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=con&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=con&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class Mping(Job):
@@ -761,7 +771,7 @@ class Mping(Job):
         return meter.get_circuits()[0]
 
     def __str__(self):
-        return "job=mping&jobid=%s;" % self.id
+        return "(job=mping&jobid=%s)" % self.id
 
 
 class Cping(Job):
@@ -775,7 +785,7 @@ class Cping(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=cping&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=cping&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class JobMessage(Message):
