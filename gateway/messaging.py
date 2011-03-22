@@ -38,8 +38,8 @@ def findMeter(message):
 def findCircuit(message, meter):
     session = DBSession()
     circuit = session.query(Circuit).\
-              filter_by(ip_address=message["cid"]).\
-              filter_by(meter=meter).first()
+        filter_by(ip_address=message["cid"]).\
+        filter_by(meter=meter).first()
     if circuit:
         return circuit
 

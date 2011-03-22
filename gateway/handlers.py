@@ -471,10 +471,10 @@ class MeterHandler(object):
         grid.configure(readonly=True, exclude=excludes)        
         grid.append(Field('Last Primary Log Gateway time',
                           value=lambda item: '%s' % item\
-                          .getLastLog().created.ctime()))
+                          .getLastLogTime()))
         grid.append(Field('Last Primary Log Meter time',
                           value=lambda item: '%s' % item\
-                          .getLastLog().date.ctime()))
+                          .getLastLogTime()))
         grid.insert(grid._get_fields()[3],
                     Field('Account Number',
                           value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),
@@ -511,7 +511,6 @@ class MeterHandler(object):
             phone=params.get("phone"))
         circuit = Circuit(meter=self.meter,
                           account=account,
-                          pin=pin,
                           ip_address=params.get("ip_address"),
                           energy_max=int(params.get("energy_max")),
                           power_max=int(params.get("power_max")))
