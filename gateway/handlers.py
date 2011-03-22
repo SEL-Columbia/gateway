@@ -497,6 +497,15 @@ class MeterHandler(object):
                 "date: %s logs: %s \n" % (k, map(lambda log: "%s" % log.id, v)))
         return Response(output.getvalue(), content_type="text/plain")
 
+
+    @action(permission='admin')
+    def show_account_numbers(self):
+        output = cStringIO.StringIO()
+        for c in self.meter.get_circuits():
+            output.write('%s\n' % c.pin)
+        return Response(output.getvalue(),
+                        content_type='text/plain')
+
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
         """
