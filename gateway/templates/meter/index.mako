@@ -51,6 +51,9 @@ ${headers.ggRaphael(request)}
         <ul>
           <li><a href="${meter.edit_url()}">Edit meter information</a></li>
           <li> <a id="addCircuitButton" href="#">Add Circuit</a></li>
+          <li>
+          <a href="${a_url}/meter/show_account_numbers/${meter.id}">Show
+            account numbers</a></li>
           <li><a id="showJobButton" href="#">View active job queue</a></li>
           <li>
             <a href="${request.application_url}/${meter.remove_url()}">
