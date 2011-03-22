@@ -501,10 +501,16 @@ class MeterHandler(object):
     @action(permission='admin')
     def show_account_numbers(self):
         output = cStringIO.StringIO()
+        output.write('Pin, IpAddress \n')
         for c in self.meter.get_circuits():
-            output.write('%s\n' % c.pin)
-        return Response(output.getvalue(),
-                        content_type='text/plain')
+            output.write('%s, %s\n' % (c.pin,c.ip_address))
+        resp = Response(output.getvalue())
+        resp.content_type = 'application/x-csv'
+        resp.headers.add('Content-Disposition',
+                             'attachment;filename=%s:accounts.csv' % self.meter.name)
+        return resp
+                        
+
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
