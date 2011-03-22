@@ -507,7 +507,7 @@ class MeterHandler(object):
         resp = Response(output.getvalue())
         resp.content_type = 'application/x-csv'
         resp.headers.add('Content-Disposition',
-                             'attachment;filename=%s:accounts.csv' % self.meter.name)
+                         'attachment;filename=%s:accounts.csv' % str(self.meter.name))
         return resp
                         
 
