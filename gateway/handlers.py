@@ -29,7 +29,7 @@ from matplotlib.figure import Figure
 from matplotlib.dates import date2num
 from matplotlib.dates import DateFormatter
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-import numpy 
+import numpy
 
 from gateway import dispatcher
 from gateway import models
@@ -48,7 +48,6 @@ from gateway.models import OutgoingMessage
 from gateway.models import SystemLog
 from gateway.models import Mping
 from gateway.models import CommunicationInterface
-from gateway.models import TestMesssage
 from gateway.security import USERS
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
@@ -57,16 +56,19 @@ from gateway.utils import make_table_data
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
+
 class Index(object):
     """
     Index class to the / url. Very simple.
     """
-    
+
     def __init__(self, request):
         self.request = request
         self.breadcrumbs = breadcrumbs[:]
+
     def __call__(self):
-        return {'breadcrumbs': self.breadcrumbs} 
+        return {'breadcrumbs': self.breadcrumbs}
+
 
 class RestView(object):
     """
@@ -96,7 +98,9 @@ class RestView(object):
 
     def look_up_instance(self):
         if self.cls is not None:
-            return self.session.query(self.cls).get(self.request.matchdict['id'])
+            return self.session\
+                .query(self.cls).get(self.request.matchdict['id'])
+
 
 class AddClass(RestView):
     """
@@ -110,34 +114,34 @@ class AddClass(RestView):
         self.breadcrumbs.append({'text': 'Add a new %s' % self.cls.__name__})
 
     def get(self):
-        fs = FieldSet(self.cls,session=self.session)
+        fs = FieldSet(self.cls, session=self.session)
         return {
-            'breadcrumbs' : self.breadcrumbs,
+            'breadcrumbs': self.breadcrumbs,
             'fs': fs, 'cls': self.cls}
 
     def post(self):
         fs = FieldSet(self.cls, session=self.session).\
-             bind(self.cls(),data=self.request.POST)
+             bind(self.cls(), data=self.request.POST)
         if fs.validate():
             fs.sync()
             self.session.flush()
             return HTTPFound(location=fs.model.getUrl())
         else:
-            return {'fs': fs, 'cls' : self.cls}
+            return {'fs': fs, 'cls': self.cls}
+
 
 class EditModel(RestView):
     """
     A view that allows models to be edited.  Takes the class name as a
     string parameter and returns the correct html form.
-    """    
-    def __init__(self,request ):
+    """
+    def __init__(self, request):
         self.request = request
         self.session = DBSession()
         self.cls = self.look_up_class()
         self.instance = self.look_up_instance()
         self.breadcrumbs = breadcrumbs[:]
         self.breadcrumbs.append({'text': 'Edit %s' % self.instance})
-
 
     def get(self):
         fs = FieldSet(self.instance)
@@ -153,11 +157,11 @@ class EditModel(RestView):
             fs.sync()
             self.session.flush()
             return HTTPFound(location=fs.model.getUrl())
-        
+
 
 class GraphView(RestView):
     """
-    """    
+    """
     def __init__(self, request):
         self.now = datetime.now()
         self.days30 = timedelta(days=30)
@@ -165,22 +169,22 @@ class GraphView(RestView):
         self.session = DBSession()
         self.cls = self.look_up_class()
         self.instance = self.look_up_instance()
-        self.column = self.request.params.get('column',None)
+        self.column = self.request.params.get('column', None)
         self.figsize = tuple(map(lambda item: int(item),
                                  self.request.params.get('figsize',
                                                          "1,2").split(",")))
-        self.columns = self.request.params.get('columns',None)
-        self.start = self.request.params.get('start',None)
-        self.end = self.request.params.get('end',None)
+        self.columns = self.request.params.get('columns', None)
+        self.start = self.request.params.get('start', None)
+        self.end = self.request.params.get('end', None)
         if self.end is not None:
             self.end = parser.parse(self.end)
         if self.end is None:
             self.end = self.now
         if self.start is not None:
-            self.start = parser.parse(self.start)            
+            self.start = parser.parse(self.start)
         if self.start is None:
             self.start = self.end - self.days30
-         
+
     def get_circuit_logs(self, circuit):
         return self.session.query(PrimaryLog).filter_by(circuit=circuit)\
                .filter(PrimaryLog.created > self.start)\
@@ -191,7 +195,7 @@ class GraphView(RestView):
         """
         return {'credit': 'Credit',
                 'watthours': 'Energy (Wh)',
-                'use_time' : 'Time used (sec)'}[self.column]
+                'use_time': 'Time used (sec)'}[self.column]
 
     def graphCircuit(self):
         fig = Figure(figsize=self.figsize)
@@ -199,10 +203,10 @@ class GraphView(RestView):
         ax = fig.add_subplot(111,
                              title='%s graph for %s' % (FieldSet.prettify(
                                  self.column), self.instance))
-        logs = self.get_circuit_logs(self.instance)            
+        logs = self.get_circuit_logs(self.instance)
         x = [date2num(log.date) for log in logs]
-        y = [getattr(log,self.column) for log in logs]
-        ax.plot_date(x,y,'x-')
+        y = [getattr(log, self.column) for log in logs]
+        ax.plot_date(x, y, 'x-')
         ax.set_ylabel(self.get_ylabel())
         ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
         ax.set_ylim(ymin=0)
@@ -210,7 +214,7 @@ class GraphView(RestView):
         fig.autofmt_xdate()
         ax.set_xlabel('Date')
         output = cStringIO.StringIO()
-        canvas.print_figure(output)        
+        canvas.print_figure(output)
         return Response(
             body=output.getvalue(),
             content_type='image/png')
@@ -226,9 +230,10 @@ class GraphView(RestView):
         else:
             return Response("Class not supported")
 
+
 class AlertHandler(object):
     """
-    """        
+    """
     def __init__(self, request):
         self.request = request
         self.session = DBSession()
@@ -237,10 +242,10 @@ class AlertHandler(object):
     @action(renderer='alerts/make.mako', permission='admin')
     def make(self):
         breadcrumbs = self.breadcrumbs[:]
-        breadcrumbs.append({'text': 'Send Alerts'})        
+        breadcrumbs.append({'text': 'Send Alerts'})
         return {
             'breadcrumbs': breadcrumbs,
-            'interfaces':self.session.query(CommunicationInterface).all()}
+            'interfaces': self.session.query(CommunicationInterface).all()}
 
     @action(permission="admin")
     def send_test(self):
@@ -249,10 +254,10 @@ class AlertHandler(object):
                     .get(self.request.params['interface'])
         number = self.request.params['number']
         text = self.request.params['text']
-        msg = interface.sendMessage(number,text)
+        msg = interface.sendMessage(number, text)
         return HTTPFound(location="%s/message/index/%s" %
-                         (self.request.application_url,msg.uuid))
-    
+                         (self.request.application_url, msg.uuid))
+
 
 class Dashboard(object):
     """
@@ -271,16 +276,13 @@ class Dashboard(object):
                     .order_by(desc(SystemLog.created)).limit(10))
         logs.configure(readonly=True)
         return {
-            'interfaces': interfaces,
             'logs': logs,
-            'meters': meters,
-            'breadcrumbs': self.breadcrumbs }
+            'breadcrumbs': self.breadcrumbs}
 
     @action(renderer="dashboard.mako", permission="admin")
     def dashboard(self):
         return {
             "logged_in": authenticated_userid(self.request)}
-
 
 
 class ManageHandler(object):
@@ -294,21 +296,22 @@ class ManageHandler(object):
     @action(renderer='manage/index.mako')
     def index(self):
         return {
-            'breadcrumbs': self.breadcrumbs }
+            'breadcrumbs': self.breadcrumbs}
 
     def makeGrid(self, cls):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': "%ss" % cls.__name__})
-        grid = Grid(cls,self.session.query(cls).all())
+        grid = Grid(cls, self.session.query(cls).all())
         grid.configure(readonly=True, exclude=[grid._get_fields()[0]])
         grid.insert(grid._get_fields()[1],
             Field('%s overview page' % cls.__name__,
-                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
-                                                           ,str(item))))
+                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl() 
+                                                           , str(item))))
         return {'grid': grid,
                 'cls' : cls,
                 'breadcrumbs': breadcrumbs}
-    @action(renderer='manage/genertic.mako',permission='admin')
+
+    @action(renderer='manage/genertic.mako', permission='admin')
     def show(self):
         cls = getattr(models,self.request.params['class'])
         return self.makeGrid(cls)
@@ -327,7 +330,7 @@ class ManageHandler(object):
                           .query(Token)\
                           .filter_by(batch=item)\
                           .filter_by(state='new').count()))
-                          
+
         return {'breadcrumbs': breadcrumbs,
                 'grid': grid} 
 
@@ -358,10 +361,10 @@ class ManageHandler(object):
         return HTTPFound(
             location='%s%s' % (self.request.application_url,'/manage/tokens'))
 
-    
-    @action(permission='admin',renderer='manage/pricing-models.mako')
+    @action(permission='admin', renderer='manage/pricing-models.mako')
     def pricing_models(self):
         return Response()
+
 
 class UserHandler(object):
 
@@ -380,7 +383,8 @@ class UserHandler(object):
             if USERS.get(login) == password:
                 headers = remember(self.request, login)
                 return HTTPFound(
-                    location="%s%s" % (self.request.application_url, came_from),
+                    location="%s%s" % (self.request.application_url, 
+                                       came_from),
                     headers=headers)
             message = 'Failed login'
         return {
@@ -388,7 +392,7 @@ class UserHandler(object):
             'url': self.request.application_url + '/login',
             'came_from': came_from,
             'login': login,
-            'password': password }
+            'password': password}
 
     def logout(self):
         headers = forget(self.request)
@@ -449,7 +453,7 @@ class MeterHandler(object):
     """
     def __init__(self, request):
         self.request = request
-        self.session  = DBSession()
+        self.session = DBSession()
         self.meter = self.session.query(Meter).\
                      get(self.request.matchdict['id'])
         self.breadcrumbs = breadcrumbs[:]
@@ -465,7 +469,7 @@ class MeterHandler(object):
                             'url': '/manage/show?class=Meter'})
         breadcrumbs.append({"text": "Meter Overview"})
         grid = Grid(Circuit, self.meter.get_circuits())
-        excludes  = []
+        excludes = []
         excludes.extend(grid._get_fields()[:3])
         excludes.append(grid._get_fields()[-2])
         grid.configure(readonly=True, exclude=excludes)        
@@ -483,7 +487,7 @@ class MeterHandler(object):
             'grid': grid,
             "meter": self.meter,
             "fields": get_fields(self.meter),
-            "breadcrumbs": breadcrumbs }
+            "breadcrumbs": breadcrumbs}
 
     @action(renderer='meter/messsage_graph.mako', permission='admin')
     def message_graph(self):
@@ -497,7 +501,6 @@ class MeterHandler(object):
                 "date: %s logs: %s \n" % (k, map(lambda log: "%s" % log.id, v)))
         return Response(output.getvalue(), content_type="text/plain")
 
-
     @action(permission='admin')
     def show_account_numbers(self):
         output = cStringIO.StringIO()
@@ -509,8 +512,6 @@ class MeterHandler(object):
         resp.headers.add('Content-Disposition',
                          'attachment;filename=%s:accounts.csv' % str(self.meter.name))
         return resp
-                        
-
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):

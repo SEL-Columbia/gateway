@@ -7,35 +7,117 @@ from pyramid import testing
 class GatewayTests(unittest.TestCase):
     """ Unit tests for the Gateway UI """
     def setUp(self):
-        from pyramid.config import Configurator
-        from gateway.models import initialize_sql
-        self.session = initialize_sql('sqlite://')
-        self.config = Configurator(autocommit=True)
-        self.config.begin()
+        self.config = testing.setUp()
         from gateway.models import DBSession
+        from gateway.models import initialize_sql
+        initialize_sql('sqlite://')
         self.session = DBSession()
 
     def tearDown(self):
-        self.config.end()
+        testing.tearDown()
+
+    def testingAddKannelInterface(self):
+        from gateway.models import KannelInterface
+        interface = KannelInterface(name='Kannel',
+                                    location='USA',
+                                    host='localhost',
+                                    port='5432',
+                                    provider='Ivan',
+                                    username='kannel',
+                                    password='kannel')
+        self.session.add(interface)
+        self.session.flush()
+        query = self.session.query(KannelInterface)
+        self.assertEqual(query.count(), 1)
+
+    def testingAddNetbookInterface(self):
+        from gateway.models import NetbookInterface
+        interface = NetbookInterface(name='Netbook',
+                                     provider='Ivan',
+                                     location='USA')
+        self.session.add(interface)
+        self.session.flush()
+        query = self.session.query(NetbookInterface)
+        self.assertEqual(query.count(),1)
+
+    def testingAddingMeters(self):
+        from gateway.models import Meter
+        meter = Meter(
+            name='Test meter',
+            phone='181812345',
+            location='USA',
+            battery=100,
+            status=1,
+            panel_capacity=100)
+        self.session.add(meter)
+        self.session.flush()
+        query = self.session.query(Meter)
+        self.assertEqual(query.count(),1)
+
+    def testingAddingAccount(self):
+        from gateway.models import Account
+        a = Account(name='default',
+                    phone='19291212',
+                    lang='fr')
+        self.session.add(a)
+        self.session.flush()
+        q = self.session.query(Account)
+        self.assertEqual(q.count(),1)
+        
+    def testingAddingCircuits(self):
+        from gateway.models import Circuit
+        c = Circuit(meter=None,
+                    account=None,
+                    energy_max=100,
+                    power_max=100,
+                    ip_address='192.168.1.200',
+                    status=1,
+                    credit=1)
+        self.session.add(c)
+        self.session.flush()
+        q = self.session.query(Circuit)
+        self.assertEquals(q.count(), 1)
+
+    
+    def testingAddingAnIncomingMessage(self):
+        from gateway.models import IncomingMessage        
+        import uuid
+        msg = IncomingMessage(number='181812345',
+                              text='Hello world',
+                              uuid=str(uuid.uuid4()),
+                              communication_interface=None)
+        self.session.add(msg)
+        self.session.flush()
+        q = self.session.query(IncomingMessage)
+        self.assertEquals(q.count(), 1)
 
     def testDashboardIndex(self):
         request = testing.DummyRequest()
         from gateway.handlers import Dashboard
+        from formalchemy.tables import Grid
         handler = Dashboard(request)
         # test index
         index = handler.index()
-        self.assertEqual(type(index['system_logs']), list)
-        self.assertEqual(type(index['tokenBatchs']), list)
+        self.assertEqual(type(index['logs']), Grid)
         self.assertEqual(type(index['breadcrumbs']), list)
-        self.assertEqual(type(index['meters']), Query)
 
-        add = handler.add_meter()
-        self.assertEqual(type(add['breadcrumbs']), list)
-        self.assertEqual(add['breadcrumbs'][1]['text'], 'Add a new meter')
+    def testManage(self):
+        request = testing.DummyRequest()
+        from gateway.handlers import ManageHandler
+        handler = ManageHandler(request)
+        index = handler.index()
+        self.assertEqual(type(index['breadcrumbs']), list)
 
-        send_msg = handler.send_message()
-        self.assertEqual(type(send_msg), HTTPFound)
-        self.assertEqual(send_msg.status, '302 Found')
+    def testAlert(self):
+        from gateway.handlers import AlertHandler
+        handler = AlertHandler(testing.DummyRequest())
+        make = handler.make()
+
+    def testAddModels(self):
+        # test adding a Meter
+        # totally broken from within the testing
+        # request. FIXME
+        from gateway.handlers import AddClass
 
     def testUser(self):
         request = testing.DummyRequest()
@@ -47,28 +129,8 @@ class GatewayTests(unittest.TestCase):
         self.assertEqual(login['url'], 'http://example.com/login',)
         self.assertEqual(login['login'], '')
         self.assertEqual(login['password'], '')
-        self.assertEqual(login['came_from'], None)
+        self.assertEqual(login['came_from'], '/')
 
         logout = handler.logout()
         self.assertEqual(type(logout), HTTPFound)
         self.assertEqual(logout.status, '302 Found')
-
-    def testMeterHandler(self):
-        from gateway.handlers import MeterHandler
-        from gateway.models import Meter
-        meter = Meter(name='test1001',
-                      phone='18182124554',
-                      location='New York City',
-                      battery=12,
-                      communication='gsm',
-                      panel_capacity=10)
-        self.session.add(meter)
-        self.session.flush()
-        request = testing.DummyRequest(path='http://example.com/meter/view/%s' % meter.uuid)
-        handler = MeterHandler(request)
-        # test meter index
-        handler.index()
-
-
-class GatewayNetbook(unittest.TestCase):
-    """Test the netbook urls """

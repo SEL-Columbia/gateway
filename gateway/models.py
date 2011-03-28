@@ -33,7 +33,7 @@ Base = declarative_base()
 class RootFactory(object):
 
     __acl__ = [(Allow, Everyone, 'view'),
-                (Allow, 'group:admins', 'admin') ]
+                (Allow, 'group:admins', 'admin')]
 
     def __init__(self, request):
         self.request = request
@@ -137,7 +137,6 @@ class KannelInterface(CommunicationInterface):
         session.flush()
         self.sendData(msg)
 
-        
     def sendJob(self, job, incoming=None):
         session = DBSession()
         msg = KannelJobMessage(job,
@@ -177,6 +176,7 @@ class NetbookInterface(CommunicationInterface):
         session.flush()
         return msg
 
+
 class Meter(Base):
     """
     A class that repsents a meter in the gateway
@@ -202,7 +202,7 @@ class Meter(Base):
         primaryjoin=communication_interface_id == CommunicationInterface.id)
 
     def __init__(self, name=None, phone=None, location=None,
-                 battery=None, status=None,panel_capacity=None,
+                 battery=None, status=None, panel_capacity=None,
                  communication_interface_id=None):
         self.uuid = str(uuid.uuid4())
         self.name = name
@@ -212,7 +212,6 @@ class Meter(Base):
         self.battery = battery
         self.communication_interface_id = communication_interface_id
         self.panel_capacity = panel_capacity
-
 
     def get_circuits(self):
         session = DBSession()
@@ -234,12 +233,9 @@ class Meter(Base):
         return list(itertools.chain(*map(lambda x: list(session.query(PrimaryLog)\
                                                         .filter_by(circuit=x)), self.get_circuits())))
 
-    def getRawLogs(self):
-        session = DBSession()
-        logs = PrimaryLog.__mapper__.tables[0]
-        circuits = Circuit.__mapper__.tables[1]
-        
-        
+    def getLogs(self):
+        return list(itertools.chain(*map(lambda c: c.get_logs().all(), self.get_circuits())))
+
     @staticmethod
     def slugify(name):
         slug = name.lower()
@@ -289,15 +285,15 @@ class Circuit(Base):
     date = Column(DateTime)
     pin = Column(String)
     meter_id = Column("meter", ForeignKey("meter.id"))
-    meter  = relation(Meter,
+    meter = relation(Meter,
                       lazy=False, primaryjoin=meter_id == Meter.id)
     energy_max = Column(Float)
     power_max = Column(Float)
     status = Column(Integer)
     ip_address = Column(String)
     credit = Column(Float)
-    account_id  = Column(Integer, ForeignKey('account.id'))
-    account  = relation(Account, lazy=False,
+    account_id = Column(Integer, ForeignKey('account.id'))
+    account = relation(Account, lazy=False,
                         cascade="all,delete",
                         backref='circuit',
                         primaryjoin=account_id == Account.id)
@@ -341,7 +337,6 @@ class Circuit(Base):
         log = self.getLastLog()
         if log:
             return log.created.ctime()
-        
 
     def genericJob(self, cls, incoming=""):
         session = DBSession()
@@ -401,7 +396,7 @@ class Message(Base):
     """
     Abstract class for all messages
     """
-    __tablename__  = "message"
+    __tablename__ = "message"
     type = Column('type', String(50))
     __mapper_args__ = {'polymorphic_on': type}
     id = Column(Integer, primary_key=True)
@@ -415,7 +410,7 @@ class Message(Base):
         self.sent = sent
         self.number = number
         self.uuid = uuid
-        
+
     def url(self):
         return "message/index/%s" % self.uuid
 
@@ -453,27 +448,6 @@ class Message(Base):
         return
 
 
-class TestMesssage(Message):
-    """
-    Message for testing communication interfaces
-    """
-    __tablename__ = "test_message"
-    __mapper_args__ = {'polymorphic_identity': 'test_message'}
-    id = Column(Integer, ForeignKey('message.id'), primary_key=True)
-    text = Column(String)    
-    communication_interface_id = Column(
-        Integer,
-        ForeignKey('communication_interface.id'))
-    communication_interface = relation(
-        CommunicationInterface,
-        lazy=False,
-        primaryjoin=communication_interface_id == CommunicationInterface.id)
-    
-    def __init__(self, text=None,number=None, communication_interface=None):
-        Message.__init__(self,number=number,uuid = uuid.uuid4())
-        self.communication_interface = communication_interface                     
-    
-      
 class IncomingMessage(Message):
     """
     """
@@ -635,13 +609,6 @@ class SystemLog(Base):
     def getUrl(self):
         return ""
 
-class SystemAlert(object):
-    """
-    """
-    def __init__(self, ):
-        """
-        """
-
 
 class PrimaryLog(Log):
     __tablename__ = "primary_log"
@@ -664,18 +631,28 @@ class PrimaryLog(Log):
         self.created = get_now()
         self.status = status
 
-
     def getUrl(self):
         return ""
 
+    def getType(self):
+        if self.circuit.ip_address == '192.168.1.200':
+            return 'MAIN'
+        else:
+            return 'CIRCUIT'
+    
+    def getCreditAndType(self):
+        if self.getType() == 'MAIN':
+            return [('ct', self.getType()), ('cr', 0)]
+        else:
+            return [('cr', float(self.credit)), ('ct', self.getType())]
+
     def __str__(self):
-        return 'job=pp&status=%s&ts=%s&cid=%s&tu=%s&mid=%s&wh=%s&cr=%s' % (self.status,
-                                                                           self.created.strftime("%Y%m%d%H%M"),
-                                                                           self.circuit.ip_address,
-                                                                           self.use_time,
-                                                                           self.circuit.meter.name,
-                                                                           self.watthours,
-                                                                           self.credit)
+        return urllib.urlencode([('job', 'pp'),
+                                 ('status', self.status),
+                                 ('ts', self.created.strftime("%Y%m%d%H")),
+                                 ('cid', self.circuit.ip_address),
+                                 ('tu', int(self.use_time)),
+                                 ('wh', float(self.watthours))] + self.getCreditAndType())
 
 
 class Job(Base):
