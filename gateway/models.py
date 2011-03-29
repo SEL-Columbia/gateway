@@ -639,7 +639,7 @@ class PrimaryLog(Log):
             return 'MAIN'
         else:
             return 'CIRCUIT'
-    
+
     def getCreditAndType(self):
         if self.getType() == 'MAIN':
             return [('ct', self.getType()), ('cr', 0)]
@@ -683,7 +683,6 @@ class Job(Base):
         return session.query(IncomingMessage).\
                             filter_by(uuid=incoming_uuid).first()
 
-
     def url(self):
         return "jobs/job/%s/" % self.id
 
@@ -694,7 +693,7 @@ class Job(Base):
                 "type": self._type}
 
     def __str__(self):
-        return "job"
+        return "(job)"
 
 
 class AddCredit(Job):
@@ -709,7 +708,7 @@ class AddCredit(Job):
         self.credit = credit
 
     def __str__(self):
-        return "job=cr&jobid=%s&cid=%s&amt=%s;" % (self.id,
+        return "(job=cr&jobid=%s&cid=%s&amt=%s)" % (self.id,
                                                 self.circuit.ip_address,
                                                 float(self.credit))
 
@@ -724,7 +723,7 @@ class TurnOff(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=coff&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=coff&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class TurnOn(Job):
@@ -737,7 +736,7 @@ class TurnOn(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=con&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=con&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class Mping(Job):
@@ -754,7 +753,7 @@ class Mping(Job):
         return meter.get_circuits()[0]
 
     def __str__(self):
-        return "job=mping&jobid=%s;" % self.id
+        return "(job=mping&jobid=%s)" % self.id
 
 
 class Cping(Job):
@@ -768,7 +767,7 @@ class Cping(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=cping&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=cping&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class JobMessage(Message):
