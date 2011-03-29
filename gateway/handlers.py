@@ -702,6 +702,7 @@ class DeleteJobs(object):
         jobids = simplejson.loads(self.request.body)
         print jobids
 
+
 class JobHandler(object):
 
     def __init__(self, request):
@@ -784,7 +785,7 @@ class MessageHandler(object):
         breadcrumbs.extend({})
         return {
             'breadcrumbs': breadcrumbs,
-            'message': self.message }
+            'message': self.message}
 
     @action(request_method="POST")
     def remove(self):
@@ -797,7 +798,7 @@ class MessageHandler(object):
         if self.request.method == 'POST':
             return Response("Removed Message")
         elif self.request.method == 'GET':
-            return {'message': self.message }
+            return {'message': self.message}
 
 
 class SMSHandler(object):

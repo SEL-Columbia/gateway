@@ -16,7 +16,7 @@ class GatewayTests(unittest.TestCase):
     def tearDown(self):
         testing.tearDown()
 
-    def testingAddKannelInterface(self):
+    def testAddKannelInterface(self):
         from gateway.models import KannelInterface
         interface = KannelInterface(name='Kannel',
                                     location='USA',
@@ -30,7 +30,7 @@ class GatewayTests(unittest.TestCase):
         query = self.session.query(KannelInterface)
         self.assertEqual(query.count(), 1)
 
-    def testingAddNetbookInterface(self):
+    def testAddNetbookInterface(self):
         from gateway.models import NetbookInterface
         interface = NetbookInterface(name='Netbook',
                                      provider='Ivan',
@@ -38,9 +38,9 @@ class GatewayTests(unittest.TestCase):
         self.session.add(interface)
         self.session.flush()
         query = self.session.query(NetbookInterface)
-        self.assertEqual(query.count(),1)
+        self.assertEqual(query.count(), 1)
 
-    def testingAddingMeters(self):
+    def testAddingMeters(self):
         from gateway.models import Meter
         meter = Meter(
             name='Test meter',
@@ -52,9 +52,9 @@ class GatewayTests(unittest.TestCase):
         self.session.add(meter)
         self.session.flush()
         query = self.session.query(Meter)
-        self.assertEqual(query.count(),1)
+        self.assertEqual(query.count(), 1)
 
-    def testingAddingAccount(self):
+    def testAddingAccount(self):
         from gateway.models import Account
         a = Account(name='default',
                     phone='19291212',
@@ -62,9 +62,9 @@ class GatewayTests(unittest.TestCase):
         self.session.add(a)
         self.session.flush()
         q = self.session.query(Account)
-        self.assertEqual(q.count(),1)
-        
-    def testingAddingCircuits(self):
+        self.assertEqual(q.count(), 1)
+
+    def testAddingCircuits(self):
         from gateway.models import Circuit
         c = Circuit(meter=None,
                     account=None,
@@ -78,9 +78,8 @@ class GatewayTests(unittest.TestCase):
         q = self.session.query(Circuit)
         self.assertEquals(q.count(), 1)
 
-    
-    def testingAddingAnIncomingMessage(self):
-        from gateway.models import IncomingMessage        
+    def testAddingAnIncomingMessage(self):
+        from gateway.models import IncomingMessage
         import uuid
         msg = IncomingMessage(number='181812345',
                               text='Hello world',
@@ -108,10 +107,22 @@ class GatewayTests(unittest.TestCase):
         index = handler.index()
         self.assertEqual(type(index['breadcrumbs']), list)
 
-    def testAlert(self):
+    def testAlerts(self):
         from gateway.handlers import AlertHandler
         handler = AlertHandler(testing.DummyRequest())
         make = handler.make()
+        self.assertEqual(type(make['breadcrumbs']),list)
+        self.assertEqual(type(make['interfaces']),list)
+
+## Below need to be functional tests.
+
+    # def testAlertsSend(self):
+    #     from gateway.handlers import AlertHandler
+    #     request = testing.DummyRequest(params={'interface' : 1,
+    #                                            'text'      : 'This is an test',
+    #                                            'number'    : '181812345'})
+    #     handler = AlertHandler(request)        
+    #     send = handler.send_test()
 
     def testAddModels(self):
         # test adding a Meter
