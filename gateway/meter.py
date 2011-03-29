@@ -3,6 +3,7 @@ Module for SS Gateway.
 Handles all of the meter communcation
 """
 from dateutil import parser
+from datetime import datetime
 from gateway.models import Job
 from gateway.models import SystemLog
 from gateway.models import PrimaryLog
@@ -68,8 +69,8 @@ def make_delete(msgDict, session):
 
 def make_pp(message, circuit, session):
     if valid(message.keys(),
-             ['status', 'cid', 'tu', 'mid', 'wh', 'job']):
-        date = parser.parse(message["ts"])
+             ['status', 'cid', 'tu', 'wh', 'job']):
+        date = datetime.strptime(message['ts'], "%Y%m%d%H")
         log = PrimaryLog(
             date=date,
             circuit=circuit,
@@ -85,7 +86,7 @@ def make_pp(message, circuit, session):
     else:
         session.add(
             SystemLog(text="Unable to process message %s"
-                      % message.uuid))
+                      % message))
 
 
 def make_nocw(message, circuit, session):
