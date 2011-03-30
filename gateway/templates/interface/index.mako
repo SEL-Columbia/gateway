@@ -17,7 +17,6 @@
        href="${request.application_url}/interface/remove/${interface.id}">
       Remove</a>
     <hr />
-
     <table>
       % for key,value in fields.iteritems(): 
       <tr>

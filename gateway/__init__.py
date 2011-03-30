@@ -108,6 +108,11 @@ def main(global_config, **settings):
                        action='index')
     config.add_handler('main', '/:action',
                       handler='gateway.handlers:Dashboard')
+
+    config.add_handler('twilio',
+                       'twilio/{action}',
+                       handler='gateway.handlers:TwilioHandler')
+
     config.add_handler('manage', '/manage/:action',
                        handler='gateway.handlers:ManageHandler')
     config.add_handler('interfaces', '/interface/:action/:id',

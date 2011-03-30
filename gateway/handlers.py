@@ -48,6 +48,7 @@ from gateway.models import OutgoingMessage
 from gateway.models import SystemLog
 from gateway.models import Mping
 from gateway.models import CommunicationInterface
+from gateway.models import TwilioInterface
 from gateway.security import USERS
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
@@ -55,6 +56,34 @@ from gateway.utils import make_table_header
 from gateway.utils import make_table_data
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
+
+
+def save_and_parse_message(interface, origin, text, id=None):
+    """
+    """
+    session = DBSession()
+    if id is None:
+        id = str(uuid.uuid4())
+    message = IncomingMessage(origin, text, id, interface)
+    session.add(message)
+    session.flush()
+    dispatcher.matchMessage(message)
+    return message
+
+
+class TwilioHandler(object):
+    def __init__(self, request):
+        self.request = request
+        self.session = DBSession()
+
+    @action()
+    def send(self):
+        twilio = self.session.query(TwilioInterface).first()
+        msg = save_and_parse_message(twilio,
+                                     self.request.params['From'],
+                                     self.request.params['Body'],
+                                     id=self.request.params['SmsMessageSid'])
+        return Response(msg.uuid)
 
 
 class Index(object):
@@ -417,27 +446,16 @@ class InterfaceHandler(object):
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Interface overview'})
-        testmessage = FieldSet(TestMesssage,session=self.session)
         return {'interface': self.interface,
                 'breadcrumbs': breadcrumbs,
-                'testmessage': testmessage,
                 'fields': get_fields(self.interface)}
-
-    def save_and_parse_message(self, origin, text, id=None):
-        """
-        """
-        if id is None:
-            id = str(uuid.uuid4())
-        message = IncomingMessage(origin, text, id, self.interface)
-        self.session.add(message)
-        self.session.flush()
-        dispatcher.matchMessage(message)
-        return message
 
     @action()
     def send(self):
-        msg = self.save_and_parse_message(self.request.params['number'],
-                                          self.request.params['message'])
+        msg = save_and_parse_message(
+            self.interface,
+            self.request.params['number'],
+            self.request.params['message'])
         return Response(msg.uuid)
 
     @action()

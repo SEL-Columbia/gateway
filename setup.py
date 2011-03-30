@@ -9,6 +9,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'dispatch',
+    'twilio',
     'WebTest',
     'fa.jquery',
     'distribute',
@@ -26,13 +27,13 @@ requires = [
     'WebError',
 ]
 
-if sys.version_info[:3] < (2,5,0):
+if sys.version_info[:3] < (2, 5, 0):
     requires.append('pysqlite')
-    
+
 setup(name='gateway',
       version='0.0',
       description='gateway',
-      long_description=README + '\n\n' +  CHANGES,
+      long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pylons",
@@ -54,4 +55,3 @@ setup(name='gateway',
       main = gateway:main
       """
       )
-
