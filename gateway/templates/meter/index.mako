@@ -56,10 +56,13 @@ ${headers.ggRaphael(request)}
             account numbers</a></li>
           <li><a id="showJobButton" href="#">View active job queue</a></li>
           <li>
-            <a href="${request.application_url}/${meter.remove_url()}">
+            <a href="${a_url}/${meter.remove_url()}">
               Remove Meter</a>
           </li>
-          <li><a href="${request.application_url}/meter/ping/${meter.id}"> 
+          <li> 
+            <a href="${a_url}/meter/message_graph/${meter.id}">Message
+            table</a></li>
+          <li><a href="${a_url}/meter/ping/${meter.id}"> 
               Ping Meter</a>
           </li>
         </ul>

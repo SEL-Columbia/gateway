@@ -507,16 +507,19 @@ class MeterHandler(object):
             "fields": get_fields(self.meter),
             "breadcrumbs": breadcrumbs}
 
-    @action(renderer='meter/messsage_graph.mako', permission='admin')
+    @action(renderer='meter/messsage_graph.mako', permission='view')
     def message_graph(self):
         output = cStringIO.StringIO()
         d = collections.defaultdict(list)
         logs = self.meter.getLogs()
+        cids = sorted([c.id for c in self.meter.get_circuits()])
         for log in logs:
-            d[log.date].append(log)
-        for k, v in d.iteritems():
-            output.write(
-                "date: %s logs: %s \n" % (k, map(lambda log: "%s" % log.id, v)))
+            d[log.date.strftime('%Y.%m.%d.%H.%M')].append(log)
+        for key in sorted(d.iterkeys(), reverse=True):
+            log_cids = [log.circuit.id for log in d[key]]
+            output.write(str(key) + " | ")
+            output.write(" ".join([str(x).ljust(3) if x in log_cids else ' - ' for x in cids]))
+            output.write("\n")
         return Response(output.getvalue(), content_type="text/plain")
 
     @action(permission='admin')
