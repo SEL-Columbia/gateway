@@ -1,7 +1,7 @@
-from datetime import datetime
-import random,  sys, urllib, urlparse
-from collections import deque
 
+from datetime import datetime
+import random, sys, urllib, urlparse
+from collections import deque
 
 def base36encode(number, alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
     """Convert positive integer to a base36 string. Source: Wikipedia"""
@@ -25,19 +25,19 @@ def base36encode(number, alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
 
     return sign + base36
 
-
 def base36decode(number):
     return int(number, 36)
 
-
 class Globals:
     maxlen_sms = 160
-    max_tu = 86400  # number of seconds in a day
-    max_wh = 99999  # tenths; [0 - 10kWh]
-    max_cr = 9999999  # hundredths; [0 - 100K]
+    max_tu = 86400 # number of seconds in a day
+    max_wh = 99999 # tenths; [0 - 10kWh]
+    max_cr = 9999999 # hundredths; [0 - 100K]
     factor_wh = 10.0
     factor_cr = 100.0
 
+def paren_enclose(s):
+    return '(' + s.strip() + ')'
 
 def deflatelogs(logs):
     """Returns a list of messages containing compressed logs"""
@@ -50,7 +50,7 @@ def deflatelogs(logs):
     parsedfirstlog = urlparse.parse_qs(firstlog)
     job = 'l' # primary log
     timestamp = base36encode(int(
-            datetime.strptime(parsedfirstlog["ts"][0], "%Y%m%d%H"
+            datetime.strptime(parsedfirstlog["ts"][0], "%Y%m%d%H%M%S"
                               ).strftime("%y%m%d%H")))
 
     # transform the logs
@@ -68,13 +68,14 @@ def deflatelogs(logs):
                  int(parsedlog["status"][0])))
 
     header = "Transformed Messages:"
-    # print header
-    # print "=" * len(header)
-    # for i, message in enumerate(transformedmessages):
-    #     print i+1, message
-    # print
+    print header
+    print "=" * len(header)
+    for i, message in enumerate(transformedmessages):
+        print i+1, message
+    print
 
     # compress into messages
+    sectiondelim = '#'
     prefix = "%s%s" % (job, timestamp)
     consection = []
     coffsection = []
@@ -87,24 +88,24 @@ def deflatelogs(logs):
         if nextstatus == 1:
             tmpconsection = consection[:]
             tmpconsection.append(nextlog)
-            tmpmessage = '|'.join([
+            tmpmessage = sectiondelim.join([
                     prefix, 
                     ';'.join(tmpconsection), 
                     ';'.join(coffsection)])
         else:
             tmpcoffsection = coffsection[:]
             tmpcoffsection.append(nextlog)
-            tmpmessage = '|'.join([
+            tmpmessage = sectiondelim.join([
                     prefix, 
                     ';'.join(consection), 
                     ';'.join(tmpcoffsection)])
 
-        if len(tmpmessage) > Globals.maxlen_sms:
-            message = '|'.join([
+        if len(tmpmessage) + 2 > Globals.maxlen_sms: # +2 for the ()
+            message = sectiondelim.join([
                     prefix, 
                     ';'.join(consection), 
                     ';'.join(coffsection)])
-            compressedmessages.append(message)
+            compressedmessages.append(paren_enclose(message))
             consection[:]= []
             coffsection[:]= []
         else:
@@ -116,22 +117,28 @@ def deflatelogs(logs):
             transformedmessages.popleft()
 
             if not transformedmessages:
-                compressedmessages.append('|'.join([
-                            prefix, 
-                            ';'.join(consection), 
-                            ';'.join(coffsection)]))
-
+                compressedmessages.append(paren_enclose(sectiondelim.join([
+                                prefix, 
+                                ';'.join(consection), 
+                                ';'.join(coffsection)])))
+                
     return compressedmessages
 
 def inflatelogs(logs):
     """Returns a list of messages containing uncompressed logs"""
 
+    sectiondelim = '#'
     uncompressedmessages = []
     transformedmessages = deque()
 
     for log in logs:
+        if '(' not in log or ')' not in log: # discard incomplete message
+            continue
+
+        # remove leading and trailing ()
+        log = log[1:-1]
         # split the sections: prefix, con, coff
-        prefix, consection, coffsection = log.split('|')
+        prefix, consection, coffsection = log.split(sectiondelim)
 
         # get the meterid and timestamp from the prefix
         timestamp = datetime.strptime(
@@ -154,13 +161,13 @@ def inflatelogs(logs):
                       ("cr", 0),
                       ("ct", ct))
                 uncompressedmessages.append(urllib.urlencode(kv))
-
+                
             else: # consumer circuits
                 ct = "CIRCUIT"
                 cid = "192.168.1.2%02d" % (base36decode(messageparts[0]),)
                 tu = base36decode(messageparts[1])
-                wh = "%.1f" % (base36decode(messageparts[2]) / Globals.factor_wh)
-                cr = "%.2f" % (base36decode(messageparts[3]) / Globals.factor_cr)
+                wh = base36decode(messageparts[2]) / Globals.factor_wh
+                cr = base36decode(messageparts[3]) / Globals.factor_cr
                 kv = (("job", "pp"),
                       ("status", status),
                       ("ts", timestamp),
