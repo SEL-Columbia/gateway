@@ -57,7 +57,7 @@ def parse_meter_message(message):
 
     # compressed primary logs
     if re.match("^\(l.*\)$", message.text):
-        inflatedlogs = compactsms.inflatelogs([message.text.strip(')').strip('(')])
+        inflatedlogs = compactsms.inflatelogs([message.text])
         for log in inflatedlogs:
             m = reduce_message(parse_qs(log))
             circuit = findCircuit(m, meter)
