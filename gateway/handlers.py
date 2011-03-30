@@ -456,7 +456,7 @@ class InterfaceHandler(object):
             self.interface,
             self.request.params['number'],
             self.request.params['message'])
-        return Response(msg.uuid)
+        return Response(msg)
 
     @action()
     def remove(self):
