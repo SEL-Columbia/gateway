@@ -10,6 +10,7 @@ import simplejson
 from datetime import timedelta
 from datetime import datetime
 import collections
+import hashlib
 
 from dateutil import parser
 from webob import Response
@@ -47,14 +48,21 @@ from gateway.models import IncomingMessage
 from gateway.models import OutgoingMessage
 from gateway.models import SystemLog
 from gateway.models import Mping
+from gateway.models import Users
+from gateway.models import Groups
 from gateway.models import CommunicationInterface
-from gateway.security import USERS
+
+# random junk that needs to be cleaned up.
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
 from gateway.utils import make_table_header
 from gateway.utils import make_table_data
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
+
+
+def forbidden_view(request):
+    return Response("Hey, you can't do that!")
 
 
 class Index(object):
@@ -370,18 +378,54 @@ class UserHandler(object):
 
     def __init__(self, request):
         self.request = request
+        self.breadcrumbs = breadcrumbs[:]
 
-    @action(renderer="login.mako")
+    @action(renderer='users/add.mako', permission='admin')
+    def add(self):
+        errors = None
+        session = DBSession()
+        groups = session.query(Groups).all()
+        breadcrumbs = self.breadcrumbs[:]
+        breadcrumbs.append({'text' : 'Add a new user'})
+
+        if self.request.method == 'GET':            
+            return {'breadcrumbs' : breadcrumbs,
+                    'groups' : groups,
+                    'errors' : errors}
+        elif self.request.method == 'POST':
+            name = self.request.params['name']
+            email = self.request.params['email']
+            password = self.request.params['password']
+            group = self.request.params['group']
+            user = Users(name=name, email=email, 
+                         group_id=group,
+                         password=password)
+            session.add(user)
+            session.flush()
+            return HTTPFound(location='/')
+
+    @action()
+    def show(self):
+        session = DBSession()
+        users = session.query(Users).all()
+        return Response(str(users))
+
+    @action(renderer='login.mako')
     def login(self):
+        session = DBSession()
         came_from = self.request.params.get('came_from','/')
         message = ''
         login = ''
         password = ''
         if 'form.submitted' in self.request.params:
-            login = self.request.params['login']
-            password = self.request.params['password']
-            if USERS.get(login) == password:
-                headers = remember(self.request, login)
+            name = self.request.params['name']
+            hash = hashlib.md5(self.request.params['password']).hexdigest()
+            print(name, hash)
+            user = session.query(Users)\
+                .filter_by(name=name)\
+                .filter_by(password=unicode(hash)).first()
+            if user:
+                headers = remember(self.request, user.name)
                 return HTTPFound(
                     location="%s%s" % (self.request.application_url, 
                                        came_from),
@@ -481,8 +525,8 @@ class MeterHandler(object):
                           .getLastLogTime()))
         grid.insert(grid._get_fields()[3],
                     Field('Account Number',
-                          value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(),
-                                                                    item.pin)))
+                          value=lambda item: '<a href=%s>%s</a>' %\
+                              (item.getUrl(),item.pin)))
         return {
             'grid': grid,
             "meter": self.meter,
@@ -500,7 +544,8 @@ class MeterHandler(object):
         for key in sorted(d.iterkeys(), reverse=True):
             log_cids = [log.circuit.id for log in d[key]]
             output.write(str(key) + " | ")
-            output.write(" ".join([str(x).ljust(3) if x in log_cids else ' - ' for x in cids]))
+            output.write(" ".join([str(x).ljust(3) if x in 
+                                   log_cids else ' - ' for x in cids]))
             output.write("\n")
         return Response(output.getvalue(), content_type="text/plain")
 
@@ -513,7 +558,8 @@ class MeterHandler(object):
         resp = Response(output.getvalue())
         resp.content_type = 'application/x-csv'
         resp.headers.add('Content-Disposition',
-                         'attachment;filename=%s:accounts.csv' % str(self.meter.name))
+                         'attachment;filename=%s:accounts.csv' % \
+                         str(self.meter.name))
         return resp
 
     @action(request_method='POST', permission="admin")
@@ -826,7 +872,7 @@ class SMSHandler(object):
             "count": count,
             "messages": messages,
             "table_headers": make_table_header(OutgoingMessage),
-            "breadcrumbs": breadcrumbs }
+            "breadcrumbs": breadcrumbs}
 
     @action(permission="admin")
     def remove_all(self):

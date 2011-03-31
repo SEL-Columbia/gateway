@@ -1,10 +1,10 @@
 from pyramid_beaker import session_factory_from_settings
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.exceptions import Forbidden
 import pyramid_handlers
 from dispatch import Dispatcher
 from gateway.messaging import findMeter
-
 
 dispatcher = Dispatcher()
 dispatcher.addMatcher(findMeter,
@@ -66,7 +66,7 @@ def main(global_config, **settings):
 
     config = Configurator(settings=settings,
                           autocommit=True,
-                          root_factory='gateway.models.RootFactory',
+                          root_factory='gateway.security.RootFactory',
                           authentication_policy=authn_policy,
                           authorization_policy=authz_policy)
     config.begin()
@@ -75,7 +75,9 @@ def main(global_config, **settings):
     config.set_session_factory(session_factory)
 
     config.add_static_view('static', 'gateway:static/')
-    config.add_static_view('deform-static', 'deform:static')
+
+    config.add_view(view='gateway.handlers.forbidden_view',
+                    context=Forbidden)
 
     config.add_route('add',
                      '/add/{class}',
@@ -93,52 +95,71 @@ def main(global_config, **settings):
                      renderer='edit.mako',
                      permission='admin',
                      view='gateway.handlers.EditModel',)
+
     config.add_route('graph',
                      '/graph/{class}/{id}',
                      view='gateway.handlers.GraphView')
+
     config.add_route('index',
                      '/',
                      renderer='index.mako',
                      view='gateway.handlers.Index')
+
     config.add_handler('alerts',
                        '/alerts/{action}',
                        'gateway.handlers:AlertHandler')
+
     config.add_handler('dashboard', '/dashboard',
                        'gateway.handlers:Dashboard',
                        action='index')
+
     config.add_handler('main', '/:action',
                       handler='gateway.handlers:Dashboard')
+
     config.add_handler('manage', '/manage/:action',
                        handler='gateway.handlers:ManageHandler')
+
     config.add_handler('interfaces', '/interface/:action/:id',
                        handler='gateway.handlers:InterfaceHandler'),
+
     config.add_handler('export-load', 'system/:action',
                        handler='gateway.sys:ExportLoadHandler')
+
     config.add_handler('users', 'user/:action',
-                      handler='gateway.handlers:UserHandler')
+                       handler='gateway.handlers:UserHandler')
+
     config.add_handler('meter', 'meter/:action/:id',
                        handler='gateway.handlers:MeterHandler')
+
     config.add_handler('circuit', 'circuit/:action/:id',
                        handler='gateway.handlers:CircuitHandler')
+
     config.add_handler('logs', 'logs/:action/:meter/',
                        handler='gateway.handlers:LoggingHandler')
+
     config.add_handler('jobs', 'jobs/:action/:id/',
                        handler='gateway.handlers:JobHandler')
+
     config.add_handler('sms', 'sms/:action',
                        handler='gateway.handlers:SMSHandler')
+
     config.add_handler('message', 'message/:action/:id',
                        handler='gateway.handlers:MessageHandler')
+
     config.add_handler('account', 'account/:action/:id',
                        handler='gateway.handlers:AccountHandler')
+
     config.add_handler('token', 'token/:action/:id',
                        handler='gateway.handlers:TokenHandler')
 
     config.add_subscriber('gateway.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
+
     config.include('pyramid_formalchemy')
     config.include('fa.jquery')
     config.formalchemy_admin('admin',
                              package='gateway',
                              view='fa.jquery.pyramid.ModelView')
+
     config.end()
     return config.make_wsgi_app()

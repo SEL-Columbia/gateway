@@ -1,12 +1,26 @@
+from pyramid.security import Allow
+from pyramid.security import Everyone
+
+from gateway.models import Users
+from gateway.models import DBSession
 
 
-USERS = {'admin': '3ebrufu3',
-          'viewer': 'viewer'}
+class RootFactory(object):
 
-GROUPS = {
-    'admin': ['group:admins']}
+    __acl__ = [(Allow, Everyone, 'vistor'),
+               (Allow, 'viewer', 'viewer'),
+               (Allow, 'admin', 'admin')]
+    
+    def __init__(self, request):
+        self.request = request
 
 
 def groupfinder(userid, request):
-    if userid in USERS:
-        return GROUPS.get(userid, [])
+    """
+    Rough cut of user admin system.
+    """
+    session = DBSession()
+    user = session.query(Users).filter_by(name=userid).first()
+    if user:
+        if user.group:
+            return [user.group.name]

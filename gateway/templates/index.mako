@@ -33,6 +33,12 @@
         <li><a href="${a_url}/sms/index?limit=100">Check all SMS messages</a></li>
         <li><a href="${a_url}/system/download">Download data tables</a></li>
       </ul>
+      <hr /> 
+      <h3>Manage and add users</h3>
+      <ul class="index-list">        
+        <li> <a href="${a_url}/user/add">Add a new user</a></li>
+        <li> <a href="${a_url}/user/manage">Manage users</a></li>
+      </ul>      
     </td>
   </tr>
 </table>

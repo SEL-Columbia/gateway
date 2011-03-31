@@ -8,6 +8,8 @@ import urllib2
 import urllib
 import itertools
 import transaction
+import hashlib
+
 from sqlalchemy import create_engine
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -23,25 +25,61 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker, relation
 from zope.sqlalchemy import ZopeTransactionExtension
-from pyramid.security import Allow
-from pyramid.security import Everyone
 
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
 
-class RootFactory(object):
-
-    __acl__ = [(Allow, Everyone, 'view'),
-               (Allow, 'group:admins', 'admin')]
-
-    def __init__(self, request):
-        self.request = request
-
-
 def get_now():
     return datetime.datetime.now()
+
+
+class Groups(Base):
+    """
+    """
+    __tablename__ = 'groups'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode(100))
+
+    def __init__(self, name=None):
+        self.name = name
+
+
+class Users(Base):
+    """
+    Users
+    """
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode(100))
+    password = Column(Unicode(100))
+    email = Column(Unicode(100))
+    group_id = Column(
+        Integer,
+        ForeignKey('groups.id'))
+
+    group = relation(
+        Groups,
+        lazy=False,
+        primaryjoin=group_id == Groups.id)
+
+    def __init__(self, name=None, password=None, email=None,
+                 group_id=None):
+        self.name = name
+        if password is not None:
+            hash = hashlib.md5(password).hexdigest()
+        self.password = hash
+        self.email = email
+        self.group_id = group_id
+
+    def getUrl(self):
+        return "/users/%s" % self.id
+
+    def __str__(self):
+        return "%s" % self.name
 
 
 class CommunicationInterface(Base):
@@ -49,6 +87,7 @@ class CommunicationInterface(Base):
     Configures how the Gateway communicates with a Meter
     Subclasses
        KannelInterface
+       TwilioInterface
        Netbook interface
     """
     __tablename__ = 'communication_interface'
@@ -819,6 +858,16 @@ class KannelJobMessage(Message):
 
 
 def populate():
+    session = DBSession()
+    # add default users
+    admins = session.query(Groups).filter_by(name='admin').first()
+    if admins is None:
+        admins = Groups(name='admin')
+        session.add(admins)
+    viewers = session.query(Groups).filter_by(name='viewer').first()
+    if viewers is None:
+        viewers = Groups(name='viewer')
+        session.add(viewers)
     DBSession.flush()
     transaction.commit()
 
