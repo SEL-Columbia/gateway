@@ -255,7 +255,7 @@ class AlertHandler(object):
             'breadcrumbs': breadcrumbs,
             'interfaces': self.session.query(CommunicationInterface).all()}
 
-    @action(permission="admin")
+    @action(permission='admin')
     def send_test(self):
         interface = self.session\
                     .query(CommunicationInterface)\
@@ -287,7 +287,7 @@ class Dashboard(object):
             'logs': logs,
             'breadcrumbs': self.breadcrumbs}
 
-    @action(renderer="dashboard.mako", permission="admin")
+    @action(renderer="dashboard.mako", permission='view')
     def dashboard(self):
         return {
             "logged_in": authenticated_userid(self.request)}
@@ -319,12 +319,12 @@ class ManageHandler(object):
                 'cls' : cls,
                 'breadcrumbs': breadcrumbs}
 
-    @action(renderer='manage/genertic.mako', permission='admin')
+    @action(renderer='manage/genertic.mako', permission='view')
     def show(self):
         cls = getattr(models,self.request.params['class'])
         return self.makeGrid(cls)
 
-    @action(permission='admin',renderer='manage/tokens.mako')
+    @action(permission='view',renderer='manage/tokens.mako')
     def tokens(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Manage Tokens'})
@@ -404,11 +404,11 @@ class UserHandler(object):
             session.flush()
             return HTTPFound(location='/')
 
-    @action()
+    @action(permission='admin')
     def show(self):
         session = DBSession()
         users = session.query(Users).all()
-        return Response(str(users))
+        return Response(str([(user.name,user.group.name) for user in users]))
 
     @action(renderer='login.mako')
     def login(self):
@@ -461,10 +461,8 @@ class InterfaceHandler(object):
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Interface overview'})
-        testmessage = FieldSet(TestMesssage,session=self.session)
         return {'interface': self.interface,
                 'breadcrumbs': breadcrumbs,
-                'testmessage': testmessage,
                 'fields': get_fields(self.interface)}
 
     def save_and_parse_message(self, origin, text, id=None):
@@ -478,13 +476,13 @@ class InterfaceHandler(object):
         dispatcher.matchMessage(message)
         return message
 
-    @action()
+    @action(permission='admin')
     def send(self):
         msg = self.save_and_parse_message(self.request.params['number'],
                                           self.request.params['message'])
         return Response(msg.uuid)
 
-    @action()
+    @action(permission='admin')
     def remove(self):
         self.session.delete(self.interface)
         self.session.flush()
@@ -502,7 +500,7 @@ class MeterHandler(object):
                      get(self.request.matchdict['id'])
         self.breadcrumbs = breadcrumbs[:]
 
-    @action(renderer="meter/index.mako", permission="admin")
+    @action(renderer="meter/index.mako", permission="view")
     def index(self):
         """
         Main view for meter overview. Also includes circuit gird and
@@ -620,7 +618,7 @@ class CircuitHandler(object):
         self.meter = self.circuit.meter
         self.breadcrumbs = breadcrumbs[:]
 
-    @action(renderer="circuit/index.mako", permission="admin")
+    @action(renderer="circuit/index.mako", permission="view")
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.extend([
@@ -792,7 +790,7 @@ class TokenHandler(object):
             query(TokenBatch).filter_by(
             uuid=self.request.matchdict["id"]).first()
 
-    @action(permission="admin")
+    @action(permission="view")
     def show_batch(self):
         return Response(simplejson.dumps(
                 [x.toDict() for x in self.batch.get_tokens()]))
@@ -828,7 +826,7 @@ class MessageHandler(object):
                        query(Message).filter_by(
             uuid=self.request.matchdict["id"]).first()
 
-    @action(renderer='sms/index_msg.mako')
+    @action(renderer='sms/index_msg.mako', permission='admin')
     def index(self):
         global breadcrumbs
         breadcrumbs.extend({})
@@ -859,7 +857,7 @@ class SMSHandler(object):
         self.breadcrumbs = breadcrumbs[:]
         self.session = DBSession()
 
-    @action(renderer="sms/index.mako", permission="admin")
+    @action(renderer="sms/index.mako", permission="view")
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({"text": "SMS Message"})
@@ -874,7 +872,7 @@ class SMSHandler(object):
             "table_headers": make_table_header(OutgoingMessage),
             "breadcrumbs": breadcrumbs}
 
-    @action(permission="admin")
+    @action(permission="view")
     def remove_all(self):
         [self.session.delete(msg) for msg in self.session.query(Message).all()]
         return HTTPFound(

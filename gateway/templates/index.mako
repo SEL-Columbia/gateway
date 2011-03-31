@@ -37,7 +37,7 @@
       <h3>Manage and add users</h3>
       <ul class="index-list">        
         <li> <a href="${a_url}/user/add">Add a new user</a></li>
-        <li> <a href="${a_url}/user/manage">Manage users</a></li>
+        <li> <a href="${a_url}/user/show">Manage users</a></li>
       </ul>      
     </td>
   </tr>

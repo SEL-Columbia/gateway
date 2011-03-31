@@ -864,9 +864,9 @@ def populate():
     if admins is None:
         admins = Groups(name='admin')
         session.add(admins)
-    viewers = session.query(Groups).filter_by(name='viewer').first()
+    viewers = session.query(Groups).filter_by(name='view').first()
     if viewers is None:
-        viewers = Groups(name='viewer')
+        viewers = Groups(name='view')
         session.add(viewers)
     DBSession.flush()
     transaction.commit()
