@@ -269,12 +269,8 @@ class Meter(Base):
         return l
 
     def getLogs(self):
-        session = DBSession()
-        return list(itertools.chain(*map(lambda x: list(session.query(PrimaryLog)\
-                                                        .filter_by(circuit=x)), self.get_circuits())))
-
-    def getLogs(self):
-        return list(itertools.chain(*map(lambda c: c.get_logs().all(), self.get_circuits())))
+        return list(itertools.chain(*map(lambda c: c.get_logs().all(),
+                                         self.get_circuits())))
 
     @staticmethod
     def slugify(name):
@@ -371,12 +367,16 @@ class Circuit(Base):
         """
         """
         session = DBSession()
-        return session.query(PrimaryLog).filter_by(circuit=self).order_by(PrimaryLog.created.desc()).first()
+        return session.query(PrimaryLog)\
+            .filter_by(circuit=self)\
+            .order_by(PrimaryLog.created.desc()).first()
 
     def getLastLogTime(self):
         log = self.getLastLog()
         if log:
-            return log.created.ctime()
+            return [log.created.ctime(), log.date.ctime()]
+        else:
+            return [None, None]
 
     def genericJob(self, cls, incoming=""):
         session = DBSession()
