@@ -381,10 +381,42 @@ class UserHandler(object):
     def __init__(self, request):
         self.request = request
         self.breadcrumbs = breadcrumbs[:]
+        self.session = DBSession()
 
-    @action()
+    def findUser(self):
+        name = authenticated_userid(self.request)
+        return self.session.query(Users).filter_by(name=name).first()
+        
+
+    @action(renderer='users/profile.mako',permission='view')
     def profile(self):
-        return Response('Working on it...')
+        error = None                
+        user = self.findUser()
+        breadcrumbs = self.breadcrumbs[:]
+        breadcrumbs.append({'text' : 'Edit your profile'})
+
+        if self.request.method == 'POST':
+            user = self.findUser()
+            old_password = hashlib\
+                .md5(self.request.params['old_password']).hexdigest()
+            new_password = hashlib\
+                .md5(self.request.params['new_password']).hexdigest()
+            verify = hashlib\
+                .md5(self.request.params['verify_password']).hexdigest()
+            if unicode(old_password) == user.password:
+                if new_password == verify:
+                    user.password = unicode(new_password)
+                    self.session.merge(user)
+                    self.session.flush()
+                    return HTTPFound(location='/')
+                else: 
+                    error = 'You entered two different new passwords'
+            else:
+                error = 'Old password did not match'
+        return {'user': user, 
+                'error' : error,
+                'breadcrumbs': breadcrumbs}
+
 
     @action(renderer='users/add.mako', permission='admin')
     def add(self):
@@ -393,7 +425,6 @@ class UserHandler(object):
         groups = session.query(Groups).all()
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text' : 'Add a new user'})
-
         if self.request.method == 'GET':            
             return {'breadcrumbs' : breadcrumbs,
                     'groups' : groups,

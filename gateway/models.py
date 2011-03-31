@@ -75,7 +75,7 @@ class Users(Base):
         self.email = email
         self.group_id = group_id
 
-    def getUrl(self):
+   def getUrl(self):
         return "/users/%s" % self.id
 
     def __str__(self):
