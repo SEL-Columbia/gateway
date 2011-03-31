@@ -29,7 +29,7 @@
          <p>You are logged in, but lack sufficient privileges.</p>
       % else: 
          <p>You are not logged in, please do so now. 
-           <a href="${a_url}/user/login?came_from=${request.path}">Log in</a></p>
+           <a href="${a_url}/user/login?came_from=${request.url}">Log in</a></p>
       % endif
       </div>
     </div>

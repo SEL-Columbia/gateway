@@ -386,9 +386,8 @@ class UserHandler(object):
     def findUser(self):
         name = authenticated_userid(self.request)
         return self.session.query(Users).filter_by(name=name).first()
-        
 
-    @action(renderer='users/profile.mako',permission='view')
+    @action(renderer='users/profile.mako', permission='view')
     def profile(self):
         error = None                
         user = self.findUser()
@@ -416,7 +415,6 @@ class UserHandler(object):
         return {'user': user, 
                 'error' : error,
                 'breadcrumbs': breadcrumbs}
-
 
     @action(renderer='users/add.mako', permission='admin')
     def add(self):
@@ -464,8 +462,7 @@ class UserHandler(object):
             if user:
                 headers = remember(self.request, user.name)
                 return HTTPFound(
-                    location="%s%s" % \
-                        (self.request.application_url,came_from),
+                    location="%s" % came_from,
                     headers=headers)
             message = 'Failed login'
         return {
@@ -553,11 +550,11 @@ class MeterHandler(object):
         excludes.append(grid._get_fields()[-2])
         grid.configure(readonly=True, exclude=excludes)        
         grid.append(Field('Last Primary Log Gateway time',
-                          value=lambda item: '%s' % item\
-                          .getLastLogTime()))
+                          value=lambda item: '%s' %\
+                              item.getLastLogTime()[0]))
         grid.append(Field('Last Primary Log Meter time',
-                          value=lambda item: '%s' % item\
-                          .getLastLogTime()))
+                          value=lambda item: '%s' %\
+                              item.getLastLogTime()[1]))
         grid.insert(grid._get_fields()[3],
                     Field('Account Number',
                           value=lambda item: '<a href=%s>%s</a>' %\
