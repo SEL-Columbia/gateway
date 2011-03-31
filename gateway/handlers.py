@@ -513,7 +513,7 @@ class InterfaceHandler(object):
         dispatcher.matchMessage(message)
         return message
 
-    @action(permission='admin')
+    @action()
     def send(self):
         msg = self.save_and_parse_message(self.request.params['number'],
                                           self.request.params['message'])
