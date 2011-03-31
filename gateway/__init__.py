@@ -2,6 +2,7 @@ from pyramid_beaker import session_factory_from_settings
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.exceptions import Forbidden
+from pyramid.exceptions import NotFound
 import pyramid_handlers
 from dispatch import Dispatcher
 from gateway.messaging import findMeter
@@ -77,7 +78,11 @@ def main(global_config, **settings):
     config.add_static_view('static', 'gateway:static/')
 
     config.add_view(view='gateway.handlers.forbidden_view',
+                    renderer='forbidden.mako',
                     context=Forbidden)
+
+    config.add_view(view='gateway.handlers.not_found',
+                    context=NotFound)
 
     config.add_route('add',
                      '/add/{class}',

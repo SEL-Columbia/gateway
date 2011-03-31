@@ -31,8 +31,10 @@
         % endif 
 
         <div id="auth">
-        % if logged_in: 
-              <a href="${a_url}/user/logout">Log out</a>
+        % if user: 
+             <span>Hi ${user}</span> | 
+             <a href="/user/profile">Edit profile</a> | 
+             <a href="${a_url}/user/logout">Log out</a>
         % else: 
               <a href="${a_url}/user/login?came_from=${request.path}">
                 Log in</a>

@@ -6,10 +6,10 @@
    ${headers.styleSheets(request)} 
 
    <style type="text/css" media="screen">
+     h3 { margin: 5px;} 
      #login-form { 
         margin: 10px auto; 
         width: 500px;
-        padding: 10px;
         background: #E5ECF9; 
      } 
      
@@ -19,7 +19,9 @@
   <body>
 
     <div id="login-form">
-    <h2>Please login</h2>
+      <div class="ui-widget-header ui-corner-all">
+        <h3>Please login</h3>
+      </div>
       <div class="error"><p>${message}</p></div>
     <form method="POST" id=""
           action="${request.application_url}/user/login">
@@ -30,13 +32,14 @@
         </tr>
         <tr>
           <td><label>Password</label>
-          <td><input type="password" name="password" value="" /></td>
+          <td><input type="password" name="password" value="" /></td>          
         <tr>
           <td></td>
           <td> 
             <input type="submit" name="form.submitted" value="Log in"/>
           </td>
       </table>
+      <input type="hidden" name="came_from" value="${came_from}" />
     </form>
     </div>
   </body>

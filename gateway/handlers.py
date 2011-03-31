@@ -62,8 +62,10 @@ breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
 
 def forbidden_view(request):
-    return Response("Hey, you can't do that!")
+    return {'logged_in': authenticated_userid(request)}
 
+def not_found(request):
+    return Response("Unable to find resource")
 
 class Index(object):
     """
@@ -380,6 +382,10 @@ class UserHandler(object):
         self.request = request
         self.breadcrumbs = breadcrumbs[:]
 
+    @action()
+    def profile(self):
+        return Response('Working on it...')
+
     @action(renderer='users/add.mako', permission='admin')
     def add(self):
         errors = None
@@ -413,7 +419,7 @@ class UserHandler(object):
     @action(renderer='login.mako')
     def login(self):
         session = DBSession()
-        came_from = self.request.params.get('came_from','/')
+        came_from = self.request.params['came_from']
         message = ''
         login = ''
         password = ''
@@ -427,8 +433,8 @@ class UserHandler(object):
             if user:
                 headers = remember(self.request, user.name)
                 return HTTPFound(
-                    location="%s%s" % (self.request.application_url, 
-                                       came_from),
+                    location="%s%s" % \
+                        (self.request.application_url,came_from),
                     headers=headers)
             message = 'Failed login'
         return {

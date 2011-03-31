@@ -129,9 +129,10 @@ ul.message li {
 }
 
 #auth { 
- float: right; 
- width: 100px;
- font-size: 15px;
+    text-align: right;
+    float: right; 
+    width: 250px;
+    font-size: 15px;
 }  
 .buttons { 
     list-style-type: none;  

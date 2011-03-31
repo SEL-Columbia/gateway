@@ -3,6 +3,7 @@ from pyramid.exceptions import ConfigurationError
 from pyramid.security import authenticated_userid
 from pyramid.url import route_url
 
+
 def add_renderer_globals(event):
     """ A subscriber to the ``pyramid.events.BeforeRender`` events.  Updates
     the :term:`renderer globals` with values that are familiar to Pylons
@@ -12,9 +13,9 @@ def add_renderer_globals(event):
         request = get_current_request()
     globs = {
         'url': route_url,
-        'h':None,
+        'h': None,
         'a_url': request.application_url,
-        'logged_in': authenticated_userid(request)
+        'user': authenticated_userid(request)
         }
     if request is not None:
         tmpl_context = request.tmpl_context
@@ -25,5 +26,3 @@ def add_renderer_globals(event):
         except ConfigurationError:
             pass
     event.update(globs)
-
-
