@@ -17,6 +17,7 @@ from sqlalchemy import String
 from sqlalchemy import Float
 from sqlalchemy import Boolean
 from sqlalchemy import Numeric
+from sqlalchemy import Unicode
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
@@ -33,7 +34,7 @@ Base = declarative_base()
 class RootFactory(object):
 
     __acl__ = [(Allow, Everyone, 'view'),
-                (Allow, 'group:admins', 'admin')]
+               (Allow, 'group:admins', 'admin')]
 
     def __init__(self, request):
         self.request = request
@@ -525,8 +526,9 @@ class TokenBatch(Base):
 
 
 class Token(Base):
-
-    __tablename__  = "token"
+    """
+    """
+    __tablename__ = "token"
 
     id = Column(Integer, primary_key=True)
     created = Column(DateTime)
@@ -534,7 +536,7 @@ class Token(Base):
     value = Column(Numeric)
     state = Column(String)
     batch_id = Column(Integer, ForeignKey('tokenbatch.id'))
-    batch  = relation(TokenBatch, lazy=False,
+    batch = relation(TokenBatch, lazy=False,
                       primaryjoin=batch_id == TokenBatch.id)
 
     def __init__(self, token=None, batch=None, value=None, state="new"):
@@ -639,7 +641,7 @@ class PrimaryLog(Log):
             return 'MAIN'
         else:
             return 'CIRCUIT'
-    
+
     def getCreditAndType(self):
         if self.getType() == 'MAIN':
             return [('ct', self.getType()), ('cr', 0)]
@@ -660,7 +662,7 @@ class Job(Base):
     id = Column(Integer, primary_key=True)
     _type = Column('type', String(50))
     __mapper_args__ = {'polymorphic_on': _type}
-    uuid  = Column(String)
+    uuid = Column(String)
     start = Column(String)
     end = Column(String)
     state = Column(Boolean)
@@ -682,7 +684,6 @@ class Job(Base):
             incoming_uuid = job.kannel_job_message[0].incoming
         return session.query(IncomingMessage).\
                             filter_by(uuid=incoming_uuid).first()
-
 
     def url(self):
         return "jobs/job/%s/" % self.id
