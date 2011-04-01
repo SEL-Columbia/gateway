@@ -6,6 +6,8 @@
 </%def> 
 
 <%def name="content()"> 
+
+  <a href="${a_url}/message/delete/${message.uuid}">Remove message</a>
   <table>
     <tr>
       <td>Message number</td>

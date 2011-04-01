@@ -64,8 +64,10 @@ breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 def forbidden_view(request):
     return {'logged_in': authenticated_userid(request)}
 
+
 def not_found(request):
     return Response("Unable to find resource")
+
 
 class Index(object):
     """
@@ -874,12 +876,11 @@ class MessageHandler(object):
         self.session.merge(self.message)
         return Response("ok")
 
-    @action(renderer='sms/delete_msg.mako')
+    @action(permission='admin')
     def delete(self):
-        if self.request.method == 'POST':
-            return Response("Removed Message")
-        elif self.request.method == 'GET':
-            return {'message': self.message}
+        self.session.delete(self.message)
+        self.session.flush()
+        return HTTPFound(location='/')
 
 
 class SMSHandler(object):
