@@ -149,7 +149,7 @@ class KannelInterface(CommunicationInterface):
         data = urllib.urlencode({'username': self.username,
                                  'password': self.password,
                                  'to': message.number,
-                                 'text': message.text })
+                                 'text': message.text})
         request = urllib2.Request(
                url='http://%s:%s/cgi-bin/sendsms?%s' % (self.host,
                                                         self.port,
@@ -426,7 +426,7 @@ class Circuit(Base):
                  "uuid": self.uuid,
                  "energy_max": self.energy_max,
                  "power_max": self.power_max,
-                 "status": self.status }
+                 "status": self.status}
 
     def __str__(self):
         return "Circuit id:%s account:%s" % (self.id, self.pin)
@@ -479,7 +479,7 @@ class Message(Base):
                  "time": str(self.date),
                  "uuid": self.uuid,
                  "text": self.text,
-                 "id": self.id }
+                 "id": self.id}
 
     def __unicode__(self):
         return "Messsage <%s>" % self.uuid
