@@ -7,6 +7,7 @@ Simple twisted application to check if meters are MIA.
 from operator import sub
 from datetime import datetime
 from datetime import timedelta
+from string import Template
 import transaction
 
 from twisted.internet import task
@@ -26,6 +27,8 @@ session = DBSession()
 
 
 def checkMeters():
+    error = Template('The last time we heard from\
+ $circuit was on $date, over $timediff ago')
     with transaction:
         meters = session.query(Meter).all()
         for meter in meters:
@@ -38,8 +41,10 @@ def checkMeters():
                 if last_log:
                     if time_difference > last_log.created:
                         log = SystemLog(
-                            text='The last time we heard from %s was on %s, over %s ago' %\
-                                (circuit, last_log.created, sub(now, last_log.created)))
+                            text=error\
+                                .substitute(circuit=circuit,
+                                            timediff=sub(now, last_log.created)
+                                            date=last_log.created,))
                         print(log)
                         session.add(log)
 
