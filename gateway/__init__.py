@@ -76,6 +76,7 @@ def main(global_config, **settings):
     config.set_session_factory(session_factory)
 
     config.add_static_view('static', 'gateway:static/')
+    config.include('pyramid_mailer')
 
     config.add_view(view='gateway.handlers.forbidden_view',
                     renderer='forbidden.mako',
