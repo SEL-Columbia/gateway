@@ -57,6 +57,7 @@ class Users(Base):
     name = Column(Unicode(100))
     password = Column(Unicode(100))
     email = Column(Unicode(100))
+    notify = Column(Boolean)
     group_id = Column(
         Integer,
         ForeignKey('groups.id'))
@@ -67,12 +68,14 @@ class Users(Base):
         primaryjoin=group_id == Groups.id)
 
     def __init__(self, name=None, password=None, email=None,
+                 notify=False,
                  group_id=None):
         self.name = name
         if password is not None:
             hash = hashlib.md5(password).hexdigest()
         self.password = hash
         self.email = email
+        self.notify = notify
         self.group_id = group_id
 
     def getUrl(self):
