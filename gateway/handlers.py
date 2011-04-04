@@ -317,7 +317,7 @@ class ManageHandler(object):
         grid.configure(readonly=True, exclude=[grid._get_fields()[0]])
         grid.insert(grid._get_fields()[1],
             Field('%s overview page' % cls.__name__,
-                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl() 
+                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
                                                            , str(item))))
         return {'grid': grid,
                 'cls' : cls,
@@ -344,7 +344,7 @@ class ManageHandler(object):
                           .filter_by(state='new').count()))
 
         return {'breadcrumbs': breadcrumbs,
-                'grid': grid} 
+                'grid': grid}
 
     @action(permission="admin")
     def upload_tokens(self):
@@ -450,7 +450,7 @@ class UserHandler(object):
     @action(renderer='login.mako')
     def login(self):
         session = DBSession()
-        came_from = self.request.params['came_from']
+        came_from = self.request.params.get('came_from','/')
         message = ''
         login = ''
         password = ''
