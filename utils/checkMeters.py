@@ -34,6 +34,7 @@ error = Template('$circuit last sent a log on $date, over $timediff ago.')
 mailer = Mailer()
 _from = 'admin@sharedsolar.org'
 
+
 def check_circuit(circuit, output):
     now = datetime.now()
     time_difference = now - timedelta(hours=1)
@@ -49,6 +50,7 @@ def check_circuit(circuit, output):
             session.add(log)
     return circuit
 
+
 def check_meters():
     output = StringIO.StringIO()
     print('++++++++++++++++++++')
@@ -61,10 +63,10 @@ def check_meters():
             for circuit in meter.get_circuits():
                 check_circuit(circuit, output)
         msg = Message(subject='Gateway: Alert, Circuit failed',
-                      sender=_from, 
+                      sender=_from,
                       body=output.getvalue(),
-                      recipients=['ifw2104@gmail.com', 
-                                  'drdrsoto@gmail.com', 
+                      recipients=['ifw2104@gmail.com',
+                                  'drdrsoto@gmail.com',
                                   #'rajeshmenon.mrg@gmail.com'
                                   ])
         mailer.send_immediately(msg, fail_silently=False)

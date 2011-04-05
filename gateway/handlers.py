@@ -334,6 +334,10 @@ class ManageHandler(object):
         breadcrumbs.append({'text': 'Manage Tokens'})
         grid = Grid(TokenBatch, self.session.query(TokenBatch).all())
         grid.configure(readonly=True,exclude=[grid._get_fields()[0]])
+        grid.append(Field('Export to CSV file',
+                          value = lambda item: '<a href="/%s">%s</a>' %\
+                              (item.exportTokens(),
+                               str(item))))
         grid.append(Field('Number of token',
                           value= lambda item: self.session.query(Token)\
                           .filter_by(batch=item).count()))
@@ -833,7 +837,7 @@ class TokenHandler(object):
 
     @action(permission="admin")
     def export_batch(self):
-        tokens = self.batch.get_tokens()
+        tokens = self.batch.getTokens()
         s = cStringIO.StringIO()
         csvWriter = csv.writer(s)
         mapper = tokens[0].__mapper__

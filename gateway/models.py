@@ -560,11 +560,17 @@ class TokenBatch(Base):
         self.created = datetime.datetime.now()
 
     def getUrl(self):
-        return "token/show_batch/%s" % self.uuid
+        return 'token/show_batch/%s' % self.uuid
+
+    def exportTokens(self):
+        return 'token/export_batch/%s' % self.uuid
 
     def getTokens(self):
         session = DBSession()
         return session.query(Token).filter_by(batch=self)
+
+    def __str__(self):
+        return "Token Batch :%s" % self.id
 
 
 class Token(Base):
