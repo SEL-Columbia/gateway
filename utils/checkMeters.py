@@ -56,7 +56,7 @@ def check_meters():
     print('++++++++++++++++++++')
     print('Checking system at %s' % datetime.now())
     with transaction:
-        meters = session.query(Meter).all()
+        meters = session.query(Meter).filter_by(status=True)
         for meter in meters:
             output.write('====================\n')
             output.write('Checking circuits for %s\n' % meter)
@@ -66,7 +66,6 @@ def check_meters():
                       sender=_from,
                       body=output.getvalue(),
                       recipients=['ifw2104@gmail.com',
-                                  'drdrsoto@gmail.com',
                                   #'rajeshmenon.mrg@gmail.com'
                                   ])
         mailer.send_immediately(msg, fail_silently=False)
