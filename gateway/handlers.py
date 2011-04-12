@@ -530,6 +530,8 @@ class InterfaceHandler(object):
                                           message['message'])
             return Response(msg.uuid)
 
+        else:
+            return Response("error")
     @action(permission='admin')
     def remove(self):
         self.session.delete(self.interface)
