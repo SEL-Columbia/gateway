@@ -524,14 +524,14 @@ class InterfaceHandler(object):
             msg = self.save_and_parse_message(self.request.params['number'],
                                               self.request.params['message'])
             return Response(msg.uuid)
-        elif isinstance(self.interface, NetbookInterface):
+        if isinstance(self.interface, NetbookInterface):
             message = simplejson.loads(self.request.body)
             msg = self.save_and_parse_message(message['number'],
                                           message['message'])
             return Response(msg.uuid)
-
         else:
             return Response("error")
+
     @action(permission='admin')
     def remove(self):
         self.session.delete(self.interface)
