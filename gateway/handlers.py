@@ -518,9 +518,8 @@ class InterfaceHandler(object):
 
     @action()
     def send(self):
-        message = simplejson.loads(self.request.body)
-        msg = self.save_and_parse_message(message['number'],
-                                          message['message'])
+        msg = self.save_and_parse_message(self.request.params['number'],
+                                          self.request.params['message'])
         return Response(msg.uuid)
 
     @action(permission='admin')
