@@ -11,6 +11,7 @@ from datetime import timedelta
 from datetime import datetime
 import collections
 import hashlib
+import simplejson
 
 from dateutil import parser
 from webob import Response
@@ -517,8 +518,9 @@ class InterfaceHandler(object):
 
     @action()
     def send(self):
-        msg = self.save_and_parse_message(self.request.params['number'],
-                                          self.request.params['message'])
+        message = simplejson.loads(self.request.body)
+        msg = self.save_and_parse_message(message['number'],
+                                          message['message'])
         return Response(msg.uuid)
 
     @action(permission='admin')
