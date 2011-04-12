@@ -113,10 +113,6 @@ class CommunicationInterface(Base):
     def __str__(self):
         return "Communication Interface %s" % self.name
 
-    def getUrl(self):
-        return "/interface/index/%s" % self.id
-
-
 class KannelInterface(CommunicationInterface):
     """
     Kannel Interface supports sending messages via a Kannel SMPP system.
@@ -169,16 +165,6 @@ class KannelInterface(CommunicationInterface):
         session.flush()
         self.sendData(msg)
         return msg
-
-    def sendTest(self):
-        session = DBSession()
-        text = '_[%s]' % uuid.uuid4()
-        msg = KannelOutgoingMessage(
-            number,
-            text)
-        session.add(msg)
-        session.flush()
-        self.sendData(msg)
 
     def sendJob(self, job, incoming=None):
         session = DBSession()
@@ -478,7 +464,7 @@ class Message(Base):
             return "Incoming message"
 
     def toDict(self):
-        return {"number": int(self.number),
+        return {"number": self.number,
                  "time": str(self.date),
                  "uuid": self.uuid,
                  "text": self.text,
