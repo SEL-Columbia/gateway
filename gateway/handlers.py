@@ -30,7 +30,6 @@ from matplotlib.figure import Figure
 from matplotlib.dates import date2num
 from matplotlib.dates import DateFormatter
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-import numpy
 
 from gateway import dispatcher
 from gateway import models
