@@ -50,6 +50,8 @@ from gateway.models import SystemLog
 from gateway.models import Mping
 from gateway.models import Users
 from gateway.models import Groups
+from gateway.models import KannelInterface
+from gateway.models import NetbookInterface
 from gateway.models import CommunicationInterface
 
 # random junk that needs to be cleaned up.
@@ -518,9 +520,15 @@ class InterfaceHandler(object):
 
     @action()
     def send(self):
-        msg = self.save_and_parse_message(self.request.params['number'],
-                                          self.request.params['message'])
-        return Response(msg.uuid)
+        if isinstance(self.interface, KannelInterface):
+            msg = self.save_and_parse_message(self.request.params['number'],
+                                              self.request.params['message'])
+            return Response(msg.uuid)
+        elif isinstance(self.interface, NetbookInterface):
+            message = simplejson.loads(self.request.body)
+            msg = self.save_and_parse_message(message['number'],
+                                          message['message'])
+            return Response(msg.uuid)
 
     @action(permission='admin')
     def remove(self):
