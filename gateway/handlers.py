@@ -26,12 +26,6 @@ from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 
-from matplotlib import pyplot
-from matplotlib.figure import Figure
-from matplotlib.dates import date2num
-from matplotlib.dates import DateFormatter
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-
 from gateway import dispatcher
 from gateway import models
 from gateway.models import DBSession
@@ -52,6 +46,7 @@ from gateway.models import Users
 from gateway.models import Groups
 from gateway.models import KannelInterface
 from gateway.models import NetbookInterface
+from gateway.models import AirtelInterface
 from gateway.models import CommunicationInterface
 
 # random junk that needs to be cleaned up.
@@ -69,7 +64,6 @@ def forbidden_view(request):
 
 def not_found(request):
     return Response("Unable to find resource")
-
 
 class Index(object):
     """
@@ -172,77 +166,6 @@ class EditModel(RestView):
             self.session.flush()
             return HTTPFound(location=fs.model.getUrl())
 
-
-class GraphView(RestView):
-    """
-    """
-    def __init__(self, request):
-        self.now = datetime.now()
-        self.days30 = timedelta(days=30)
-        self.request = request
-        self.session = DBSession()
-        self.cls = self.look_up_class()
-        self.instance = self.look_up_instance()
-        self.column = self.request.params.get('column', None)
-        self.figsize = tuple(map(lambda item: int(item),
-                                 self.request.params.get('figsize',
-                                                         "1,2").split(",")))
-        self.columns = self.request.params.get('columns', None)
-        self.start = self.request.params.get('start', None)
-        self.end = self.request.params.get('end', None)
-        if self.end is not None:
-            self.end = parser.parse(self.end)
-        if self.end is None:
-            self.end = self.now
-        if self.start is not None:
-            self.start = parser.parse(self.start)
-        if self.start is None:
-            self.start = self.end - self.days30
-
-    def get_circuit_logs(self, circuit):
-        return self.session.query(PrimaryLog).filter_by(circuit=circuit)\
-               .filter(PrimaryLog.created > self.start)\
-               .filter(PrimaryLog.created < self.end).order_by(PrimaryLog.date)
-
-    def get_ylabel(self):
-        """
-        """
-        return {'credit': 'Credit',
-                'watthours': 'Energy (Wh)',
-                'use_time': 'Time used (sec)'}[self.column]
-
-    def graphCircuit(self):
-        fig = Figure(figsize=self.figsize)
-        canvas = FigureCanvasAgg(fig)
-        ax = fig.add_subplot(111,
-                             title='%s graph for %s' % (FieldSet.prettify(
-                                 self.column), self.instance))
-        logs = self.get_circuit_logs(self.instance)
-        x = [date2num(log.date) for log in logs]
-        y = [getattr(log, self.column) for log in logs]
-        ax.plot_date(x, y, 'x-')
-        ax.set_ylabel(self.get_ylabel())
-        ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
-        ax.set_ylim(ymin=0)
-        ax.grid(True, linestyle='-', color='#e0e0e0')
-        fig.autofmt_xdate()
-        ax.set_xlabel('Date')
-        output = cStringIO.StringIO()
-        canvas.print_figure(output)
-        return Response(
-            body=output.getvalue(),
-            content_type='image/png')
-
-    def graphMeter(self):
-        return Response()
-
-    def get(self):
-        if isinstance(self.instance, Circuit):
-            return self.graphCircuit()
-        elif isinstance(self.instance, Meter):
-            return self.graphMeter()
-        else:
-            return Response("Class not supported")
 
 
 class AlertHandler(object):
@@ -397,7 +320,7 @@ class UserHandler(object):
 
     @action(renderer='users/profile.mako', permission='view')
     def profile(self):
-        error = None                
+        error = None
         user = self.findUser()
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text' : 'Edit your profile'})
@@ -416,11 +339,11 @@ class UserHandler(object):
                     self.session.merge(user)
                     self.session.flush()
                     return HTTPFound(location='/')
-                else: 
+                else:
                     error = 'You entered two different new passwords'
             else:
                 error = 'Old password did not match'
-        return {'user': user, 
+        return {'user': user,
                 'error' : error,
                 'breadcrumbs': breadcrumbs}
 
@@ -431,7 +354,7 @@ class UserHandler(object):
         groups = session.query(Groups).all()
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text' : 'Add a new user'})
-        if self.request.method == 'GET':            
+        if self.request.method == 'GET':
             return {'breadcrumbs' : breadcrumbs,
                     'groups' : groups,
                     'errors' : errors}
@@ -440,7 +363,7 @@ class UserHandler(object):
             email = self.request.params['email']
             password = self.request.params['password']
             group = self.request.params['group']
-            user = Users(name=name, email=email, 
+            user = Users(name=name, email=email,
                          group_id=group,
                          password=password)
             session.add(user)
@@ -520,10 +443,11 @@ class InterfaceHandler(object):
 
     @action()
     def send(self):
-        if isinstance(self.interface, KannelInterface):
+        if isinstance(self.interface, KannelInterface) or isinstance(self.interface, AirtelInterface):
             msg = self.save_and_parse_message(self.request.params['number'],
                                               self.request.params['message'])
             return Response(msg.uuid)
+
         if isinstance(self.interface, NetbookInterface):
             message = simplejson.loads(self.request.body)
             msg = self.save_and_parse_message(message['number'],
@@ -564,7 +488,7 @@ class MeterHandler(object):
         excludes = []
         excludes.extend(grid._get_fields()[:3])
         excludes.append(grid._get_fields()[-2])
-        grid.configure(readonly=True, exclude=excludes)        
+        grid.configure(readonly=True, exclude=excludes)
         grid.append(Field('Last Primary Log Gateway time',
                           value=lambda item: '%s' %\
                               item.getLastLogTime()[0]))
@@ -592,7 +516,7 @@ class MeterHandler(object):
         for key in sorted(d.iterkeys(), reverse=True):
             log_cids = [log.circuit.id for log in d[key]]
             output.write(str(key) + " | ")
-            output.write(" ".join([str(x).ljust(3) if x in 
+            output.write(" ".join([str(x).ljust(3) if x in
                                    log_cids else ' - ' for x in cids]))
             output.write("\n")
         return Response(output.getvalue(), content_type="text/plain")
@@ -791,7 +715,7 @@ class LoggingHandler(object):
         return Response(self.request)
 
 
-class DeleteJobs(object):    
+class DeleteJobs(object):
     def __init__(self, request):
         self.request = request
 
