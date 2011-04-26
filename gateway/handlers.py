@@ -26,6 +26,14 @@ from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 
+ 
+from matplotlib import pyplot
+from matplotlib.figure import Figure
+from matplotlib.dates import date2num
+from matplotlib.dates import DateFormatter
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+
 from gateway import dispatcher
 from gateway import models
 from gateway.models import DBSession
@@ -165,6 +173,79 @@ class EditModel(RestView):
             fs.sync()
             self.session.flush()
             return HTTPFound(location=fs.model.getUrl())
+
+
+class GraphView(RestView):
+    """
+"""
+    def __init__(self, request):
+        self.now = datetime.now()
+        self.days30 = timedelta(days=30)
+        self.request = request
+        self.session = DBSession()
+        self.cls = self.look_up_class()
+        self.instance = self.look_up_instance()
+        self.column = self.request.params.get('column', None)
+        self.figsize = tuple(map(lambda item: int(item),
+                                 self.request.params.get('figsize',
+                                                         "1,2").split(",")))
+        self.columns = self.request.params.get('columns', None)
+        self.start = self.request.params.get('start', None)
+        self.end = self.request.params.get('end', None)
+        if self.end is not None:
+            self.end = parser.parse(self.end)
+        if self.end is None:
+            self.end = self.now
+        if self.start is not None:
+            self.start = parser.parse(self.start)
+        if self.start is None:
+            self.start = self.end - self.days30
+
+    def get_circuit_logs(self, circuit):
+        return self.session.query(PrimaryLog).filter_by(circuit=circuit)\
+               .filter(PrimaryLog.created > self.start)\
+               .filter(PrimaryLog.created < self.end).order_by(PrimaryLog.date)
+
+    def get_ylabel(self):
+        """
+"""
+        return {'credit': 'Credit',
+                'watthours': 'Energy (Wh)',
+                'use_time': 'Time used (sec)'}[self.column]
+
+    def graphCircuit(self):
+        fig = Figure(figsize=self.figsize)
+        canvas = FigureCanvasAgg(fig)
+        ax = fig.add_subplot(111,
+                             title='%s graph for %s' % (FieldSet.prettify(
+                                 self.column), self.instance))
+        logs = self.get_circuit_logs(self.instance)
+        x = [date2num(log.date) for log in logs]
+        y = [getattr(log, self.column) for log in logs]
+        ax.plot_date(x, y, 'x-')
+        ax.set_ylabel(self.get_ylabel())
+        ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
+        ax.set_ylim(ymin=0)
+        ax.grid(True, linestyle='-', color='#e0e0e0')
+        fig.autofmt_xdate()
+        ax.set_xlabel('Date')
+        output = cStringIO.StringIO()
+        canvas.print_figure(output)
+        return Response(
+            body=output.getvalue(),
+            content_type='image/png')
+
+    def graphMeter(self):
+        return Response()
+
+    def get(self):
+        if isinstance(self.instance, Circuit):
+            return self.graphCircuit()
+        elif isinstance(self.instance, Meter):
+            return self.graphMeter()
+        else:
+            return Response("Class not supported")
+
 
 
 
