@@ -10,6 +10,7 @@ import itertools
 import transaction
 import hashlib
 
+
 from sqlalchemy import create_engine
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -173,6 +174,49 @@ class KannelInterface(CommunicationInterface):
         session.add(msg)
         session.flush()
         self.sendData(msg)
+
+
+class AirtelInterface(CommunicationInterface):
+    __tablename__ = 'airtel_interface'
+    __mapper_args__ = {'polymorphic_identity': 'airtel_interface'}
+
+    id = Column(Integer,
+                ForeignKey('communication_interface.id'),
+                primary_key=True)
+    host = Column(String)
+    
+    
+    def __init__(self, name=None,host=None, location=None, provider=None):
+        CommunicationInterface.__init__(self, name, provider, location)
+        self.host = host
+
+    def sendData(self, message):
+        url = "http://41.223.84.25:1234/?&SOURCEADD=wifi_smsc&MSISDN=%s&MESSAGE=%s" % (
+            urllib.quote(message.number), urllib.quote(message.text))
+        print(url)
+        request = urllib2.Request(url)
+        
+        return urllib2.urlopen(request)
+
+    
+    def sendMessage(self, number, text, incoming=None):
+        session = DBSession()
+        msg = OutgoingMessage(
+            number,
+            text,
+            incoming)
+        session.add(msg)
+        session.flush()
+        self.sendData(msg)
+        return msg
+    
+    def sendJob(self, job, incoming=None):
+        session = DBSession()
+        msg = JobMessage(job, incoming=incoming)
+        session.add(msg)
+        session.flush()
+        self.sendData(msg)                   
+        return msg
 
 
 class NetbookInterface(CommunicationInterface):
