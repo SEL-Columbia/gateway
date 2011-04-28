@@ -191,8 +191,8 @@ class AirtelInterface(CommunicationInterface):
         self.host = host
 
     def sendData(self, message):
-        url = "http://41.223.84.25:1234/?SOURCEADD=wifi_smsc&MSISDN=%s&MESSAGE=%s" % (
-            message.number,message.text)
+        url = "http://41.223.84.25:1234/?&SOURCEADD=wifi_smsc&MSISDN=%s&MESSAGE=%s" % (
+            urllib.quote(message.number), urllib.quote_plus(message.text))
         print(url)
         request = urllib2.Request(url)        
         return urllib2.urlopen(request)
