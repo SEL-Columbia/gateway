@@ -19,7 +19,7 @@ if __name__ == '__main__':
         
         for line in locations: 
             with transaction:
-                point = Point(float(line[1]), float(line[2]))
+                point = Point(float(line[2]), float(line[1]))
                 print point.wkt
                 meter = query.filter_by(name= line[0]).first()
                 meter.geometry = point.wkt

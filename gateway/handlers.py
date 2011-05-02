@@ -33,6 +33,7 @@ from matplotlib.dates import date2num
 from matplotlib.dates import DateFormatter
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
+from shapely.wkt import loads
 
 from gateway import dispatcher
 from gateway import models
@@ -314,6 +315,28 @@ class ManageHandler(object):
     def index(self):
         return {
             'breadcrumbs': self.breadcrumbs}
+    
+    @action()
+    def metersAsGeoJson(self):
+        session = DBSession()
+        meters = session.query(Meter).filter(Meter.geometry != None)
+        return Response(
+            content_type='application/json',
+            body= simplejson.dumps(
+                {'type' : 'FeatureCollection',
+                 'features': 
+                 [ { 'type': 'Feature',
+                     'properties': {'name': x.name},
+                     'geometry': {'type': 'Point', 
+                                  'coordinates': list(loads(
+                                        x.geometry).coords)[0]} } 
+                   for x in meters]
+                 }))
+
+    
+    @action(renderer='map.mako')
+    def map(self):
+        return {}
 
     def makeGrid(self, cls):
         breadcrumbs = self.breadcrumbs[:]
@@ -554,10 +577,6 @@ class MeterHandler(object):
                      get(self.request.matchdict['id'])
         self.breadcrumbs = breadcrumbs[:]
 
-    @action()
-    def geometry(self):
-        return Response()
-
     @action(renderer="meter/index.mako", permission="view")
     def index(self):
         """
@@ -608,11 +627,29 @@ class MeterHandler(object):
             body= simplejson.dumps(
                 [{'id' :x.id,
                   'ipaddress' : x.ip_address,
+                  'language': x.account.lang,
+                  'last_msg': x.getLastLogTime()[0],
                   'status' : x.status,
                   'account': x.pin,
                   'credit' : x.credit
                   } 
                  for x in self.meter.get_circuits()]))
+
+
+    @action()
+    def geometry(self):
+        point = loads(self.meter.geometry)
+        return Response(
+            content_type='application/json',
+            body=simplejson.dumps(
+                { 'type': 'FeatureCollection',
+                  'features': [{ 
+                            'type':'Feature',
+                            'geometry': {'type': 'Point', 
+                                         'coordinates': list(point.coords)[0]},
+                            'properties': { } 
+                            }]}))
+
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):

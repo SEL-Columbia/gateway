@@ -295,6 +295,11 @@ class Meter(Base):
                     query(Circuit).\
                     filter_by(meter=self).order_by(Circuit.ip_address))
 
+    def getMainCircuit(self):
+        session = DBSession()
+        return session.query(Circuit).filter_by(meter=self)\
+            .filter_by(ip_address='192.168.1.200').first()
+
     def getJobs(self):
         session = DBSession()
         l = []
@@ -719,7 +724,7 @@ class PrimaryLog(Log):
         else:
             return 'CIRCUIT'
 
-    def getCreditAndType(self):
+    def getCircuitAndType(self):
         if self.getType() == 'MAIN':
             return [('ct', self.getType()), ('cr', 0)]
         else:
@@ -731,7 +736,7 @@ class PrimaryLog(Log):
                                  ('ts', self.created.strftime("%Y%m%d%H")),
                                  ('cid', self.circuit.ip_address),
                                  ('tu', int(self.use_time)),
-                                 ('wh', float(self.watthours))] + self.getCreditAndType())
+                                 ('wh', float(self.watthours))] + self.getCircuitAndType())
 
 
 class Job(Base):

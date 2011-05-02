@@ -4,6 +4,9 @@
 <%def name="header()">
 ${headers.loadSlickGrid(request)} 
 
+<link rel="stylesheet" 
+      href="${a_url}/static/js/openlayers/theme/default/style.css" type="text/css" />
+
 <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
 
 <script type="text/javascript" 
@@ -38,7 +41,7 @@ ${headers.loadSlickGrid(request)}
 
 <script type="text/javascript">
   $(function() { 
-     loadPage({ "meter" : ${meter.id}});
+     loadPage({ 'meter' : ${meter.id}, 'geometry': "${meter.geometry}"});
   });
 </script>
 </%def>
@@ -97,6 +100,10 @@ ${headers.loadSlickGrid(request)}
           <div id="map"></div>
 	</div>
 	<div id="tabs-2">
+          <div id="graph">
+            <img 
+               src="${a_url}/graph/Circuit/${meter.getMainCircuit().id}?column=watthours&figsize=8,3" class="" alt="" />
+          </div>
 	</div>
 </div>
 

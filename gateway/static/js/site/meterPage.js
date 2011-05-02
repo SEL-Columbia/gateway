@@ -1,8 +1,8 @@
-var grid;
+var grid, vector_layer;
 function loadGrid(options) { 
-//  $("#grid").css("height",400);
 
   var gridOptions = {
+    forceFitColumns: false,
     autoHeight: true,
     enableCellNavigation: true,
     enableColumnReorder: true
@@ -13,19 +13,15 @@ function loadGrid(options) {
   }; 
   
   var columns = [ 
+    {id: "ip_address",width: 100, name: "Ip Address", 
+     field: "ipaddress", sortable:true},
     {id: "account", name: "Account", 
-     formatter: CircuitLinkFormatter,
-     field: "account", sortable:true},
-    {id: "id", name: "Id", 
-     field: "id", sortable:true}, 
-    {id: "ip_address", 
-     width: 100,
-     name: "Ip Address", 
-     field: "ipaddress", 
-     sortable:true},
-    {id: "status", name: "Status", 
-     formatter:BoolCellFormatter,
+     formatter: CircuitLinkFormatter, field: "account", sortable:true},
+    {id: "last_msg",width: 200, name: "Last Messages", 
+     field: "last_msg", sortable:true},
+    {id: "status", name: "Status",  formatter:BoolCellFormatter, 
      field: "status", sortable: true },
+    {id: "language", name: "Language", field: "language", sortable:true},
     {id: "credit", name: "Credit", field: "credit", sortable:true}
   ]; 
 
@@ -74,27 +70,60 @@ x     y     result
   return grid; 
 }
 
-function loadMap(div) {
+function loadMap(div, options) {
+  var geographic = new OpenLayers.Projection("EPSG:4326");
+  var googleProj = new OpenLayers.Projection("EPSG:900913");
+  var bounds = new OpenLayers.Bounds(
+        -20037508, -20037508, 20037508, 20037508.34
+  ); 
+
   var map = new OpenLayers.Map('map', {
-      allOverlays: true,
-      controls: []
+    projection: googleProj,
+    maxResolution: 156543.0339,
+    controls: [],
+    maxExtent: bounds
     });
+
   map.addControl(new OpenLayers.Control.Navigation());
 
   var gsat = new OpenLayers.Layer.Google(
     "Google Satellite",
-    {type: google.maps.MapTypeId.SATELLITE, numZoomLevels: 22}
+    {type: google.maps.MapTypeId.SATELLITE, 
+     'sphericalMercator': true,
+     numZoomLevels: 22}
   );
-
   map.addLayers([gsat]);
-  map.zoomToMaxExtent();
+
+  var WKT = new OpenLayers.Format.WKT();
+  var geom = WKT.read(options.geometry);
+  if (options.geometry !== 'None') { 
+    geom.geometry.transform(geographic, googleProj);
+    var style = new OpenLayers.StyleMap({ 
+      'default': new OpenLayers.Style({           
+        pointRadius: 10,
+        fillColor: '#CD0707',
+        strokeColor: '#004276'
+      })
+    })
+    var vector_layer = new OpenLayers.Layer.Vector('Meter', { 
+      styleMap: style,
+    });
+    map.addLayer(vector_layer);
+    vector_layer.addFeatures(geom);  
+    map.setCenter(new OpenLayers.LonLat(geom.geometry.x, geom.geometry.y), 17);
+
+  } else { 
+    map.zoomToExtent(bounds);
+  }
+ 
+  return map;
 }
  
 
-
+var map;
 function loadPage(options) {
   
-  var map = loadMap("map"); 
+  map = loadMap("map", options); 
 
   $( "#tabs" ).tabs();
   $("#tabs-1").removeClass("ui-corner-bottom");
@@ -123,9 +152,6 @@ function loadPage(options) {
   }); 
 
 
-  function flashMessage(msg) { 
-    $("<div />", {id : "flashMessage", })
-  }; 
 
   $('#addCircuitButton').click(function() { 
     $('#addCircuit').dialog({
