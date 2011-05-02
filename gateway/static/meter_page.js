@@ -1,4 +1,0 @@
-
-function loadPage(postURL,getURL) {   
-
-}

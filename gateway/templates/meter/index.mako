@@ -2,96 +2,134 @@
 <%namespace name="headers" file="../headers.mako"/>
 
 <%def name="header()">
-${headers.ggRaphael(request)}
+${headers.loadSlickGrid(request)} 
 
-<script src="${request.application_url}/static/js/g.raphael/g.line.js" 
-        type="text/javascript"></script>
+<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+<script type="text/javascript" 
+        src="${a_url}/static/js/openlayers/OpenLayers.js">
+</script>
+
+<script type="text/javascript" 
+        src="${a_url}/static/js/site/jquery.tmpl.js.js"></script>
+
+<script type="text/javascript" 
+        src="${a_url}/static/js/datastore.js"></script>
+
+<script type="text/javascript" 
+        src="${a_url}/static/js/grid.js"></script>
 
 <script type="text/javascript"
-        src="${request.application_url}/static/js/site/meterPage.js"></script>
+        src="${a_url}/static/js/site/meterPage.js"></script>
+
+<style type="text/css" media="screen">
+  	.tabs-bottom { position: relative; } 
+	.tabs-bottom .ui-tabs-panel { height: 140px; overflow: auto; } 
+	.tabs-bottom .ui-tabs-nav { position: absolute !important; 
+        left: 0; bottom: 0; right:0; padding: 0 0.2em 0.2em 0; } 
+	.tabs-bottom .ui-tabs-nav li { margin-top: -2px !important; 
+        margin-bottom: 1px !important; border-top: none; border-bottom-width: 1px; }
+        #tabs { 
+           width: 900px;
+           height: 350px;
+           float: right; 
+        } 
+</style>
 
 <script type="text/javascript">
   $(function() { 
-     loadPage({"url": "${request.application_url}",
-               "meter" : ""
-              }); 
+     loadPage({ "meter" : ${meter.id}});
   });
 </script>
-
-<style type="text/css" media="screen">
-  #graph { 
-    background: #fff ; 
-    width:700px;
-    margin: 5px; 
-    height: 250px;
-  } 
-  #graphSlider { 
-    margin: 4px;
-  } 
-</style>
-
 </%def>
 
 <%def name="content()">
-<h3>Meter overview page for <span class="underline">${meter.name}</span></h3> 
-<table>
-  <tr>
-    <td>
-    <table>
-      % for key,value in fields.iteritems(): 
-      <tr>
-        <td class="hint">Meter ${key}</td>
-        <td>${value.get("value")}</td>
-      </tr>
-      % endfor 
-    </table>  
-    </td> 
-    <td> 
-      <div class="buttons"> 
-        <ul>
-          <li><a href="${meter.edit_url()}">Edit meter information</a></li>
-          <li> <a id="addCircuitButton" href="#">Add Circuit</a></li>
+
+  <div id="tools" class=""> 
+    <ul class="tool-box" id="edit-box">
+      <li class="tool-controls" >
+        <a href="#">Manage meter information</a>
+        <ul style="display:none">         
           <li>
-          <a href="${a_url}/meter/show_account_numbers/${meter.id}">Show
-            account numbers</a></li>
-          <li><a id="showJobButton" href="#">View active job queue</a></li>
+                <a id="edit" href="${meter.edit_url()}">Edit meter information</a>
+          </li> 
           <li>
-            <a href="${a_url}/${meter.remove_url()}">
-              Remove Meter</a>
+            <a id="removeMeter" href="#">Remove Meter</a>
           </li>
-          <li> 
-            <a href="${a_url}/meter/message_graph/${meter.id}">Message
-              table</a></li>
-          <li><a href="${a_url}/meter/ping/${meter.id}"> 
-              Ping Meter</a>
+          <li>
+            <a id="addCircuitButton" href="#">Add Circuit</a>
           </li>
         </ul>
-      </div>
-      <div id="graphCon">
-        <div id="graph">
-        </div>
-        <div id="graphSlider"></div>
-      </div>
-    </td>  
-    
-  </tr>
-  <tr> 
-</table>
-<div id="showJobs" style="display: none">
-<ul>
-% for job in meter.getJobs(): 
-    <li>${str(job)} </li>
-% endfor 
-</ul>
+      </li>
+      <li class="tool-controls">
+        <a  href="#">Download information</a>
+        <ul style="display:none">
+          <li>
+            <a id="accounts" 
+               href="${a_url}/meter/show_account_numbers/${meter.id}">
+              Download accounts</a>
+          </li>
+          <li><a id="showAlerts"href="#">Show alerts</a></li>
+          <li><a id="messages" href="#">Message table</a></li>
+        </ul>
+      </li>
+      <li class="tool-controls">
+        <a  href="#">Create job</a>
+        <ul style="display:none">
+          <li>
+            <a id="ping" href="${a_url}/meter/ping/${meter.id}">Ping</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+
+
+<h3>Meter overview page for <span class="underline">${meter.name}</span></h3> 
+
+<div id="tabs" class="tabs-bottom">
+	<ul>
+	  <li><a href="#tabs-1">Map</a></li>          
+	  <li><a href="#tabs-2">Power Graph</a></li>
+	</ul>
+	<div id="tabs-1">
+          <div id="map"></div>
+	</div>
+	<div id="tabs-2">
+	</div>
 </div>
 
-<hr /> 
+
+
+<ul id="meter-overview">
+  <li>
+    <h4>Meter Name</h4>
+    <p>${meter.name}</p>
+  </li>
+  <li>
+    <h4>Meter location</h4>
+    <p>${meter.location}</p>
+  </li>
+  <li>
+    <h4>Meter phone</h4>
+    <p>${meter.phone}</p>
+  </li>
+  <li>
+    <h4>Meter status</h4>
+    <p>${meter.status}</p>       
+  </li>
+  <li>
+    <h4>Time of last report</h4>
+         <p> TBD </p>
+  </li>
+</ul>
+
 <h4>Circuits associated
   with <span class="underline">${meter.name}</span></h4>
 
-<div id="addCircuit" class="small-form" style="display: none">
-  <form method="POST" id=""
-        action="${request.application_url}/meter/add_circuit/${meter.id}">    
+<div id="addCircuit" style="display: none">
+  <form  id="add-circuit">
   <table>
     <tr>
       <td><label>Account language</label></td>
@@ -127,14 +165,9 @@ ${headers.ggRaphael(request)}
       <td><input type="text" id="power_max"  name="power_max" value="100"
       /></td>
     </tr>
-    <tr>
-      <td></td>
-      <td><input type="submit" id="add-circuit" name="" value="Add circuit" /></td>
-    </tr>
 </table>
 </form>
 </div> 
-${grid.render()}
-<hr /> 
+<div id="grid"></div>
 
 </%def> 

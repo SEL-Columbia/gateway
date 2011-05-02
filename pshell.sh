@@ -1,1 +1,1 @@
-paster --plugin=pyramid pshell production.ini gateway
+paster --plugin=pyramid pshell development.ini gateway

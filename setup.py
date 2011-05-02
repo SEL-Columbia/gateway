@@ -9,6 +9,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'dispatch',
+    'shapely',
     'WebTest',
     'pyramid_mailer',
     'fa.jquery',

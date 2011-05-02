@@ -174,10 +174,10 @@ class EditModel(RestView):
             self.session.flush()
             return HTTPFound(location=fs.model.getUrl())
 
-
+ 
 class GraphView(RestView):
     """
-"""
+    """
     def __init__(self, request):
         self.now = datetime.now()
         self.days30 = timedelta(days=30)
@@ -208,7 +208,7 @@ class GraphView(RestView):
 
     def get_ylabel(self):
         """
-"""
+        """
         return {'credit': 'Credit',
                 'watthours': 'Energy (Wh)',
                 'use_time': 'Time used (sec)'}[self.column]
@@ -245,7 +245,6 @@ class GraphView(RestView):
             return self.graphMeter()
         else:
             return Response("Class not supported")
-
 
 
 
@@ -555,6 +554,10 @@ class MeterHandler(object):
                      get(self.request.matchdict['id'])
         self.breadcrumbs = breadcrumbs[:]
 
+    @action()
+    def geometry(self):
+        return Response()
+
     @action(renderer="meter/index.mako", permission="view")
     def index(self):
         """
@@ -565,25 +568,8 @@ class MeterHandler(object):
         breadcrumbs.append({'text': 'Meters',
                             'url': '/manage/show?class=Meter'})
         breadcrumbs.append({"text": "Meter Overview"})
-        grid = Grid(Circuit, self.meter.get_circuits())
-        excludes = []
-        excludes.extend(grid._get_fields()[:3])
-        excludes.append(grid._get_fields()[-2])
-        grid.configure(readonly=True, exclude=excludes)
-        grid.append(Field('Last Primary Log Gateway time',
-                          value=lambda item: '%s' %\
-                              item.getLastLogTime()[0]))
-        grid.append(Field('Last Primary Log Meter time',
-                          value=lambda item: '%s' %\
-                              item.getLastLogTime()[1]))
-        grid.insert(grid._get_fields()[3],
-                    Field('Account Number',
-                          value=lambda item: '<a href=%s>%s</a>' %\
-                              (item.getUrl(),item.pin)))
         return {
-            'grid': grid,
             "meter": self.meter,
-            "fields": get_fields(self.meter),
             "breadcrumbs": breadcrumbs}
 
     @action(renderer='meter/messsage_graph.mako', permission='view')
@@ -614,6 +600,19 @@ class MeterHandler(object):
                          'attachment;filename=%s:accounts.csv' % \
                          str(self.meter.name))
         return resp
+    # this serialization should be a class method.
+    @action(permission='admin')
+    def circuits(self):
+        return Response(
+            content_type="application/json",
+            body= simplejson.dumps(
+                [{'id' :x.id,
+                  'ipaddress' : x.ip_address,
+                  'status' : x.status,
+                  'account': x.pin,
+                  'credit' : x.credit
+                  } 
+                 for x in self.meter.get_circuits()]))
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
@@ -635,8 +634,7 @@ class MeterHandler(object):
         self.session.add(account)
         self.session.add(circuit)
         self.session.flush()
-        return HTTPFound(location="%s%s" % (
-                self.request.application_url, self.meter.getUrl()))
+        return Response(simplejson.dumps(circuit.id))
 
     @action(permission="admin")
     def remove(self):

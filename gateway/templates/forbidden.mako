@@ -10,7 +10,6 @@
      #center-box { 
         margin: 10px auto; 
         width: 500px;
-        background: #E5ECF9; 
      }
      #box-content { 
         padding: 8px;
@@ -20,15 +19,15 @@
   </head>
   <body>
     <div id="center-box">
-      <div class="ui-widget-header ui-corner-all">
+      <div class="ui-widget-header ui-corner-top">
         <h3>You are not allowed to access that page!</h3>
       </div>
-      <div id="box-content">
+      <div class="ui-widget ui-widget-content">
       <p>Reason:</p>
       % if logged_in:
-         <p>You are logged in, but lack sufficient privileges.</p>
+       <p>You are logged in, but lack sufficient privileges.</p>
       % else: 
-         <p>You are not logged in, please do so now. 
+      <p>You are not logged in, please do so now. 
            <a href="${a_url}/user/login?came_from=${request.url}">Log in</a></p>
       % endif
       </div>

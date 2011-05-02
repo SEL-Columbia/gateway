@@ -98,15 +98,15 @@ def main(global_config, **settings):
                      permission='view',
                      view='gateway.handlers.DeleteJobs')
 
+    config.add_route('graph',
+                     '/graph/{class}/{id}',
+                     view='gateway.handlers.GraphView')
+
     config.add_route('edit',
                      '/edit/{class}/{id}',
                      renderer='edit.mako',
                      permission='admin',
                      view='gateway.handlers.EditModel',)
-
-    config.add_route('graph',
-                     '/graph/{class}/{id}',
-                     view='gateway.handlers.GraphView')
 
     config.add_route('index',
                      '/',

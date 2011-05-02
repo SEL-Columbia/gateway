@@ -13,11 +13,12 @@
       </div>
       <div class="navigation">
         <ul class="menu">
-          <li> <a href="#">Dashboard</a></li>
-          <li class="here"><a href="/">Manage</a></li>
+          <li > <a href="#">Dashboard</a></li>
+          <li class="ui-state-default ui-corner-top ui-tabs-active">
+            <a href="/">Manage</a></li>
         </ul>
       </div>
-        <ol class="breadcrumbs ui-widget-header ui-corner-all">
+        <ol class="breadcrumbs ui-widget-header ui-corner-top">
 
         % if breadcrumbs:
             % for crumb in breadcrumbs: 
@@ -42,7 +43,7 @@
         </div>
 
         </ol>
-        <div class="content">
+        <div class="ui-widget ui-widget-content content">
           ${self.content()}
         </div>
     </div>

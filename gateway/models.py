@@ -265,16 +265,18 @@ class Meter(Base):
     date = Column(DateTime)
     battery = Column(Integer)
     panel_capacity = Column(Integer)
+    geometry = Column(Unicode)
+
     communication_interface_id = Column(
         Integer,
         ForeignKey('communication_interface.id'))
-
     communication_interface = relation(
         CommunicationInterface,
         lazy=False,
         primaryjoin=communication_interface_id == CommunicationInterface.id)
 
     def __init__(self, name=None, phone=None, location=None,
+                 geometry=None,
                  battery=None, status=None, panel_capacity=None,
                  communication_interface_id=None):
         self.uuid = str(uuid.uuid4())
@@ -285,6 +287,7 @@ class Meter(Base):
         self.battery = battery
         self.communication_interface_id = communication_interface_id
         self.panel_capacity = panel_capacity
+        self.geometry = geometry
 
     def get_circuits(self):
         session = DBSession()
@@ -305,10 +308,6 @@ class Meter(Base):
         return list(itertools.chain(*map(lambda c: c.get_logs().all(),
                                          self.get_circuits())))
 
-    @staticmethod
-    def slugify(name):
-        slug = name.lower()
-        return slug.replace(' ', '-')
 
     def getUrl(self):
         return "/meter/index/%s" % self.id
