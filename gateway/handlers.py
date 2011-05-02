@@ -620,7 +620,7 @@ class MeterHandler(object):
                          str(self.meter.name))
         return resp
     # this serialization should be a class method.
-    @action(permission='admin')
+    @action(permission='view')
     def circuits(self):
         return Response(
             content_type="application/json",
