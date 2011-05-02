@@ -13,15 +13,6 @@ ${headers.loadSlickGrid(request)}
         src="${a_url}/static/js/openlayers/OpenLayers.js">
 </script>
 
-<script type="text/javascript" 
-        src="${a_url}/static/js/site/jquery.tmpl.js.js"></script>
-
-<script type="text/javascript" 
-        src="${a_url}/static/js/datastore.js"></script>
-
-<script type="text/javascript" 
-        src="${a_url}/static/js/grid.js"></script>
-
 <script type="text/javascript"
         src="${a_url}/static/js/site/meterPage.js"></script>
 
@@ -41,7 +32,7 @@ ${headers.loadSlickGrid(request)}
 
 <script type="text/javascript">
   $(function() { 
-     loadPage({ 'meter' : ${meter.id}, 'geometry': "${meter.geometry}"});
+    loadPage({ 'meter' : ${meter.id}, 'geometry': "${meter.geometry}"});
   });
 </script>
 </%def>

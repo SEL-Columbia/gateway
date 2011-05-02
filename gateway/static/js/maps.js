@@ -26,29 +26,35 @@ $(function() {
 
   var style = new OpenLayers.StyleMap({ 
     'default': new OpenLayers.Style({ 
-      label: "${name}",
       labelYOffset: 30,
       fontColor: "#fff",
-      pointRadius: 10,
+      pointRadius: 7,
       fillColor: '#820BBB',
     }),
     'select': new OpenLayers.Style({
-      pointRadius: 10,
+      pointRadius: 7,
       fillColor: "#E32E30"
     })
   })
   
-
-  var meters = new OpenLayers.Layer.GML("GeoJSON", "/manage/metersAsGeoJson", {
-    styleMap: style,
-    projection: new OpenLayers.Projection("EPSG:4326"),
-    format: OpenLayers.Format.GeoJSON
-  });
+  var meters = new OpenLayers.Layer.Vector(
+    "Meters", { 
+      projection: new OpenLayers.Projection("EPSG:4326"),
+      styleMap: style,
+      strategies: [
+        new OpenLayers.Strategy.Cluster(),
+        new OpenLayers.Strategy.Fixed()],
+      protocol: new OpenLayers.Protocol.HTTP({ 
+        url: "/manage/metersAsGeoJson",
+        format: new OpenLayers.Format.GeoJSON()
+      })
+    }    
+  )
+  map.addLayer(meters);
 
   var selectControl = new OpenLayers.Control.SelectFeature(meters, 
     {
-      box: true
-    }
+      box: true    }
   )
 
   map.addControl(selectControl);
@@ -68,7 +74,6 @@ $(function() {
     }
   })
 
-  map.addLayer(meters);
   map.zoomToExtent(new OpenLayers.Bounds(
       -4006523.2738786, -2191602.4746, 8213617.3099402, 3678761.29665
   ));
