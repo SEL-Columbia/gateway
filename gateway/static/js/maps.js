@@ -25,17 +25,25 @@ $(function() {
   map.addLayers([gsat]);
 
   var style = new OpenLayers.StyleMap({ 
-    'default': new OpenLayers.Style({ 
-      labelYOffset: 30,
+    'default': new OpenLayers.Style({       
+      label: "${count}",
       fontColor: "#fff",
-      pointRadius: 7,
+      pointRadius: "${radius}",
       fillColor: '#820BBB',
-    }),
-    'select': new OpenLayers.Style({
-      pointRadius: 7,
-      fillColor: "#E32E30"
-    })
-  })
+    }, { 
+      context: { 
+        count: function(feature) { 
+          return feature.attributes.count
+        },
+        radius: function(feature) { 
+          var pix = 2;
+          if(feature.cluster) {
+            pix = Math.min(feature.attributes.count, 7) + 20 ;
+          }
+          return pix;
+        }
+      }
+    }),})
   
   var meters = new OpenLayers.Layer.Vector(
     "Meters", { 
