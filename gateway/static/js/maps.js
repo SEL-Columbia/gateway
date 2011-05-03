@@ -38,7 +38,7 @@ $(function() {
         radius: function(feature) { 
           var pix = 2;
           if(feature.cluster) {
-            pix = Math.min(feature.attributes.count, 7) + 20 ;
+            pix = Math.min(feature.attributes.count, 30) + 10;
           }
           return pix;
         }
@@ -76,9 +76,14 @@ $(function() {
   });
 
   meters.events.on({ 
-    'featureselected': function(event) { 
-      $("<div />", {id: "popup"});
-      $("#popup").dialog(event);
+    'featureselected': function(thing) { 
+      console.log(thing.feature.cluster); 
+      $("#info").empty();
+      $.each(thing.feature.cluster, function(i, item){ 
+        console.log(item);
+        $("#info").append("<p>" + item.data.name +"</p>");
+      })
+
     }
   })
 

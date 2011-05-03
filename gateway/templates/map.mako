@@ -32,5 +32,7 @@
     </div>
     <a id="select" href="#">Select Features</a>
     <a id="pan" href="#">Pan Map</a>
+    <div id="info"></div>
+
   </body>
 </html>
