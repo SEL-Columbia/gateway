@@ -27,9 +27,11 @@ from gateway.models import SystemLog
 from gateway.models import initialize_sql
 
 hour = 3600.00
+
 db_string = "postgresql://postgres:password@localhost:5432/gateway"
 initialize_sql(db_string)
 session = DBSession()
+
 error = Template('$circuit last sent a log on $date, over $timediff ago.')
 mailer = Mailer()
 _from = 'admin@sharedsolar.org'

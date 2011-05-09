@@ -28,6 +28,9 @@
 
 
 <%def name="globalScripts(request)"> 
+<script type="text/javascript"
+        src="${a_url}/static/js/site/globals.js">
+</script>
 <script type="text/javascript" 
         src="${request.application_url}/static/js/jquery-1.4.3.min.js"></script>
 <script type="text/javascript"

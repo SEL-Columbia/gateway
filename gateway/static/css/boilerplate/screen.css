@@ -70,9 +70,10 @@ ol.breadcrumbs {
 } 
 
 ol.breadcrumbs li { 
-    display: inline; 
-    padding: 5px;
-    font-weight: bold; 
+   height: 50px;
+   display: inline; 
+   padding: 5px;
+   font-weight: bold; 
 } 
 ol.breadcrumbs li a { 
 } 
@@ -222,12 +223,6 @@ code { background: white;
   display: block;
   padding: 4px 0;
 }
-
-
-#grid { 
-  border: 1px  solid #DDDDDD;
-} 
-
 
 #meter-overview h4 { 
    margin: 0px;

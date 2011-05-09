@@ -315,6 +315,21 @@ class ManageHandler(object):
     def index(self):
         return {
             'breadcrumbs': self.breadcrumbs}
+
+    @action(renderer='manage/meters.mako')
+    def show_meters(self):
+        session = DBSession()
+        return {
+            'breadcrumbs': self.breadcrumbs,
+            'meters': simplejson.dumps([{'name': m.name,
+                                         'id': m.id,
+                                         'number_of_circuits': len(m.get_circuits()),
+                                         'pv': m.panel_capacity,
+                                         'phone': m.phone,
+                                         'battery': m.battery,
+                                         'location': m.location
+                                         } 
+                                        for m in session.query(Meter).all()])}
     
     @action()
     def metersAsGeoJson(self):

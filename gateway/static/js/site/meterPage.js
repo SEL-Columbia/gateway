@@ -35,36 +35,20 @@ function loadGrid(options) {
     dataView.endUpdate();
     grid.invalidate();
     grid.render();
-
   }); 
-  var sortdir, sortcol;
-
-  function comparer(a, b) { 
-    var x = a[sortcol], y = b[sortcol];
-/*--
-x     y     result
-10    1     1
-1     10    -1
-1     1     0
-''    0     -1
-0     ''    1
-  --*/
-    if(x===null) {return -1}
-    if(y===null) {return 1}
-    return (x === y ? 0 : (x > y ? 1 : -1));
-  }; 
 
   grid.onSort.subscribe(function(e, args) { 
     sortdir = args.sortAsc ? 1 : -1;
     sortcol = args.sortCol.field;
-
     dataView.sort(comparer, args.sortAsc);
   });
+
 
   dataView.onRowsChanged.subscribe(function(e,args) {
     grid.invalidateRows(args.rows);
     grid.render();
   });
+
 
   $("#grid").show();
   return grid; 

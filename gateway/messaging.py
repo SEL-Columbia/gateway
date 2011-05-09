@@ -1,9 +1,16 @@
 import re
 from urlparse import parse_qs
-
 from gateway.models import DBSession, Circuit
 from gateway.models import Meter, SystemLog
 from gateway import meter as meter_funcs
+import compactsms
+
+
+def reduce_message(message):
+    m = {}
+    for k, v in message.iteritems():
+        m[k] = v[0]
+    return m
 
 
 def clean_message(messageRaw):
@@ -14,10 +21,7 @@ def clean_message(messageRaw):
     """
     messageBody = messageRaw.text.lower()
     messageBody = messageBody.strip(")").strip("(")
-    message = {}
-    parsed_message = parse_qs(messageBody)
-    for k, v in parsed_message.iteritems():
-        message[k] = v[0]
+    message = reduce_message(parse_qs(messageBody))
     message['meta'] = messageRaw
     return message
 
@@ -36,6 +40,8 @@ def findMeter(message):
 
 
 def findCircuit(message, meter):
+    """Looks up circuit from meter and message.
+    """
     session = DBSession()
     circuit = session.query(Circuit).\
         filter_by(ip_address=message["cid"]).\
@@ -50,7 +56,16 @@ def parse_meter_message(message):
     """
     session = DBSession()
     meter = findMeter(message)
-    if re.match("^\(.*\)$", message.text.lower()):
+
+    # compressed primary logs
+    if re.match("^\(l.*\)$", message.text):
+        inflatedlogs = compactsms.inflatelogs([message.text])
+        for log in inflatedlogs:
+            m = reduce_message(parse_qs(log))
+            circuit = findCircuit(m, meter)
+            meter_funcs.make_pp(m, circuit, session)
+    # old messages
+    elif re.match("^\(.*\)$", message.text.lower()):
         messageDict = clean_message(message)
         if messageDict["job"] == "delete":
             getattr(meter_funcs,
