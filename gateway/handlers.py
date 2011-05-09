@@ -600,7 +600,7 @@ class MeterHandler(object):
         """
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Meters',
-                            'url': '/manage/show?class=Meter'})
+                            'url': '/manage/show_meters'})
         breadcrumbs.append({"text": "Meter Overview"})
         return {
             "meter": self.meter,
