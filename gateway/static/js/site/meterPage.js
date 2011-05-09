@@ -107,10 +107,11 @@ function loadMap(div, options) {
 var map;
 function loadPage(options) {
   
-  map = loadMap("map", options); 
+//  map = loadMap("map", options); 
 
   $( "#tabs" ).tabs();
   $("#tabs-1").removeClass("ui-corner-bottom");
+  
 
   $( ".tabs-bottom .ui-tabs-nav, .tabs-bottom .ui-tabs-nav > *" )
     .removeClass( "ui-corner-all ui-corner-top" )
@@ -123,7 +124,9 @@ function loadPage(options) {
    
   $(".tool-controls").click(function() { 
     $(this).find("ul").width($(this).width()-14).css({'margin-left':'-5px'});
-    $(this).find("ul").toggle();
+    $(this).find("ul").toggle().css("margin-top",10).height(80);
+    $(this).find("ul").menu();
+    $(this).find("ul").css("position","absolute");
   })
 
   var grid = loadGrid(options); 

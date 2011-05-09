@@ -207,23 +207,6 @@ code { background: white;
    height: 10px;
 } 
 
-.tool-box ul.showing {
-  display: block
-}
-.tool-box ul { 
-   margin-top: 6px;
-   list-style: none;
-   position: absolute; 
-   z-index: 10000
-} 
-.tool-box ul li { 
-   background: #fff;
-} 
-.tool-box ul li a {
-  display: block;
-  padding: 4px 0;
-}
-
 #meter-overview h4 { 
    margin: 0px;
 } 
@@ -233,7 +216,11 @@ code { background: white;
    list-style: none;
 }
  
+.tool-controls ul { 
+   z-index: 1000;
+} 
 #tabs-1 { 
+  
    height: 300px;
    padding: 0px;
 } 

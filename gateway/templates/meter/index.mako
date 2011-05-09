@@ -43,9 +43,9 @@ ${headers.loadSlickGrid(request)}
     <ul class="tool-box" id="edit-box">
       <li class="tool-controls" >
         <a href="#">Manage meter information</a>
-        <ul style="display:none">         
+        <ul class="tool-menu" style="display:none">
           <li>
-                <a id="edit" href="${meter.edit_url()}">Edit meter information</a>
+            <a id="edit" href="${meter.edit_url()}">Edit meter information</a>
           </li> 
           <li>
             <a id="removeMeter" href="#">Remove Meter</a>
@@ -53,7 +53,7 @@ ${headers.loadSlickGrid(request)}
           <li>
             <a id="addCircuitButton" href="#">Add Circuit</a>
           </li>
-        </ul>
+      </ul>
       </li>
       <li class="tool-controls">
         <a  href="#">Download information</a>
@@ -99,7 +99,6 @@ ${headers.loadSlickGrid(request)}
           </div>
 	</div>
 </div>
-
 
 
 <ul id="meter-overview">
