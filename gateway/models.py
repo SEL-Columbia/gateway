@@ -325,9 +325,34 @@ class Meter(Base):
     def __str__(self):
         return "Meter %s" % self.name
 
+class MeterConfigKey(Base):
+    """
+    """
+    __tablename__ = 'meterconfigkey'
+    id = Column(Integer, primary_key=True)
+    key = Column(Unicode)
+
+    def __str__(self):
+        return "Key: %s" % self.key
+
+class MeterChangeSet(Base):
+    """ Stores changes made to the meter config
+    """
+    __tablename__ = 'meterchangeset'
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime)
+    meter_id = Column('meter', ForeignKey('meter.id'))
+    meter = relation(Meter, primaryjoin = meter_id == Meter.id)
+    keyid = Column('meterconfigkey', ForeignKey('meterconfigkey.id'))    
+    key = relation(MeterConfigKey, primaryjoin = keyid == MeterConfigKey.id)
+    value = Column(Unicode)
+    
+    def __str__(self):
+        return "Changset %s" % self.id
+
 
 class Account(Base):
-    """
+    """ Stores account information for each Circuit
     """
     __tablename__ = "account"
     id = Column(Integer, primary_key=True)
@@ -910,8 +935,18 @@ def populate():
     if viewers is None:
         viewers = Groups(name='view')
         session.add(viewers)
+    #
+    key = session.query(MeterConfigKey).filter_by(key='meter_name').first()
+    if key is None:
+        session.add(MeterConfigKey(key='meter_name'))
+    #
+    key = session.query(MeterConfigKey).filter_by(key='mode').first()
+    if key is None:
+        session.add(MeterConfigKey(key='mode'))
+    
     DBSession.flush()
     transaction.commit()
+    
 
 
 def initialize_sql(db_string, db_echo=False):

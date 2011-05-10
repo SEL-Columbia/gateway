@@ -45,8 +45,11 @@ ${headers.loadSlickGrid(request)}
         <a href="#">Manage meter information</a>
         <ul class="tool-menu" style="display:none">
           <li>
-            <a id="edit" href="${meter.edit_url()}">Edit meter information</a>
-          </li> 
+            <a id="edit" href="${meter.edit_url()}">Edit meter description</a>
+          </li>
+          <li>
+            <a id="editMeterConfig" href="#">Edit meter configuration</a>
+          </li>
           <li>
             <a id="removeMeter" href="#">Remove Meter</a>
           </li>
@@ -127,6 +130,31 @@ ${headers.loadSlickGrid(request)}
 <h4>Circuits associated
   with <span class="underline">${meter.name}</span></h4>
 
+<div id="grid"></div>
+
+<!-- 
+     Update meter configuration
+-->
+<div id="updateMeterConfig" style="display:none;">
+  <p> This form allows users to update the remote configuration on a
+  meter.</p>
+  <form method="" id="configForm" action="">
+    <select name="key">
+      % for key in meter_config_keys:
+         <option value=${key.id}> ${str(key)} </option>
+      % endfor
+    </select>
+  </form>
+  <hr />
+  <p>Change sets associated with this meter</p>
+  % for change in changesets:
+     ${change}
+  % endfor
+</div>
+<!-- 
+     Added new circuit form
+--> 
+
 <div id="addCircuit" style="display: none">
   <form  id="add-circuit">
   <table>
@@ -167,6 +195,5 @@ ${headers.loadSlickGrid(request)}
 </table>
 </form>
 </div> 
-<div id="grid"></div>
 
 </%def> 

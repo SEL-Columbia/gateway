@@ -107,7 +107,7 @@ function loadMap(div, options) {
 var map;
 function loadPage(options) {
   
-//  map = loadMap("map", options); 
+  map = loadMap("map", options); 
 
   $( "#tabs" ).tabs();
   $("#tabs-1").removeClass("ui-corner-bottom");
@@ -124,7 +124,7 @@ function loadPage(options) {
    
   $(".tool-controls").click(function() { 
     $(this).find("ul").width($(this).width()-14).css({'margin-left':'-5px'});
-    $(this).find("ul").toggle().css("margin-top",10).height(80);
+    $(this).find("ul").toggle().css("margin-top",10).height(100);
     $(this).find("ul").menu();
     $(this).find("ul").css("position","absolute");
   })
@@ -138,6 +138,20 @@ function loadPage(options) {
     } else {};     
   }); 
 
+  
+  $("#editMeterConfig").click(function() { 
+    $("#updateMeterConfig").dialog({ 
+      title: 'Update remove meter config',
+      width: 400,
+      zIndex: 2000,
+      modal: true,
+      buttons: { 
+        'Update key': function() { 
+          console.log($(""))
+        }
+      }
+    });
+  })
 
 
   $('#addCircuitButton').click(function() { 
@@ -158,8 +172,6 @@ function loadPage(options) {
               alert(response); 
             }
           })
-
-
         },
         "Cancel" : function() { 
           $(this).dialog("close"); 

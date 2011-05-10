@@ -85,7 +85,7 @@ def make_pp(message, circuit, session):
     else:
         session.add(
             SystemLog(text="Unable to process message %s"
-                      % message.uuid))
+                      % message))
 
 
 def make_nocw(message, circuit, session):

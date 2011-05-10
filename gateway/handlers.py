@@ -51,11 +51,13 @@ from gateway.models import IncomingMessage
 from gateway.models import OutgoingMessage
 from gateway.models import SystemLog
 from gateway.models import Mping
+from gateway.models import MeterConfigKey
 from gateway.models import Users
 from gateway.models import Groups
 from gateway.models import KannelInterface
 from gateway.models import NetbookInterface
 from gateway.models import AirtelInterface
+from gateway.models import MeterChangeSet
 from gateway.models import CommunicationInterface
 
 # random junk that needs to be cleaned up.
@@ -68,11 +70,19 @@ breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
 
 def forbidden_view(request):
+    """ 
+    View to handle forbidden requests
+    Checks to see if a user is authenitcated
+    Gives the user the reason why they can't view a page.    
+    """
     return {'logged_in': authenticated_userid(request)}
 
 
 def not_found(request):
+    """ View to handle 404s
+    """
     return Response("Unable to find resource")
+
 
 class Index(object):
     """
@@ -598,16 +608,25 @@ class MeterHandler(object):
         Main view for meter overview. Also includes circuit gird and
         some graphs
         """
+        session = DBSession()
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Meters',
                             'url': '/manage/show_meters'})
         breadcrumbs.append({"text": "Meter Overview"})
         return {
-            "meter": self.meter,
-            "breadcrumbs": breadcrumbs}
+            'meter': self.meter,
+            'changesets': session.query(MeterChangeSet).filter_by(meter = self.meter),
+            'meter_config_keys' : session.query(MeterConfigKey).all(),
+            'breadcrumbs': breadcrumbs}
+
+    @action()
+    def update_config(self):
+        return Response('ok')
 
     @action(renderer='meter/messsage_graph.mako', permission='view')
     def message_graph(self):
+        """ Message table. 
+        """
         output = cStringIO.StringIO()
         d = collections.defaultdict(list)
         logs = self.meter.getLogs()
@@ -624,6 +643,8 @@ class MeterHandler(object):
 
     @action(permission='admin')
     def show_account_numbers(self):
+        """ Returns the account numbers as a csv file.
+        """
         output = cStringIO.StringIO()
         output.write('Pin, IpAddress \n')
         for c in self.meter.get_circuits():
@@ -637,6 +658,9 @@ class MeterHandler(object):
     # this serialization should be a class method.
     @action(permission='view')
     def circuits(self):
+        """Dumps the circuits assoicted with Meter to a json file.
+        Used in SlickGrid
+        """
         return Response(
             content_type="application/json",
             body= simplejson.dumps(
@@ -668,8 +692,7 @@ class MeterHandler(object):
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
-        """
-        A view that allows users to add an circuit to an
+        """A view that allows users to add an circuit to an
         """
         params = self.request.params
         pin = params.get("pin")
@@ -690,9 +713,7 @@ class MeterHandler(object):
 
     @action(permission="admin")
     def remove(self):
-        """
-        Allows users to remove an meter.
-        FIXME does not seem to be working!.
+        """Allows users to remove an meter.
         """
         self.session.delete(self.meter)
         [self.session.delete(x)
