@@ -2,7 +2,8 @@
 Module for SS Gateway.
 Handles all of the meter communcation
 """
-from dateutil import parser
+#from dateutil import parser
+from datetime import datetime
 from gateway.models import Job
 from gateway.models import SystemLog
 from gateway.models import PrimaryLog
@@ -49,7 +50,7 @@ def make_delete(msgDict, session):
                                        account=circuit.pin,
                                        status=circuit.get_rich_status(),
                                        credit=circuit.credit)
-        elif job._type == "turnon" or job._type  == "turnoff":
+        elif job._type == "turnon" or job._type == "turnoff":
             messageBody = make_message_body("toggle.txt",
                                        lang=circuit.account.lang,
                                        account=circuit.pin,
@@ -67,28 +68,28 @@ def make_delete(msgDict, session):
 
 
 def make_pp(message, circuit, session):
-    if valid(message.keys(),
-             ['status', 'cid', 'tu','wh', 'job']):
-        date = parser.parse(message["ts"])
-        log = PrimaryLog(
-            date=date,
-            circuit=circuit,
-            watthours=message["wh"],
-            use_time=message["tu"],
-            credit=message.get("cr"),
-            status=int(message["status"]))
-        # override the credit and status value from the meter.
-        circuit.credit = log.credit
-        circuit.status = log.status
-        session.add(log)
-        session.merge(circuit)
-    else:
-        session.add(
-            SystemLog(text="Unable to process message %s"
-                      % message))
+    """
+    Saves primary parameter to the database.
+    """
+    date = datetime.strptime(message['ts'], "%Y%m%d%H")
+    log = PrimaryLog(
+        date=date,
+        circuit=circuit,
+        watthours=message["wh"],
+        use_time=message["tu"],
+        credit=message.get("cr"),
+        status=int(message["status"]))
+    # override the credit and status value from the meter.
+    circuit.credit = log.credit
+    circuit.status = log.status
+    session.add(log)
+    session.merge(circuit)
 
 
 def make_nocw(message, circuit, session):
+    """
+    Sends a no credit alert to the consumer
+    """
     interface = circuit.meter.communication_interface
     interface.sendMessage(
         circuit.account.phone,
@@ -104,6 +105,9 @@ def make_nocw(message, circuit, session):
 
 
 def make_lcw(message, circuit, session):
+    """
+    Sends a low credit alert to the consumer.
+    """
     interface = circuit.meter.communication_interface
     interface.sendMessage(
         circuit.account.phone,

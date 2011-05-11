@@ -1,7 +1,7 @@
 """
 Handler objects of web interface
 """
-import datetime
+
 import csv
 from urlparse import parse_qs
 import uuid
@@ -11,7 +11,6 @@ from datetime import timedelta
 from datetime import datetime
 import collections
 import hashlib
-import simplejson
 
 from dateutil import parser
 from webob import Response
@@ -26,8 +25,7 @@ from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 
- 
-from matplotlib import pyplot
+
 from matplotlib.figure import Figure
 from matplotlib.dates import date2num
 from matplotlib.dates import DateFormatter
@@ -64,16 +62,16 @@ from gateway.models import CommunicationInterface
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
 from gateway.utils import make_table_header
-from gateway.utils import make_table_data
+
 
 breadcrumbs = [{"text":"Manage Home", "url":"/"}]
 
 
 def forbidden_view(request):
-    """ 
+    """
     View to handle forbidden requests
     Checks to see if a user is authenitcated
-    Gives the user the reason why they can't view a page.    
+    Gives the user the reason why they can't view a page.
     """
     return {'logged_in': authenticated_userid(request)}
 
@@ -138,7 +136,8 @@ class AddClass(RestView):
         self.session = DBSession()
         self.cls = self.look_up_class()
         self.breadcrumbs = breadcrumbs[:]
-        self.breadcrumbs.append({'text': 'Add a new %s' % self.cls.__name__})
+        self.breadcrumbs\
+            .append({'text': 'Add a new %s' % self.cls.__name__})
 
     def get(self):
         fs = FieldSet(self.cls, session=self.session)
@@ -185,7 +184,7 @@ class EditModel(RestView):
             self.session.flush()
             return HTTPFound(location=fs.model.getUrl())
 
- 
+
 class GraphView(RestView):
     """
     """
@@ -258,9 +257,10 @@ class GraphView(RestView):
             return Response("Class not supported")
 
 
-
 class AlertHandler(object):
     """
+    This handler allows admin to send test messages.
+    Will be expaned to include more types of alerts.
     """
     def __init__(self, request):
         self.request = request
@@ -277,6 +277,9 @@ class AlertHandler(object):
 
     @action(permission='admin')
     def send_test(self):
+        """
+        Method to send a test message via a comm interface
+        """
         interface = self.session\
                     .query(CommunicationInterface)\
                     .get(self.request.params['interface'])
@@ -331,34 +334,34 @@ class ManageHandler(object):
         session = DBSession()
         return {
             'breadcrumbs': self.breadcrumbs,
-            'meters': simplejson.dumps([{'name': m.name,
-                                         'id': m.id,
-                                         'number_of_circuits': len(m.get_circuits()),
-                                         'pv': m.panel_capacity,
-                                         'phone': m.phone,
-                                         'battery': m.battery,
-                                         'location': m.location
-                                         } 
-                                        for m in session.query(Meter).all()])}
-    
+            'meters': simplejson\
+                .dumps([{'name': m.name,
+                         'id': m.id,
+                         'number_of_circuits': len(m.get_circuits()),
+                         'pv': m.panel_capacity,
+                         'phone': m.phone,
+                         'battery': m.battery,
+                         'location': m.location
+                         }
+                        for m in session.query(Meter).all()])}
+
     @action()
     def metersAsGeoJson(self):
         session = DBSession()
         meters = session.query(Meter).filter(Meter.geometry != None)
         return Response(
             content_type='application/json',
-            body= simplejson.dumps(
+            body = simplejson.dumps(
                 {'type' : 'FeatureCollection',
-                 'features': 
+                 'features' : 
                  [ { 'type': 'Feature',
                      'properties': {'name': x.name},
-                     'geometry': {'type': 'Point', 
+                     'geometry': {'type': 'Point',
                                   'coordinates': list(loads(
-                                        x.geometry).coords)[0]} } 
+                                        x.geometry).coords)[0]} }
                    for x in meters]
                  }))
 
-    
     @action(renderer='map.mako')
     def map(self):
         return {}
@@ -373,26 +376,26 @@ class ManageHandler(object):
                   value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
                                                            , str(item))))
         return {'grid': grid,
-                'cls' : cls,
+                'cls': cls,
                 'breadcrumbs': breadcrumbs}
 
     @action(renderer='manage/genertic.mako', permission='view')
     def show(self):
-        cls = getattr(models,self.request.params['class'])
+        cls = getattr(models, self.request.params['class'])
         return self.makeGrid(cls)
 
-    @action(permission='view',renderer='manage/tokens.mako')
+    @action(permission='view', renderer='manage/tokens.mako')
     def tokens(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Manage Tokens'})
         grid = Grid(TokenBatch, self.session.query(TokenBatch).all())
-        grid.configure(readonly=True,exclude=[grid._get_fields()[0]])
+        grid.configure(readonly=True, exclude=[grid._get_fields()[0]])
         grid.append(Field('Export to CSV file',
                           value = lambda item: '<a href="/%s">%s</a>' %\
                               (item.exportTokens(),
                                str(item))))
         grid.append(Field('Number of token',
-                          value= lambda item: self.session.query(Token)\
+                          value = lambda item: self.session.query(Token)\
                           .filter_by(batch=item).count()))
         grid.append(Field('Number of unused tokens',
                           value = lambda item: self.session\
@@ -428,7 +431,8 @@ class ManageHandler(object):
                     value=value,
                     batch=batch))
         return HTTPFound(
-            location='%s%s' % (self.request.application_url,'/manage/tokens'))
+            location='%s%s' % (self.request.application_url,
+                               '/manage/tokens'))
 
     @action(permission='admin', renderer='manage/pricing-models.mako')
     def pricing_models(self):
@@ -436,7 +440,11 @@ class ManageHandler(object):
 
 
 class UserHandler(object):
-
+    """
+    Handler to manage user system.
+    Allows users to log in and out.
+    Also allows users to
+    """
     def __init__(self, request):
         self.request = request
         self.breadcrumbs = breadcrumbs[:]
@@ -448,10 +456,13 @@ class UserHandler(object):
 
     @action(renderer='users/profile.mako', permission='view')
     def profile(self):
+        """
+        Allows users to edit their current password.
+        """
         error = None
         user = self.findUser()
         breadcrumbs = self.breadcrumbs[:]
-        breadcrumbs.append({'text' : 'Edit your profile'})
+        breadcrumbs.append({'text': 'Edit your profile'})
 
         if self.request.method == 'POST':
             user = self.findUser()
@@ -472,7 +483,7 @@ class UserHandler(object):
             else:
                 error = 'Old password did not match'
         return {'user': user,
-                'error' : error,
+                'error': error,
                 'breadcrumbs': breadcrumbs}
 
     @action(renderer='users/add.mako', permission='admin')
@@ -481,11 +492,11 @@ class UserHandler(object):
         session = DBSession()
         groups = session.query(Groups).all()
         breadcrumbs = self.breadcrumbs[:]
-        breadcrumbs.append({'text' : 'Add a new user'})
+        breadcrumbs.append({'text': 'Add a new user'})
         if self.request.method == 'GET':
-            return {'breadcrumbs' : breadcrumbs,
-                    'groups' : groups,
-                    'errors' : errors}
+            return {'breadcrumbs': breadcrumbs,
+                    'groups': groups,
+                    'errors': errors}
         elif self.request.method == 'POST':
             name = self.request.params['name']
             email = self.request.params['email']
@@ -502,12 +513,12 @@ class UserHandler(object):
     def show(self):
         session = DBSession()
         users = session.query(Users).all()
-        return Response(str([(user.name,user.group.name) for user in users]))
+        return Response(str([(user.name, user.group.name) for user in users]))
 
     @action(renderer='login.mako')
     def login(self):
         session = DBSession()
-        came_from = self.request.params.get('came_from','/')
+        came_from = self.request.params.get('came_from', '/')
         message = ''
         login = ''
         password = ''
@@ -571,7 +582,8 @@ class InterfaceHandler(object):
 
     @action()
     def send(self):
-        if isinstance(self.interface, KannelInterface) or isinstance(self.interface, AirtelInterface):
+        if isinstance(self.interface, KannelInterface)\
+                or isinstance(self.interface, AirtelInterface):
             msg = self.save_and_parse_message(self.request.params['number'],
                                               self.request.params['message'])
             return Response(msg.uuid)
@@ -615,8 +627,9 @@ class MeterHandler(object):
         breadcrumbs.append({"text": "Meter Overview"})
         return {
             'meter': self.meter,
-            'changesets': session.query(MeterChangeSet).filter_by(meter = self.meter),
-            'meter_config_keys' : session.query(MeterConfigKey).all(),
+            'changesets': session\
+                .query(MeterChangeSet).filter_by(meter=self.meter),
+            'meter_config_keys': session.query(MeterConfigKey).all(),
             'breadcrumbs': breadcrumbs}
 
     @action()
@@ -625,7 +638,7 @@ class MeterHandler(object):
 
     @action(renderer='meter/messsage_graph.mako', permission='view')
     def message_graph(self):
-        """ Message table. 
+        """ Message table.
         """
         output = cStringIO.StringIO()
         d = collections.defaultdict(list)
@@ -648,13 +661,14 @@ class MeterHandler(object):
         output = cStringIO.StringIO()
         output.write('Pin, IpAddress \n')
         for c in self.meter.get_circuits():
-            output.write('%s, %s\n' % (c.pin,c.ip_address))
+            output.write('%s, %s\n' % (c.pin, c.ip_address))
         resp = Response(output.getvalue())
         resp.content_type = 'application/x-csv'
         resp.headers.add('Content-Disposition',
                          'attachment;filename=%s:accounts.csv' % \
                          str(self.meter.name))
         return resp
+
     # this serialization should be a class method.
     @action(permission='view')
     def circuits(self):
@@ -663,17 +677,16 @@ class MeterHandler(object):
         """
         return Response(
             content_type="application/json",
-            body= simplejson.dumps(
-                [{'id' :x.id,
-                  'ipaddress' : x.ip_address,
+            body=simplejson.dumps(
+                [{'id':x.id,
+                  'ipaddress': x.ip_address,
                   'language': x.account.lang,
                   'last_msg': x.getLastLogTime()[0],
-                  'status' : x.status,
+                  'status': x.status,
                   'account': x.pin,
-                  'credit' : x.credit
-                  } 
+                  'credit': x.credit
+                  }
                  for x in self.meter.get_circuits()]))
-
 
     @action()
     def geometry(self):
@@ -681,14 +694,13 @@ class MeterHandler(object):
         return Response(
             content_type='application/json',
             body=simplejson.dumps(
-                { 'type': 'FeatureCollection',
-                  'features': [{ 
+                {'type': 'FeatureCollection',
+                  'features': [{
                             'type':'Feature',
-                            'geometry': {'type': 'Point', 
+                            'geometry': {'type': 'Point',
                                          'coordinates': list(point.coords)[0]},
-                            'properties': { } 
+                            'properties': {}
                             }]}))
-
 
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
@@ -758,9 +770,9 @@ class CircuitHandler(object):
             "logged_in": authenticated_userid(self.request),
             "breadcrumbs": breadcrumbs,
             "jobs": jobs,
-            "logs" : logs,
+            "logs": logs,
             "fields": get_fields(self.circuit),
-            "circuit": self.circuit }
+            "circuit": self.circuit}
 
     @action(permission="admin")
     def turn_off(self):
