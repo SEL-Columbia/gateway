@@ -68,7 +68,7 @@ def make_delete(msgDict, session):
 
 def make_pp(message, circuit, session):
     if valid(message.keys(),
-             ['status', 'cid', 'tu', 'mid', 'wh', 'job']):
+             ['status', 'cid', 'tu','wh', 'job']):
         date = parser.parse(message["ts"])
         log = PrimaryLog(
             date=date,
