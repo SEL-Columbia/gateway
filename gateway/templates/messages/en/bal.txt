@@ -1,4 +1,3 @@
 <%!
   import datetime
-%>
-The remaining electricity credit on ${account} is ${credit} as of ${datetime.datetime.now().ctime()}
+%>The remaining electricity credit on ${account} is ${credit} as of ${datetime.datetime.now().ctime()}
