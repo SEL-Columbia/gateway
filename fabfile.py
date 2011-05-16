@@ -4,6 +4,7 @@ location = '/usr/local/gateway-env/gateway'
 
 env.hosts.extend(['178.79.140.99'])
 
+
 def update_gateway():
     with cd(location):
         run('git pull origin master')

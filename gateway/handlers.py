@@ -351,14 +351,14 @@ class ManageHandler(object):
         meters = session.query(Meter).filter(Meter.geometry != None)
         return Response(
             content_type='application/json',
-            body = simplejson.dumps(
-                {'type' : 'FeatureCollection',
-                 'features' : 
-                 [ { 'type': 'Feature',
-                     'properties': {'name': x.name},
-                     'geometry': {'type': 'Point',
-                                  'coordinates': list(loads(
-                                        x.geometry).coords)[0]} }
+            body=simplejson.dumps(
+                {'type': 'FeatureCollection',
+                 'features':
+                     [{'type': 'Feature',
+                        'properties': {'name': x.name},
+                        'geometry': {'type': 'Point',
+                                     'coordinates': list(loads(
+                                        x.geometry).coords)[0]}}
                    for x in meters]
                  }))
 
@@ -373,8 +373,7 @@ class ManageHandler(object):
         grid.configure(readonly=True, exclude=[grid._get_fields()[0]])
         grid.insert(grid._get_fields()[1],
             Field('%s overview page' % cls.__name__,
-                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl()
-                                                           , str(item))))
+                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl(), str(item))))
         return {'grid': grid,
                 'cls': cls,
                 'breadcrumbs': breadcrumbs}
@@ -391,14 +390,14 @@ class ManageHandler(object):
         grid = Grid(TokenBatch, self.session.query(TokenBatch).all())
         grid.configure(readonly=True, exclude=[grid._get_fields()[0]])
         grid.append(Field('Export to CSV file',
-                          value = lambda item: '<a href="/%s">%s</a>' %\
+                          value=lambda item: '<a href="/%s">%s</a>' %\
                               (item.exportTokens(),
                                str(item))))
         grid.append(Field('Number of token',
-                          value = lambda item: self.session.query(Token)\
+                          value=lambda item: self.session.query(Token)\
                           .filter_by(batch=item).count()))
         grid.append(Field('Number of unused tokens',
-                          value = lambda item: self.session\
+                          value=lambda item: self.session\
                           .query(Token)\
                           .filter_by(batch=item)\
                           .filter_by(state='new').count()))
@@ -957,6 +956,8 @@ class TokenHandler(object):
 
 
 class MessageHandler(object):
+    """ Handler that allows the system to manage messages
+    """
     def __init__(self, request):
         self.session = DBSession()
         self.request = request

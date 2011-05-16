@@ -122,7 +122,7 @@ function loadPage(options) {
       secondary: "ui-icon-triangle-1-s"}
   });
    
-  $(".tool-controls").click(function() { 
+  $(".tool-controls").click(function(evt) { 
     $(this).find("ul").width($(this).width()-14).css({'margin-left':'-5px'});
     $(this).find("ul").toggle().css("margin-top",10).height(100);
     $(this).find("ul").menu();

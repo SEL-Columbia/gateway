@@ -68,8 +68,7 @@ ${headers.loadSlickGrid(request)}
           </li>
           <li><a id="showAlerts"href="#">Show alerts</a></li>
           <li><a id="messages" 
-                 href="${a_url}/meter/message_graph/${meter.id}">
-              Message table</a></li>
+                 href="${a_url}/meter/message_graph/${meter.id}">Message table</a></li>
         </ul>
       </li>
       <li class="tool-controls">
