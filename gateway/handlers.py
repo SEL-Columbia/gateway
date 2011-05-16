@@ -564,8 +564,13 @@ class InterfaceHandler(object):
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.append({'text': 'Interface overview'})
+        messages = self.session.query(IncomingMessage)\
+                   .filter_by(communication_interface=self.interface)\
+                   .order_by(desc(IncomingMessage.id))\
+                   .limit(200)
         return {'interface': self.interface,
                 'breadcrumbs': breadcrumbs,
+                'messages': messages,
                 'fields': get_fields(self.interface)}
 
     def save_and_parse_message(self, origin, text, id=None):

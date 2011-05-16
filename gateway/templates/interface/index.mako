@@ -27,4 +27,11 @@
       % endfor 
     </table>
 
+    <ul>
+      % for msg in messages:
+      <li>${msg.date.ctime()}, ${msg.text}</li>
+      % endfor      
+    </ul>
+
+
 </%def>
