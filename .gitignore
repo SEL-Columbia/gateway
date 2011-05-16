@@ -11,3 +11,7 @@
 /data/*
 
 
+/gateway/static/js/#maps.js#
+/gateway/static/js/SlickGrid/
+/gateway/static/js/openlayers/
+/utils/wifi_access.log
