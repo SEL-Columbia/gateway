@@ -72,7 +72,6 @@ def make_pp(message, circuit, session):
     Saves primary parameter to the database.
     """
     try:
-        print('Primary message: %s' % message)
         date = datetime.strptime(message['ts'], "%Y%m%d%H")
         log = PrimaryLog(
             date=date,
@@ -87,6 +86,7 @@ def make_pp(message, circuit, session):
         session.add(log)
         session.merge(circuit)
     except Exception as e:
+        print message
         print e
 
 
