@@ -114,6 +114,7 @@ class CommunicationInterface(Base):
     def __str__(self):
         return "Communication Interface %s" % self.name
 
+
 class KannelInterface(CommunicationInterface):
     """
     Kannel Interface supports sending messages via a Kannel SMPP system.
@@ -184,20 +185,18 @@ class AirtelInterface(CommunicationInterface):
                 ForeignKey('communication_interface.id'),
                 primary_key=True)
     host = Column(String)
-    
-    
-    def __init__(self, name=None,host=None, location=None, provider=None):
+
+    def __init__(self, name=None, host=None, location=None, provider=None):
         CommunicationInterface.__init__(self, name, provider, location)
         self.host = host
 
     def sendData(self, message):
-        url = "http://41.223.84.25:1234/?&SOURCEADD=0753444466&MSISDN=%s&MESSAGE=%s" % (
+        url = "http://41.223.84.25/SharedSolar.php?&SOURCEADD=0753444466&MSISDN=%s&MESSAGE=%s" % (
             urllib.quote(message.number), urllib.quote_plus(message.text))
         print(url)
-        request = urllib2.Request(url)        
+        request = urllib2.Request(url)
         return urllib2.urlopen(request)
 
-    
     def sendMessage(self, number, text, incoming=None):
         session = DBSession()
         msg = OutgoingMessage(
@@ -208,13 +207,13 @@ class AirtelInterface(CommunicationInterface):
         session.flush()
         self.sendData(msg)
         return msg
-    
+
     def sendJob(self, job, incoming=None):
         session = DBSession()
         msg = JobMessage(job, incoming=incoming)
         session.add(msg)
         session.flush()
-        self.sendData(msg)                   
+        self.sendData(msg)
         return msg
 
 
@@ -335,6 +334,7 @@ class MeterConfigKey(Base):
     def __str__(self):
         return "Key: %s" % self.key
 
+
 class MeterChangeSet(Base):
     """ Stores changes made to the meter config
     """
@@ -342,11 +342,11 @@ class MeterChangeSet(Base):
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)
     meter_id = Column('meter', ForeignKey('meter.id'))
-    meter = relation(Meter, primaryjoin = meter_id == Meter.id)
-    keyid = Column('meterconfigkey', ForeignKey('meterconfigkey.id'))    
-    key = relation(MeterConfigKey, primaryjoin = keyid == MeterConfigKey.id)
+    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
+    keyid = Column('meterconfigkey', ForeignKey('meterconfigkey.id'))
+    key = relation(MeterConfigKey, primaryjoin=keyid == MeterConfigKey.id)
     value = Column(Unicode)
-    
+
     def __str__(self):
         return "Changset %s" % self.id
 
