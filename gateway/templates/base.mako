@@ -7,10 +7,18 @@
 
   </head>
   <body>
+      <%! 
+         from datetime import datetime         
+      %>
+      <div id="clock">        
+        <p><strong>${datetime.now().ctime()}</strong></p>
+      </div>
+
     <div class="container">
       <div class="header">
         <h1><a href="/"> SharedSolar Gateway</a></h1>
       </div>
+
       <div class="navigation">
         <ul class="menu">
           <li > <a href="#">Dashboard</a></li>

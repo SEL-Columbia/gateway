@@ -28,6 +28,13 @@ a { color: #004276; }
 .navigation { 
     font-size: 120%;
 } 
+#clock { 
+   top: 10;
+   right: 10;
+   z-index: 1000;
+   background: #fff;
+   position:fixed;
+} 
 .menu { 
     list-style-position:inside;    
     list-style-type: none;
