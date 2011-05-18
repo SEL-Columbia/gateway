@@ -71,19 +71,23 @@ def make_pp(message, circuit, session):
     """
     Saves primary parameter to the database.
     """
-    date = datetime.strptime(message['ts'], "%Y%m%d%H")
-    log = PrimaryLog(
-        date=date,
-        circuit=circuit,
-        watthours=message["wh"],
-        use_time=message["tu"],
-        credit=message.get("cr"),
-        status=int(message["status"]))
-    # override the credit and status value from the meter.
-    circuit.credit = log.credit
-    circuit.status = log.status
-    session.add(log)
-    session.merge(circuit)
+    try:
+        print('Primary message: %s' % message)
+        date = datetime.strptime(message['ts'], "%Y%m%d%H")
+        log = PrimaryLog(
+            date=date,
+            circuit=circuit,
+            watthours=message["wh"],
+            use_time=message["tu"],
+            credit=message.get("cr"),
+            status=int(message["status"]))
+        # override the credit and status value from the meter.
+        circuit.credit = log.credit
+        circuit.status = log.status
+        session.add(log)
+        session.merge(circuit)
+    except Exception as e:
+        print e
 
 
 def make_nocw(message, circuit, session):
