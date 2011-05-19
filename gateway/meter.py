@@ -26,13 +26,13 @@ def make_delete(msgDict, session):
     session.add(SystemLog("%s" % msgDict))
     job = session.query(Job).get(msgDict["jobid"])
     if job:
-        if len(job.job_message) is not 0:
-            incoming_uuid = job.job_message[0]
-        elif len(job.kannel_job_message) is not 0:
-            incoming_uuid = job.kannel_job_message[0].incoming
         try:
-            originMsg = session.query(IncomingMessage).\
-                        filter_by(uuid=incoming_uuid).first()
+            if len(job.job_message) is not 0:
+                incoming_uuid = job.job_message[0].incoming
+            elif len(job.kannel_job_message) is not 0:
+                incoming_uuid = job.kannel_job_message[0].incoming
+            originMsg = session.query(IncomingMessage)\
+                        .filter_by(uuid=incoming_uuid).first()
         except Exception, e:
             print(e)
         circuit = job.circuit
