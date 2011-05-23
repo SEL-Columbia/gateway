@@ -1,12 +1,18 @@
 import re
+from datetime import datetime
 from urlparse import parse_qs
-from gateway.models import DBSession, Circuit
-from gateway.models import Meter, SystemLog
+from gateway.models import DBSession
+from gateway.models import Circuit
+from gateway.models import Meter
+from gateway.models import SystemLog
+from gateway.models import TestMessage
 from gateway import meter as meter_funcs
 import compactsms
 
 
 def reduce_message(message):
+    """
+    """
     m = {}
     for k, v in message.iteritems():
         m[k] = v[0]
@@ -24,6 +30,13 @@ def clean_message(messageRaw):
     message = reduce_message(parse_qs(messageBody))
     message['meta'] = messageRaw
     return message
+
+
+def add_test_message(message):
+    session = DBSession()
+    msg = TestMessage(datetime.now(), message.text)
+    session.add(msg)
+    session.flush()
 
 
 def findMeter(message):

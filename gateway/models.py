@@ -311,7 +311,6 @@ class Meter(Base):
         return list(itertools.chain(*map(lambda c: c.get_logs().all(),
                                          self.get_circuits())))
 
-
     def getUrl(self):
         return "/meter/index/%s" % self.id
 
@@ -323,6 +322,7 @@ class Meter(Base):
 
     def __str__(self):
         return "Meter %s" % self.name
+
 
 class MeterConfigKey(Base):
     """
@@ -517,7 +517,6 @@ class Message(Base):
 
     def get_incoming(self):
         session = DBSession()
-        # I hope no one ever sees this. God I am a hack.
         if isinstance(self,
                       OutgoingMessage)\
                       or isinstance(self,
@@ -549,8 +548,36 @@ class Message(Base):
         return
 
 
+class TestMessage(Base):
+    """Test message
+    """
+    __tablename__ = 'test_message'
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime)
+    text = Column(Unicode)
+
+    def __init__(self, date, text):
+        self.date = date
+        self.text = text
+
+
+class MeterMessages(Base):
+    """
+    Join table that assoicated messages with meters.
+    Takes a message and a meter.
+    """
+    __tablename__ = 'meter_messages'
+    id = Column(Integer, primary_key=True)
+    message_id = Column(Integer, ForeignKey('message.id'))
+    message = relation(Message, primaryjoin=message_id == Message.id)
+    meter_id = Column(Integer, ForeignKey('meter.id'))
+    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
+
+
 class IncomingMessage(Message):
     """
+    Message type for all incoming messages.
+    Associated with a communication interface.
     """
     __tablename__ = "incoming_message"
     __mapper_args__ = {'polymorphic_identity': 'incoming_message'}
@@ -755,12 +782,13 @@ class PrimaryLog(Log):
             return [('cr', float(self.credit)), ('ct', self.getType())]
 
     def __str__(self):
-        return urllib.urlencode([('job', 'pp'),
-                                 ('status', self.status),
-                                 ('ts', self.created.strftime("%Y%m%d%H")),
-                                 ('cid', self.circuit.ip_address),
-                                 ('tu', int(self.use_time)),
-                                 ('wh', float(self.watthours))] + self.getCircuitAndType())
+        return urllib\
+               .urlencode([('job', 'pp'),
+                           ('status', self.status),
+                           ('ts', self.created.strftime("%Y%m%d%H")),
+                           ('cid', self.circuit.ip_address),
+                           ('tu', int(self.use_time)),
+                           ('wh', float(self.watthours))] + self.getCircuitAndType())
 
 
 class Job(Base):
@@ -785,9 +813,9 @@ class Job(Base):
 
     def getMessage(self, session):
         if len(self.job_message) is not 0:
-            incoming_uuid = job.job_message[0]
+            incoming_uuid = self.job_message[0]
         elif len(self.kannel_job_message) is not 0:
-            incoming_uuid = job.kannel_job_message[0].incoming
+            incoming_uuid = self.kannel_job_message[0].incoming
         return session.query(IncomingMessage).\
                             filter_by(uuid=incoming_uuid).first()
 
@@ -875,7 +903,8 @@ class Cping(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=cping&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "job=cping&jobid=%s&cid=%s;" % (self.id,
+                                               self.circuit.ip_address)
 
 
 class JobMessage(Message):
@@ -943,10 +972,9 @@ def populate():
     key = session.query(MeterConfigKey).filter_by(key='mode').first()
     if key is None:
         session.add(MeterConfigKey(key='mode'))
-    
+
     DBSession.flush()
     transaction.commit()
-    
 
 
 def initialize_sql(db_string, db_echo=False):
