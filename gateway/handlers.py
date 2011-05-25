@@ -27,9 +27,11 @@ from formalchemy import Grid
 
 
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 from matplotlib.dates import date2num
 from matplotlib.dates import DateFormatter
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+
 
 from shapely.wkt import loads
 
@@ -617,6 +619,86 @@ class MeterHandler(object):
         self.meter = self.session.query(Meter).\
                      get(self.request.matchdict['id'])
         self.breadcrumbs = breadcrumbs[:]
+
+    def getDataListForCircuit(self,
+                              circuit_id,
+                              dateStart=datetime(2011, 5, 12),
+                              dateEnd=datetime(2011, 5, 13),
+                              quantity='watthours',
+                              verbose=0):
+        session = DBSession()
+        # get query based on circuit and date
+        logs = session.query(PrimaryLog)\
+                      .filter(PrimaryLog.circuit_id == circuit_id)\
+                      .filter(PrimaryLog.date > dateStart)\
+                      .filter(PrimaryLog.date <= dateEnd)\
+                      .order_by(PrimaryLog.date)
+
+        # turn query into a sorted list of unique dates and watthour readings
+        data = [(l.date, getattr(l, quantity)) for l in logs]
+        # remove duplicate entries and sort by date
+        data = list(set(data))
+        data.sort()
+        dates = [d[0] for d in data]
+        watthours = [d[1] for d in data]
+        return dates, watthours
+
+    @action()
+    def plotForAllCircuitsOnMeter(self,
+                                  dateStart=datetime(2011, 5, 13),
+                                  dateEnd=datetime(2011, 5, 18),
+                                  showMains=False):
+        quantity = self.request.params.get('quantity', 'credit')
+
+        start = self.request.params.get('start', '2011-5-13')
+        end = self.request.params.get('end', '2011-5-18')
+        dateStart = parser.parse(start)
+        dateEnd = parser.parse(end)
+        session = DBSession()
+        circuits = [c.id for c in session\
+                    .query(Circuit)\
+                    .filter_by(meter=self.meter)\
+                    .order_by(Circuit.id)]
+        # drop mains circuit
+        if showMains == False:
+            for c in circuits:
+                if session.query(Circuit)\
+            .filter(Circuit.id == c)[0].ip_address == '192.168.1.200':
+                    circuits.remove(c)
+        # create figure and axes with subplots
+        fig = plt.figure()
+        if len(circuits) > 12:
+            numPlotsX = 4
+            numPlotsY = 5
+        else:
+            numPlotsX = 4
+            numPlotsY = 3
+
+        # loop through circuits, get data, plot
+        for i, c in enumerate(circuits):
+            dates, data = self.getDataListForCircuit(c,
+                                                     dateStart,
+                                                     dateEnd,
+                                                     quantity)
+
+            dates = date2num(dates)
+            thisAxes = fig.add_subplot(numPlotsX, numPlotsY, i + 1)
+            thisAxes.plot_date(dates, data, ls='-', ms=3, marker='o', mfc=None)
+            thisAxes.text(0.7, 0.7, str(c), transform=thisAxes.transAxes)
+
+        fileNameString = 'meter ' + quantity + ' ' + str(self.meter.id)
+        fig.suptitle(fileNameString)
+        fig.autofmt_xdate()
+        canvas = FigureCanvasAgg(fig)
+        output = cStringIO.StringIO()
+        canvas.print_figure(output)
+        return Response(
+            body=output.getvalue(),
+            content_type='image/png')
+
+    @action()
+    def overview_graph(self):
+        return Response('blah')
 
     @action(renderer="meter/index.mako", permission="view")
     def index(self):
