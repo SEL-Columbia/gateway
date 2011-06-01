@@ -298,6 +298,11 @@ class Meter(Base):
         return session.query(Circuit).filter_by(meter=self)\
             .filter_by(ip_address='192.168.1.200').first()
 
+    def getMainCircuitId(self):
+        main = self.getMainCircuit()
+        if main:
+            return main.id
+
     def getJobs(self):
         session = DBSession()
         l = []

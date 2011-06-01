@@ -41,9 +41,9 @@ ${headers.loadSlickGrid(request)}
 
   <div id="tools" class=""> 
     <ul class="tool-box" id="edit-box">
-      <li class="tool-controls" >
-        <a href="#">Manage meter information</a>
-        <ul class="tool-menu" style="display:none">
+      <li class="tool-controls">
+        <a id="control-manage"href="#">Manage meter information</a>
+        <ul id="menu-manage" style="display:none">
           <li>
             <a id="edit" href="${meter.edit_url()}">Edit meter description</a>
           </li>
@@ -55,27 +55,6 @@ ${headers.loadSlickGrid(request)}
           </li>
           <li>
             <a id="addCircuitButton" href="#">Add Circuit</a>
-          </li>
-      </ul>
-      </li>
-      <li class="tool-controls">
-        <a  href="#">Download information</a>
-        <ul style="display:none">
-          <li>
-            <a id="accounts" 
-               href="${a_url}/meter/show_account_numbers/${meter.id}">
-              Download accounts</a>
-          </li>
-          <li><a id="showAlerts"href="#">Show alerts</a></li>
-          <li><a id="messages" 
-                 href="${a_url}/meter/message_graph/${meter.id}">Message table</a></li>
-        </ul>
-      </li>
-      <li class="tool-controls">
-        <a  href="#">Create job</a>
-        <ul style="display:none">
-          <li>
-            <a id="ping" href="${a_url}/meter/ping/${meter.id}">Ping</a>
           </li>
         </ul>
       </li>
@@ -97,13 +76,13 @@ ${headers.loadSlickGrid(request)}
 	<div id="tabs-2">
           <div id="graph">
             <img 
-               src="${a_url}/graph/Circuit/${meter.getMainCircuit().id}?column=watthours&figsize=8,3" class="" alt="" />
+               src="${a_url}/graph/Circuit/${meter.getMainCircuitId()}?column=watthours&figsize=8,3" class="" alt="" />
           </div>
 	</div>
 </div>
 
 
-<ul id="meter-overview">
+<ul class="overview">
   <li>
     <h4>Meter Name</h4>
     <p>${meter.name}</p>
