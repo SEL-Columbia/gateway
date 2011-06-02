@@ -7,6 +7,7 @@ from urlparse import parse_qs
 import uuid
 import cStringIO
 import simplejson
+
 from datetime import timedelta
 from datetime import datetime
 import collections
@@ -696,6 +697,10 @@ class MeterHandler(object):
             body=output.getvalue(),
             content_type='image/png')
 
+    @action(renderer='meter/graph.mako')
+    def graph(self):
+        return {}
+
     @action()
     def overview_graph(self):
         return Response('blah')
@@ -773,6 +778,16 @@ class MeterHandler(object):
                   'credit': x.credit
                   }
                  for x in self.meter.get_circuits()]))
+
+    @action()
+    def show_meter_logs(self):
+        import time
+        logs = self.meter.getLogs()
+        dates = map(lambda x: time.mktime(x.date.timetuple()), logs)
+        watthours = map(lambda x: x.watthours, logs)
+        return Response(simplejson\
+                        .dumps({'dates': dates,
+                                 'watthours': watthours}))
 
     @action()
     def geometry(self):
@@ -900,6 +915,27 @@ class CircuitHandler(object):
     def remove(self):
         self.session.delete(self.circuit)
         return HTTPFound(location=self.meter.getUrl())
+
+    @action()
+    def show_circuit_logs(self):
+        import time
+        session = DBSession()
+        start = parser.parse(self.request.params.get('start', '20110111'))
+        end = parser.parse(self.request.params.get('end', '20110211'))
+        logs = session.query(PrimaryLog)\
+                      .filter(PrimaryLog.circuit == self.circuit)\
+                      .filter(PrimaryLog.date > start)\
+                      .filter(PrimaryLog.date <= end)\
+                      .order_by(PrimaryLog.created)
+        dates = map(lambda x: time.mktime(x.date.timetuple()), logs)
+        watthours = map(lambda x: x.watthours, logs)
+        return Response(simplejson\
+                        .dumps({'dates': dates,
+                                 'watthours': watthours}))
+
+    @action(renderer='circuit/graph.mako')
+    def graph(self):
+        return {'circuit': self.circuit}
 
 
 class AccountHandler(object):
