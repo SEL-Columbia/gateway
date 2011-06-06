@@ -116,17 +116,12 @@ function loadPage(options) {
   $( ".tabs-bottom .ui-tabs-nav, .tabs-bottom .ui-tabs-nav > *" )
     .removeClass( "ui-corner-all ui-corner-top" )
     .addClass( "ui-corner-bottom" );
-
-  $(".tool-controls").button({ 
-    icons: { 
-      secondary: "ui-icon-triangle-1-s"}
+  
+  var button = $("#tool-control").button({ 
+    icons: { primary: 'ui-icon-triangle-1-s'}
   });
-   
-  $(".tool-controls").click(function(evt) { 
-    $(this).find("ul").width($(this).width()-14).css({'margin-left':'-5px'});
-    $(this).find("ul").toggle().css("margin-top",10).height(100);
-    $(this).find("ul").menu();
-    $(this).find("ul").css("position","absolute");
+  button.click(function() { 
+    $("#tool-menu").toggle();
   })
 
   var grid = loadGrid(options); 

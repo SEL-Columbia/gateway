@@ -204,16 +204,21 @@ code { background: white;
 .center-table table { 
     margin: 10px auto; } 
 
-#tools { 
-   float: right;
+#tool-menu { 
+    z-index: 1000;
+    width: 400px;
+    background: #F6F6F6;
+    position: absolute;
+    right: 20;
+    top: 165;
+    margin: 10px;
 } 
+#tool-menu ul { list-style: none} 
 
-#tools ul { 
-   margin: 0px 0px 0px 20px;
-   list-style: none;
-   height: 10px;
+#tool-menu a { 
+    color: #004276;
+    font-weight: bold;
 } 
-
 #meter-overview h4 { 
    margin: 0px;
 } 
@@ -223,9 +228,6 @@ code { background: white;
    list-style: none;
 }
  
-.tool-controls ul { 
-   z-index: 1000;
-} 
 #tabs-1 { 
   
    height: 300px;

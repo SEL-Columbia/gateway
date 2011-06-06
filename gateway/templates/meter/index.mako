@@ -39,24 +39,33 @@ ${headers.loadSlickGrid(request)}
 
 <%def name="content()">
 
-  <div id="tools" class=""> 
-    <ul class="tool-box" id="edit-box">
-      <li class="tool-controls">
-        <a id="control-manage"href="#">Manage meter information</a>
-        <ul id="menu-manage" style="display:none">
-          <li>
-            <a id="edit" href="${meter.edit_url()}">Edit meter description</a>
-          </li>
-          <li>
-            <a id="editMeterConfig" href="#">Edit meter configuration</a>
-          </li>
-          <li>
-            <a id="removeMeter" href="#">Remove Meter</a>
-          </li>
-          <li>
-            <a id="addCircuitButton" href="#">Add Circuit</a>
-          </li>
-        </ul>
+  <div style="float: right">
+      <a id="tool-control" href="#">Manage meter information</a>
+  </div>
+  <div id="tool-menu" class="ui-corner-all ui-widget" 
+       style="display:none">
+    <ul>      
+      <li>
+        <a id="edit" href="${meter.edit_url()}">Edit meter description</a>
+        <p>Page to allow users to edit and update meter
+          information</p>
+      </li>
+      <li>
+        <a id="editMeterConfig" href="#">Edit meter configuration</a>
+        <p>Widget that allows admins to update remote meter
+        information</p>
+      </li>
+      <li>
+        <a href="/meter/message_graph/${meter.id}">Meter messages</a>
+        <p>Table that displays all of the meter information</p>
+      </li>
+      <li>
+        <a id="removeMeter" href="#">Remove Meter</a>
+        <p>Remove the meter from the databae</p>
+      </li>
+      <li>
+        <a id="addCircuitButton" href="#">Add Circuit</a>
+        <p> Widget to allow admins to add circuits to this meter</p>
       </li>
     </ul>
   </div>
@@ -104,6 +113,7 @@ ${headers.loadSlickGrid(request)}
          <p> TBD </p>
   </li>
 </ul>
+
 
 <h4>Circuits associated
   with <span class="underline">${meter.name}</span></h4>
