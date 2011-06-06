@@ -14,3 +14,11 @@ x     y     result
     if(y===null) {return 1}
     return (x === y ? 0 : (x > y ? 1 : -1));
   }; 
+
+
+  var globalGridOptions = {
+    forceFitColumns: false,
+    autoHeight: true,
+    enableCellNavigation: true,
+    enableColumnReorder: true
+  };

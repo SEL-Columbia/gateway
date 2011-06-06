@@ -1,100 +1,104 @@
 <%inherit file="../base.mako"/>
 
 <%def name="header()"> 
+<%namespace name="headers" file="../headers.mako"/>
     <title>Circuit Page</title>
-    <script type="text/javascript">
-      var graph, column, app, circuit;    
-      app = "${a_url}";
-      circuit = "${circuit.id}";
-      graph = $('#graph-image');
+    ${headers.loadSlickGrid(request)}
 
+    <script type="text/javascript" 
+            src="${a_url}/static/js/d3/d3.js">
+    </script>
+
+    <script type="text/javascript"
+            src="${a_url}/static/js/site/circuitPage.js"></script>
+
+    <script type="text/javascript">
       $(function() { 
-         $('.buttons li').button()
-         $('.graph-tools a').click(function() { 
-           column = $(this).attr('id');
-           var url = app + "/graph/Circuit/" + circuit  + "?column=" + column +"&figsize=7,4";
-           $("#graph-image").attr('src', url);
-         })
+         loadPage({circuit: "${circuit.id}" });
       });      
     </script>
+    <style type="text/css" media="screen">
+      #graph { 
+        margin-top: 40px;
+        margin-bottom: 10px;
+        height: 400px;
+        width: 100%;
+        background: #eee;
+      } 
+    </style>
 </%def> 
 
 <%def name="content()"> 
 <h3>Circuit overview page</h3>
 
-<table class="no-border" border="0">
-  <tr>
-    <td>
-      <table class="overview">
-      % for key,value in fields.iteritems(): 
-      <tr>
-        <td class="hint">Circuit ${key}</td>
-        <td>${str(value.get("value"))}</td>
-      </tr>
-      % endfor 
-        <tr>
-          <td class="hint">Account phone</td>
-          <td><a href="${request.application_url}/${circuit.account.url()}">${str(circuit.account.phone)}</a></td>
-        </tr>
-        <tr>
-          <td class="hint">Account language</td>
-          <td>${circuit.account.lang}</td>
-        </tr>
-      </table>
-    </td>    
-    <td>
-      <div class="buttons">        
-      <ul> 
-        <li><a 
-               href="${request.application_url}${circuit.edit_url()}">
-            Edit circuit information</a></li> 
-        <li>
-          <a href="${request.application_url}/account/edit/${str(circuit.account.id)}">
-            Edit account information</a></li>
-        <li><a href="${circuit.remove_url()}">Remove circuit</a></li>
-        <li>
-          <a href="${request.application_url}/circuit/turn_on/${circuit.id}">
-            Turn On </a>
-        </li>
-        <li>
-          <a href="${request.application_url}/circuit/turn_off/${circuit.id}">
-            Turn Off </a>
-        </li>
-        <li>
-          <a href="${request.application_url}/circuit/ping/${circuit.id}">
-            Ping Circuit </a>
-        </li>
-        <li>
-          <form method="POST" id=""
-                action="${request.application_url}/circuit/add_credit/${circuit.id}">
-            <label>Amount</label>
-            <input type="text" name="amount" value="" />
-            <input type="submit" name="submit" value="Add credit" />
-          </form>
-        </li>
-      </ul>
-      <img 
-         id="graph-image"
-         src="${a_url}/graph/Circuit/${circuit.id}?column=watthours&figsize=7,4" />
+<ul class="overview">
+  <li>
+    <h4>Circuit id</h4>
+    <p>${circuit.id}</p>
+  </li>        
+  <li>
+    <h4>Circuit credit</h4>
+    <p>${circuit.credit}</p>
+  </li>
+  <li>
+    <h4>Circuit account number</h4>
+    <p>${circuit.pin}</p>
+  </li>
+  <li>
+    <h4>Circuit account phone number</h4>
+    <p>${circuit.account.phone}</p>
+  </li>
+</ul>
 
-      <p>Graph by
-        <div class="graph-tools">
-          <a id="credit" href="#">Credit</a> | 
-          <a id="watthours" href="#">Watt hours</a> |
-          <a id="use_time" href="#">Use Time </a>
-        </div>
-      </div>
-    </td>
-  </tr>
+<div id="graph"></div>
 
-</table>
-<hr />
-<h4>Jobs associated with circuit</h4>
-<a 
-   href="${request.application_url}/circuit/remove_jobs/${circuit.id}">
-   Clear job queue</a>
-${jobs.render()}
-<hr /> 
-<h4>All of the logs associated with circuit</h4>
-${logs.render()}
+<div id="tool-menu" class="ui-corner-all ui-widget">
+  <ul> 
+    <li>
+      <a href="${a_url}${circuit.edit_url()}">Edit circuit
+      information</a>
+      <p>Edit and update information about this circuit</p>
+    </li> 
+    <li>
+      <a href="${a_url}/account/edit/${str(circuit.account.id)}">Edit
+        account information</a>
+      <p>Edit information associated with this circuits's account</p>
+    </li>
+    <li>
+      <a id="removeCircuit" href="#">Remove circuit</a>
+      <p>Removes the circuit from the database, cannot be undone</p>
+    </li>
+  </ul>
+  <ul>
+    <li>
+      <a href="${a_url}/circuit/turn_on/${circuit.id}">Turn On</a>
+      <p>Creates a job that turns the circuit on</p>
+    </li>
+    <li>
+      <a href="${a_url}/circuit/turn_off/${circuit.id}">Turn Off</a>
+      <p>Creates a job that turns the circuit off</p>
+    </li>
+    <li>
+      <a href="${a_url}/circuit/ping/${circuit.id}"> Ping Circuit </a>
+      <p>Sends a job to check the status of the circuit</p>
+    </li>
+    <li>
+      <a href="#">Add credit to account</a>
+      <p>Sends a job to meter to add credit to a circuit</p>
+    </li>
+  </ul>
+</div>
+
+<div id="logs">
+  <ul>
+    <li><a href="#primary-logs">Circuit Logs</a></li>
+    <li><a href="#alarms">Alarms</a></li>
+  </ul>
+
+  <div id="primary-logs">    
+  </div>
+  <div id="alarms">
+  </div>
+  
+</div>
 </%def> 

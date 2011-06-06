@@ -44,6 +44,7 @@ ${headers.loadSlickGrid(request)}
   </div>
   <div id="tool-menu" class="ui-corner-all ui-widget" 
        style="display:none">
+
     <ul>      
       <li>
         <a id="edit" href="${meter.edit_url()}">Edit meter description</a>

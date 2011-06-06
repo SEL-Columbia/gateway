@@ -8,7 +8,6 @@
 @import "lib/reset.css";
 @import "lib/typography.css";
 @import "lib/forms.css";
-@import "lib/plugins.css";
 
 
 /* Site
@@ -31,7 +30,7 @@ a { color: #004276; }
 #clock { 
    top: 10;
    right: 10;
-   z-index: 1000;
+   z-index: 1001;
    background: #fff;
    position:fixed;
 } 

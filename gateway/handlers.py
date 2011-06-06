@@ -848,16 +848,9 @@ class CircuitHandler(object):
         breadcrumbs.extend([
                     {"text": "Meter Overview", "url": self.meter.getUrl()},
                     {"text": "Circuit Overview"}])
-        jobs = Grid(Job, self.circuit.get_jobs())
-        jobs.configure(readonly=True, exclude=[jobs._get_fields()[0]])
-        logs = Grid(PrimaryLog, self.circuit.get_logs())
-        logs.configure(readonly=True, exclude=[logs._get_fields()[1]])
         return {
             "logged_in": authenticated_userid(self.request),
             "breadcrumbs": breadcrumbs,
-            "jobs": jobs,
-            "logs": logs,
-            "fields": get_fields(self.circuit),
             "circuit": self.circuit}
 
     @action(permission="admin")
@@ -885,6 +878,33 @@ class CircuitHandler(object):
     @action()
     def jobs(self):
         return Response([x.toJSON() for x in self.circuit.get_jobs()])
+    
+    @action() 
+    def show_primary_logs(self):        
+        session = DBSession()
+        logs = session.query(PrimaryLog)\
+            .filter_by(circuit=self.circuit)\
+            .order_by(PrimaryLog.created)\
+            .limit(200)
+        return Response(simplejson.dumps([{'id': l.id, 'str': str(l) } for l in logs]))
+
+    @action()
+    def show_graphing_logs(self):
+        import time
+        session = DBSession()
+        start = datetime.strptime(self.request.params.get('start', '20110111'), '%Y%m%d')
+        end = datetime.strptime(self.request.params.get('end', '20110511'),'%Y%m%d')
+        logs = session.query(PrimaryLog)\
+                      .filter(PrimaryLog.circuit == self.circuit)\
+                      .filter(PrimaryLog.date > start)\
+                      .filter(PrimaryLog.date <= end)\
+                      .order_by(PrimaryLog.created)
+        dates = map(lambda x: time.mktime(x.date.timetuple()), logs)
+        watthours = map(lambda x: x.watthours, logs)
+        return Response(simplejson\
+                        .dumps({'dates': dates,
+                                 'watthours': watthours}))
+
 
     @action(permission="admin")
     def add_credit(self):

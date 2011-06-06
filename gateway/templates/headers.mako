@@ -32,7 +32,7 @@
         src="${a_url}/static/js/site/globals.js">
 </script>
 <script type="text/javascript" 
-        src="${request.application_url}/static/js/jquery-1.4.3.min.js"></script>
+        src="${request.application_url}/static/js/jquery-1.6.1.min.js"></script>
 <script type="text/javascript"
         src="${request.application_url}/static/js/jquery-ui-1.8.6.custom.min.js"></script>
 
