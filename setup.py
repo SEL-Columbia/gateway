@@ -21,7 +21,7 @@ requires = [
     'pyramid',
     'pyramid_beaker',
     'formalchemy',
-    'SQLAlchemy',
+    'SQLAlchemy==0.6.8',
     'transaction',
     'repoze.tm2',
     'zope.sqlalchemy',
