@@ -56,10 +56,6 @@ ${headers.loadSlickGrid(request)}
         information</p>
       </li>
       <li>
-        <a href="/meter/message_graph/${meter.id}">Meter messages</a>
-        <p>Table that displays all of the meter information</p>
-      </li>
-      <li>
         <a id="removeMeter" href="#">Remove Meter</a>
         <p>Remove the meter from the databae</p>
       </li>
@@ -68,6 +64,16 @@ ${headers.loadSlickGrid(request)}
         <p> Widget to allow admins to add circuits to this meter</p>
       </li>
     </ul>
+    <ul>
+      <li>
+        <a href="${a_url}/meter/message_graph/${meter.id}">Meter messages</a>
+        <p>Table that displays all of the meter information</p>
+      </li>
+      <li>
+        <a href="${a_url}/meter/ping/${meter.id}">Ping Meter</a>
+        <p>Sends a job to the meter to check meter's status</p>
+      </li>
+    <ul>
   </div>
 
 
