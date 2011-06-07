@@ -841,34 +841,34 @@ class CircuitHandler(object):
                        query(Circuit).get(self.request.matchdict["id"])
         self.meter = self.circuit.meter
         self.breadcrumbs = breadcrumbs[:]
-
-    @action(renderer="circuit/index.mako", permission="view")
+        
+    @action(renderer='circuit/index.mako', permission='view')
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.extend([
-                    {"text": "Meter Overview", "url": self.meter.getUrl()},
-                    {"text": "Circuit Overview"}])
+                    {'text': 'Meter Overview', 'url': self.meter.getUrl()},
+                    {'text': 'Circuit Overview'}])
         return {
-            "logged_in": authenticated_userid(self.request),
-            "breadcrumbs": breadcrumbs,
-            "circuit": self.circuit}
+            'logged_in': authenticated_userid(self.request),
+            'breadcrumbs': breadcrumbs,
+            'circuit': self.circuit}
 
-    @action(permission="admin")
+    @action(permission='admin')
     def turn_off(self):
         self.circuit.turnOff()
         return HTTPFound(location=self.circuit.getUrl())
 
-    @action(permission="admin")
+    @action(permission='admin')
     def turn_on(self):
         self.circuit.turnOn()
         return HTTPFound(location=self.circuit.getUrl())
 
-    @action(permission="admin")
+    @action(permission='admin')
     def ping(self):
         self.circuit.ping()
         return HTTPFound(location=self.circuit.getUrl())
 
-    @action(permission="admin")
+    @action(permission='admin')
     def remove_jobs(self):
         [self.session.delete(job) for job in self.circuit.get_jobs()]
         return HTTPFound(
@@ -884,7 +884,7 @@ class CircuitHandler(object):
         session = DBSession()
         logs = session.query(PrimaryLog)\
             .filter_by(circuit=self.circuit)\
-            .order_by(PrimaryLog.created)\
+            .order_by(desc(PrimaryLog.created))\
             .limit(200)
         return Response(simplejson.dumps([{'id': l.id, 'str': str(l) } for l in logs]))
 
@@ -905,8 +905,18 @@ class CircuitHandler(object):
                         .dumps({'dates': dates,
                                  'watthours': watthours}))
 
+    @action(permission='view')
+    def get_payment_logs(self):
+        session = DBSession()
+        payments = session.query(AddCredit).filter_by(circuit=self.circuit)
+        return Response(simplejson\
+                            .dumps({'total': reduce(lambda total, p: total + p.credit, payments, 0),
+                                    'payments' : [{'id': p.id,
+                                                   'credit': p.credit,
+                                                   'date' : p.start,
+                                                   'state': p.state} for p in payments]}))
 
-    @action(permission="admin")
+    @action(permission='admin')
     def add_credit(self):
         interface = self.circuit.meter.communication_interface
         job = AddCredit(circuit=self.circuit,
