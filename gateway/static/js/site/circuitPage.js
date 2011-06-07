@@ -6,6 +6,7 @@ function primaryLogGrid(options) {
 
   var columns = [ 
     {id: "id", name:"Database Id", width: 200, field: "id", sortable: true },
+    
     {id: "str", name:"Log String", width: 600, field: "str", sortable: true }
   ]
 
@@ -45,11 +46,11 @@ function loadGraph(options) {
   })
 
 
-  var w = $("#graph").width();
-  var h = $("#graph").height();
-  var margin = 50;
-
   function buildGraph(d){
+
+    var w = $("#graph").width();
+    var h = $("#graph").height();
+    var margin = 50;
     
     $('#graph').empty();
     var dataX = d.dates;
@@ -63,6 +64,8 @@ function loadGraph(options) {
       .attr("height", h);
     
     var g = vis.append("svg:g");
+
+    console.log(typeof h);
     
     var dot = g.selectAll("circle")
       .data(dataX)
@@ -71,7 +74,7 @@ function loadGraph(options) {
         return x(dataX[i])
       })
       .attr("cy", function(d, i) { 
-        return y(dataY[i])
+        return h - y(dataY[i])
       })    
       .attr("r", 2)
       .attr("fill", "808080");
@@ -103,8 +106,8 @@ function loadBillingHistory(options) {
 function loadPage(options) { 
 
   $("#logs").tabs();
-  
-
+  $("#date-start").datepicker();
+ 
   loadBillingHistory(options)
   primaryLogGrid(options);
   loadGraph(options)
