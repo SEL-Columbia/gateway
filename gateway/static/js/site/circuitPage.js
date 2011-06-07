@@ -24,6 +24,22 @@ function primaryLogGrid(options) {
 }
 
 function loadGraph(options) { 
+  
+  $("#update-graph").click(function() { 
+    $.ajax({ 
+      url: '/circuit/show_graphing_logs/'  + options.circuit,
+      data: $('form#date-ranges').serialize(),
+      beforeSend: function() { 
+        $('#graph').empty();
+        $('#graph').append(
+          $("<div />",{id: "ajax-loader"}).append($('<img>', {src: '/static/images/ajax-loader.gif'})));
+      },
+      method: 'GET',
+      success: function(d) { 
+        buildGraph(d);
+      }
+    })
+  }); 
 
   $.ajax({ 
     url: '/circuit/show_graphing_logs/' + options.circuit,
@@ -32,7 +48,6 @@ function loadGraph(options) {
     beforeSend: function() {       
     }, 
     complete: function() { 
-      $("#graph").css("background","#eee");
     },
     success: function(d) { 
       buildGraph(d);
@@ -40,21 +55,18 @@ function loadGraph(options) {
   })
   
   
-  $('#update-graph').click(function() {     
-    $.getJSON('/circuit/show_graphing_logs/' + options.circuit, 
-              $('form#date-ranges').serialize()).done(buildGraph);
-  })
-
 
   function buildGraph(d){
 
     var w = $("#graph").width();
     var h = $("#graph").height();
     var margin = 50;
-    
+
+
+
     $('#graph').empty();
     var dataX = d.dates;
-    var dataY = d.watthours; 
+    var dataY = d.values; 
     var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([margin, h - margin]);
     var x = d3.scale.linear().domain([d3.min(dataX), d3.max(dataX)]).range([margin, w - margin]);
 
@@ -64,8 +76,6 @@ function loadGraph(options) {
       .attr("height", h);
     
     var g = vis.append("svg:g");
-
-    console.log(typeof h);
     
     var dot = g.selectAll("circle")
       .data(dataX)
@@ -76,8 +86,41 @@ function loadGraph(options) {
       .attr("cy", function(d, i) { 
         return h - y(dataY[i])
       })    
-      .attr("r", 2)
+      .attr("r", 3)
       .attr("fill", "808080");
+
+
+    g.selectAll(".xTicks")
+      .data(x.ticks(10))
+      .enter().append("svg:line")
+      .attr("x1", x)
+      .attr("x2", x)
+      .attr("y1", h)
+      .attr("y2", h - 10)
+      .attr("class","xTicks")
+      .attr("stroke", "#808080")
+
+    g.selectAll(".yTicks")
+      .data(y.ticks(10))
+      .enter().append("svg:line")
+      .attr("x1", 25)
+      .attr("x2", 40)
+      .attr("y1", function(d) { return h - y(d)})
+      .attr("y2", function(d) { return h - y(d)})
+      .attr("class","yTicks")
+      .attr("stroke", "#808080")
+
+    
+    g.selectAll(".yLabel")
+      .data(y.ticks(10))
+      .enter().append("svg:text")
+      .attr("class", "yLabel")
+      .text(String)
+      .attr("x", 0)
+      .attr("y", function(d) { return h - y(d)})
+      .attr("text-anchor", "right")
+      .attr("dy", 4)
+
   }
 }
 
@@ -106,8 +149,11 @@ function loadBillingHistory(options) {
 function loadPage(options) { 
 
   $("#logs").tabs();
-  $("#date-start").datepicker();
- 
+
+  $("#date-ranges input").datepicker();
+
+  
+  
   loadBillingHistory(options)
   primaryLogGrid(options);
   loadGraph(options)
