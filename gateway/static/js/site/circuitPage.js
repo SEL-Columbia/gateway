@@ -27,6 +27,12 @@ function loadGraph(options) {
   $.ajax({ 
     url: '/circuit/show_graphing_logs/' + options.circuit,
     method: 'GET',
+    dataType: 'json',
+    beforeSend: function() {       
+    }, 
+    complete: function() { 
+      $("#graph").css("background","#eee");
+    },
     success: function(d) { 
       buildGraph(d);
     }
@@ -44,7 +50,7 @@ function loadGraph(options) {
   var margin = 50;
 
   function buildGraph(d){
-
+    
     $('#graph').empty();
     var dataX = d.dates;
     var dataY = d.watthours; 
@@ -55,7 +61,7 @@ function loadGraph(options) {
       .append("svg:svg")
       .attr("width", w)
       .attr("height", h);
- 
+    
     var g = vis.append("svg:g");
     
     var dot = g.selectAll("circle")
@@ -66,10 +72,31 @@ function loadGraph(options) {
       })
       .attr("cy", function(d, i) { 
         return y(dataY[i])
-      })
+      })    
       .attr("r", 2)
       .attr("fill", "808080");
   }
+}
+
+function loadBillingHistory(options) { 
+
+  var columns = [ 
+    {id: "id", name:"Database Id", width: 200, field: "id", sortable: true },
+    {id: "credit", name:"Credit amount", width: 200, field: "credit", sortable: true },
+    {id: "date", name:"Date", width: 200, field: "date", sortable: true },
+  ]
+
+  var logDataView = new Slick.Data.DataView();
+  var logGrid = new Slick.Grid("#billing-history",logDataView, columns, globalGridOptions)
+  
+  $.getJSON("/circuit/get_payment_logs/" + options.circuit, function(d) { 
+    logDataView.beginUpdate();
+    logDataView.setItems(d.payments);
+    logDataView.endUpdate();
+    logGrid.invalidate();
+  }); 
+  return logGrid;
+
 }
 
 
@@ -77,8 +104,9 @@ function loadPage(options) {
 
   $("#logs").tabs();
   
+
+  loadBillingHistory(options)
   primaryLogGrid(options);
   loadGraph(options)
-
-  var circuit = options.circuit;      
+  
 }
