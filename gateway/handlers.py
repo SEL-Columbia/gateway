@@ -84,6 +84,17 @@ def not_found(request):
     return Response("Unable to find resource")
 
 
+def json_response(data):
+    """
+    Helper function to render an json object.  Takes an object that
+    can be dumped by simplejson.dumps and returns an WebOb Response
+    object.
+    """
+    return Response(
+        content_type='application/json',
+        body=simplejson.dumps(data))
+
+
 class Index(object):
     """
     Index class to the / url. Very simple.
@@ -841,7 +852,7 @@ class CircuitHandler(object):
                        query(Circuit).get(self.request.matchdict["id"])
         self.meter = self.circuit.meter
         self.breadcrumbs = breadcrumbs[:]
-        
+
     @action(renderer='circuit/index.mako', permission='view')
     def index(self):
         breadcrumbs = self.breadcrumbs[:]
@@ -878,43 +889,52 @@ class CircuitHandler(object):
     @action()
     def jobs(self):
         return Response([x.toJSON() for x in self.circuit.get_jobs()])
-    
-    @action() 
-    def show_primary_logs(self):        
+
+    @action()
+    def show_primary_logs(self):
         session = DBSession()
         logs = session.query(PrimaryLog)\
             .filter_by(circuit=self.circuit)\
             .order_by(desc(PrimaryLog.created))\
             .limit(200)
-        return Response(simplejson.dumps([{'id': l.id, 'str': str(l) } for l in logs]))
+        return json_response([{'id': l.id,
+                               'str': str(l)} for l in logs])
 
     @action()
     def show_graphing_logs(self):
         import time
         session = DBSession()
-        start = datetime.strptime(self.request.params.get('start', '20110111'), '%Y%m%d')
-        end = datetime.strptime(self.request.params.get('end', '20110511'),'%Y%m%d')
+        value = self.request.params.get('value', 'watthours')
+        start = datetime\
+            .strptime(self.request\
+                          .params.get('start', '04/01/2011'), '%m/%d/%Y')
+        end = datetime\
+            .strptime(self.request\
+                          .params.get('end', '04/15/2011'), '%m/%d/%Y')
+
         logs = session.query(PrimaryLog)\
                       .filter(PrimaryLog.circuit == self.circuit)\
                       .filter(PrimaryLog.date > start)\
                       .filter(PrimaryLog.date <= end)\
                       .order_by(PrimaryLog.created)
-        dates = map(lambda x: time.mktime(x.date.timetuple()), logs)
-        watthours = map(lambda x: x.watthours, logs)
-        return Response(simplejson\
-                        .dumps({'dates': dates,
-                                 'watthours': watthours}))
+        return json_response(
+            {'dates': map(lambda x: time.mktime(x.date.timetuple()), logs),
+             'values': map(lambda x: getattr(x, value), logs)
+             })
 
     @action(permission='view')
     def get_payment_logs(self):
+        """
+        A view to render a circuit's payment history as a json object.
+        """
         session = DBSession()
         payments = session.query(AddCredit).filter_by(circuit=self.circuit)
-        return Response(simplejson\
-                            .dumps({'total': reduce(lambda total, p: total + p.credit, payments, 0),
-                                    'payments' : [{'id': p.id,
-                                                   'credit': p.credit,
-                                                   'date' : p.start,
-                                                   'state': p.state} for p in payments]}))
+        return json_response(
+            {'total': reduce(lambda total, p: total + p.credit, payments, 0),
+             'payments': [{'id': p.id,
+                           'credit': p.credit,
+                           'date': p.start,
+                           'state': p.state} for p in payments]})
 
     @action(permission='admin')
     def add_credit(self):
