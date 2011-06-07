@@ -23,7 +23,6 @@
         margin-bottom: 10px;
         height: 400px;
         width: 100%;
-        background: #eee;
       } 
     </style>
 </%def> 
@@ -50,7 +49,11 @@
   </li>
 </ul>
 
-<div id="graph"></div>
+<div id="graph">
+  <div id="ajax-loader">
+    <img src="${a_url}/static/images/ajax-loader.gif" class="" alt="" />
+  </div>
+</div>
 
 <div id="tool-menu" class="ui-corner-all ui-widget">
   <ul> 
@@ -92,12 +95,12 @@
 <div id="logs">
   <ul>
     <li><a href="#primary-logs">Circuit Logs</a></li>
-    <li><a href="#alarms">Alarms</a></li>
+    <li><a href="#billing-history">Billing history</a></li>
   </ul>
 
   <div id="primary-logs">    
   </div>
-  <div id="alarms">
+  <div id="billing-history">
   </div>
   
 </div>
