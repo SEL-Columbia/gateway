@@ -1,8 +1,10 @@
 <%inherit file="../base.mako"/>
+<%namespace name="headers" file="../headers.mako"/>
 
 <%def name="header()"> 
-<%namespace name="headers" file="../headers.mako"/>
+
     <title>Circuit Page</title>
+
     ${headers.loadSlickGrid(request)}
 
     <script type="text/javascript" 
@@ -48,6 +50,19 @@
     <p>${circuit.account.phone}</p>
   </li>
 </ul>
+
+<form method="GET" id="date-ranges" action="">
+  <select name="value">
+    <option value="watthours">Watt hours</option>
+    <option value="credit">Credit</option>
+    <option value="use_time">Use time</option>
+  </select>
+
+  <input id="start" type="text" name="start" value="" />
+  <input id="end" type="text" name="end" value="" />      
+</form>
+<a id="update-graph" href="#">Update Graph</a>
+
 
 <div id="graph">
   <div id="ajax-loader">
@@ -104,4 +119,5 @@
   </div>
   
 </div>
+
 </%def> 
