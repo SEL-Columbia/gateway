@@ -67,7 +67,7 @@ function loadGraph(options) {
     $('#graph').empty();
     var dataX = d.dates;
     var dataY = d.values; 
-    var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([margin, h - margin]);
+    var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([h - margin ,margin]);
     var x = d3.scale.linear().domain([d3.min(dataX), d3.max(dataX)]).range([margin, w - margin]);
 
     var vis = d3.select("#graph")
@@ -83,9 +83,7 @@ function loadGraph(options) {
       .attr("cx", function(d,i) {  
         return x(dataX[i])
       })
-      .attr("cy", function(d, i) { 
-        return h - y(dataY[i])
-      })    
+      .attr("cy", function(d, i) { return y(dataY[i])})
       .attr("r", 3)
       .attr("fill", "808080");
 
@@ -105,8 +103,8 @@ function loadGraph(options) {
       .enter().append("svg:line")
       .attr("x1", 25)
       .attr("x2", 40)
-      .attr("y1", function(d) { return h - y(d)})
-      .attr("y2", function(d) { return h - y(d)})
+      .attr("y1", function(d) { return y(d)})
+      .attr("y2", function(d) { return y(d)})
       .attr("class","yTicks")
       .attr("stroke", "#808080")
 
@@ -117,7 +115,7 @@ function loadGraph(options) {
       .attr("class", "yLabel")
       .text(String)
       .attr("x", 0)
-      .attr("y", function(d) { return h - y(d)})
+      .attr("y", function(d) { return y(d)})
       .attr("text-anchor", "right")
       .attr("dy", 4)
 
