@@ -27,7 +27,7 @@ function loadGrid(options) {
 
   var dataView = new Slick.Data.DataView();
   
-  grid = new Slick.Grid("#grid", dataView, columns, gridOptions);
+  grid = new Slick.Grid("#circuit-grid", dataView, columns, gridOptions);
 
   $.getJSON("/meter/circuits/" + options.meter, function(data){ 
     dataView.beginUpdate();

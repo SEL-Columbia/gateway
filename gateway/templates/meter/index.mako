@@ -3,7 +3,6 @@
 
 <%def name="header()">
 ${headers.loadSlickGrid(request)} 
-
 <link rel="stylesheet" 
       href="${a_url}/static/js/openlayers/theme/default/style.css" type="text/css" />
 
@@ -121,12 +120,11 @@ ${headers.loadSlickGrid(request)}
   </li>
 </ul>
 
-
-<h4>Circuits associated
-  with <span class="underline">${meter.name}</span></h4>
-
-<div id="grid"></div>
-
+<div class="grid">
+  <h4>Circuits associated
+    with <span class="underline">${meter.name}</span></h4>
+  <div id="circuit-grid"></div>
+</div>
 <!-- 
      Update meter configuration
 -->
