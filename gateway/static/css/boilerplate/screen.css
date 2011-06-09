@@ -87,7 +87,10 @@ ol.breadcrumbs li.active {
 } 
 .overview { 
     font-size: 120%; 
-    min-width: 500px;
+    min-width: 500px;    
+} 
+.overview h4 { 
+    margin: 0px;
 } 
 .overview td { 
     border-bottom:1px solid #DDDDDD;
@@ -153,6 +156,9 @@ ul.message li {
 } 
 
 .grid { 
+    margin-top: 100px;
+}
+#circuit-grid { 
     border: 1px solid #808080; 
 } 
 span.underline { 
