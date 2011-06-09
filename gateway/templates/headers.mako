@@ -1,4 +1,5 @@
 
+
 <%def name="loadSlickGrid(request)"> 
 <link rel="stylesheet" 
       href="${a_url}/static/js/SlickGrid/slick.grid.css" 
@@ -47,7 +48,7 @@
       media="screen" />
 
 <link rel="stylesheet" 
-      href="${a_url}/static/css/smoothness/jquery-ui-1.8.13.custom.css" 
+      href="${a_url}/static/css/blitzer/jquery-ui-1.8.13.custom.css" 
       type="text/css" 
       media="screen" />
 
