@@ -913,10 +913,10 @@ class CircuitHandler(object):
         value = self.request.params.get('value', 'watthours')
         start = datetime\
             .strptime(self.request\
-                          .params.get('start', '04/01/2011'), '%m/%d/%Y')
+                          .params.get('start', '05/01/2011'), '%m/%d/%Y')
         end = datetime\
             .strptime(self.request\
-                          .params.get('end', '04/15/2011'), '%m/%d/%Y')
+                          .params.get('end', '06/01/2011'), '%m/%d/%Y')
 
         logs = session.query(PrimaryLog)\
                       .filter(PrimaryLog.circuit == self.circuit)\
