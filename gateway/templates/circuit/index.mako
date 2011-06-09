@@ -17,15 +17,17 @@
     <script type="text/javascript">
       $(function() { 
          loadPage({circuit: "${circuit.id}" });
+         $("#update-graph").button();
       });      
     </script>
     <style type="text/css" media="screen">
       #graph { 
-        margin-top: 40px;
+        margin-top: 80px;
         margin-bottom: 10px;
         height: 400px;
         width: 100%;
       } 
+      
     </style>
 </%def> 
 
@@ -51,6 +53,7 @@
   </li>
 </ul>
 
+<p>Select value to graph</p>
 <form method="GET" id="date-ranges" action="">
   <select name="value">
     <option value="watthours">Watt hours</option>
@@ -58,8 +61,15 @@
     <option value="use_time">Use time</option>
   </select>
 
-  <input id="start" type="text" name="start" value="" />
-  <input id="end" type="text" name="end" value="" />      
+<%! 
+  from datetime import datetime, timedelta
+  now = datetime.now() + timedelta(days=1)
+  last_week = now - timedelta(days=7)
+%>
+  <p>Select date range</p>
+  <input id="start" type="text" name="start"
+         value="${last_week.strftime("%m/%d/%Y")}" />
+  <input id="end" type="text" name="end" value="${now.strftime("%m/%d/%Y")}" />
 </form>
 <a id="update-graph" href="#">Update Graph</a>
 
