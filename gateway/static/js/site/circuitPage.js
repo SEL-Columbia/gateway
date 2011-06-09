@@ -46,12 +46,9 @@ function loadGraph(options) {
 
   $.ajax({ 
     url: '/circuit/show_graphing_logs/' + options.circuit,
+    data: $('form#date-ranges').serialize(),
     method: 'GET',
     dataType: 'json',
-    beforeSend: function() {       
-    }, 
-    complete: function() { 
-    },
     success: function(d) { 
       buildGraph(d);
     }
@@ -60,56 +57,82 @@ function loadGraph(options) {
   
 
   function buildGraph(d){
-
-    var w = $("#graph").width();
-    var h = $("#graph").height();
-    var margin = 50;
-
-
-
     $('#graph').empty();
-    var dataX = d.dates;
-    var dataY = d.values; 
-    var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([h - margin ,margin]);
-    var x = d3.scale.linear().domain([d3.min(dataX), d3.max(dataX)]).range([margin, w - margin]);
+    var w = $("#graph").width(),
+        h = $("#graph").height(),
+        top_margin = 20,
+        left_margin = 70,
+        right_margin = 20,
+        bottom_margin = 100,
+        dataY = d.values,
+        dataX = d.dates,
+        start = new Date($("#start").val()),
+        end = new Date($("#end").val());
+
+    var dateRange =  new Array();    
+    dateRange.push((start.valueOf()/1000));
+
+    var current = start;     
+    while (current < end ) { 
+      var date = current.getDate() + 1; 
+      var current = new Date(current.getFullYear(), current.getMonth(), date, current.getHours());
+      dateRange.push((current.valueOf() / 1000)); 
+    }; 
+        
+    var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([h - bottom_margin ,top_margin]);
+    var x = d3.scale.linear().domain([(start.valueOf() / 1000),
+                                      (end.valueOf() /1000)]).range([left_margin, w - right_margin]);
 
     var vis = d3.select("#graph")
       .append("svg:svg")
       .attr("width", w)
       .attr("height", h);
     
-    var g = vis.append("svg:g");
-    
-    var dot = g.selectAll("circle")
-      .data(dataX)
-      .enter().append("svg:circle")
-      .attr("cx", function(d,i) {  
-        return x(dataX[i])
-      })
-      .attr("cy", function(d, i) { return y(dataY[i])})
-      .attr("r", 3)
-      .attr("fill", "808080");
+    var g = vis.append("svg:g")
 
 
     g.selectAll(".xTicks")
-      .data(x.ticks(10))
+      .data(dateRange)
       .enter().append("svg:line")
       .attr("x1", x)
       .attr("x2", x)
-      .attr("y1", h)
-      .attr("y2", h - 10)
+      .attr("y1", h - bottom_margin)
+      .attr("y2", h - bottom_margin + 20)
       .attr("class","xTicks")
       .attr("stroke", "#808080")
+
+
+    g.selectAll(".xGrid")
+      .data(dateRange)
+      .enter().append("svg:line")
+      .attr("x1", x)
+      .attr("stroke","#eee")
+      .attr("x2", x)
+      .attr("y1", top_margin)
+      .attr("y2", h - bottom_margin)
+      .attr("class","xGrid")
+
 
     g.selectAll(".yTicks")
       .data(y.ticks(10))
       .enter().append("svg:line")
-      .attr("x1", 25)
-      .attr("x2", 40)
+      .attr("x1", left_margin)
+      .attr("x2", left_margin -20)
       .attr("y1", function(d) { return y(d)})
       .attr("y2", function(d) { return y(d)})
       .attr("class","yTicks")
       .attr("stroke", "#808080")
+
+    g.selectAll(".yGrid")
+      .data(y.ticks(10))
+      .enter().append("svg:line")
+      .attr("stroke","#eee")
+      .attr("x1", left_margin)
+      .attr("x2", w - right_margin)
+      .attr("y1", function(d) { return y(d)})
+      .attr("y2", function(d) { return y(d)})
+      .attr("class","yGrid")
+ 
 
     
     g.selectAll(".yLabel")
@@ -117,22 +140,44 @@ function loadGraph(options) {
       .enter().append("svg:text")
       .attr("class", "yLabel")
       .text(String)
-      .attr("x", 0)
+      .attr("x", left_margin-20)
       .attr("y", function(d) { return y(d)})
-      .attr("text-anchor", "right")
-      .attr("dy", 4)
+      .attr("text-anchor", "end")
+      .attr("dy", ".25em")
+      .attr("dx","-0.5em")
 
+    function prettyDateString(d){
+      var local_date = new Date(d * 1000);      
+      return local_date.getDate() + " " +
+        ("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(' ')[local_date.getMonth()]) + " " +
+        local_date.getFullYear();
+    }
     
     g.selectAll(".xLabel")
-      .data(x.ticks(4))
+      .data(dateRange)
       .enter().append("svg:text")
       .attr("class", "xLabel")
-      .text(function(d) { var date = new Date(d * 1000) ; 
-                   return date.toString() })
-      .attr("x", function(d) { return x(d) ;})
-      .attr("y", h)
-//      .attr("transform", "rotate(45)")
+      .text(prettyDateString)
+      .attr("x", function(d) { return x(d) ;})    
+      .attr("y", h - bottom_margin + 20)
+      .attr("dx","-0.5em")
+      .attr("dy","0.25em")
+      .attr("transform", function(d) { 
+        return "rotate(-60, "+ x(d) +", " + (h - bottom_margin + 20) +" )"; 
+      })
       .attr("text-anchor", "end")
+    
+
+    var dots = g.selectAll("circle")
+      .data(dataX)      
+      .enter().append("svg:circle")
+      .attr("cx", function(d,i) {  
+        return x(dataX[i])
+      })
+      .attr("cy", function(d, i) { return y(dataY[i])})
+      .attr("r", 2)
+      .attr("fill", "#000");
+
 
 
   }
