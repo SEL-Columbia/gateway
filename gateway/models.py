@@ -759,7 +759,6 @@ class PrimaryLog(Log):
     status = Column(Integer)
     created = Column(DateTime)
     credit = Column(Float, nullable=True)
-    status = Column(Integer)
 
     def __init__(self, date=None, circuit=None, watthours=None,
                  use_time=None, status=None, credit=0):
@@ -802,7 +801,7 @@ class Job(Base):
     _type = Column('type', String(50))
     __mapper_args__ = {'polymorphic_on': _type}
     uuid = Column(String)
-    start = Column(String)
+    start = Column(DateTime)
     end = Column(String)
     state = Column(Boolean)
     circuit_id = Column(Integer, ForeignKey('circuit.id'))
