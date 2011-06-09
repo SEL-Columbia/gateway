@@ -5,9 +5,12 @@
 function primaryLogGrid(options) { 
 
   var columns = [ 
-    {id: "id", name:"Database Id", width: 200, field: "id", sortable: true },
-    
-    {id: "str", name:"Log String", width: 600, field: "str", sortable: true }
+    {id: "id", name:"Log id", width: 100, field: "id", sortable: true },  
+    {id: "status", name:"Circuit Staus", field: "status", sortable: true, width: 100 },
+    {id: "use_time", name:"Use time", field: "use_time", sortable: true, width: 100 },
+    {id: "date", name:"Log Date", field: "date", sortable: true,width: 200 },
+    {id: "watthours", name:"Watthours", field: "watthours", sortable: true, width: 100 },
+    {id: "credit", name:"Credit", field: "credit", sortable: true, width: 100 }
   ]
 
   var logDataView = new Slick.Data.DataView();
@@ -118,6 +121,19 @@ function loadGraph(options) {
       .attr("y", function(d) { return y(d)})
       .attr("text-anchor", "right")
       .attr("dy", 4)
+
+    
+    g.selectAll(".xLabel")
+      .data(x.ticks(4))
+      .enter().append("svg:text")
+      .attr("class", "xLabel")
+      .text(function(d) { var date = new Date(d * 1000) ; 
+                   return date.toString() })
+      .attr("x", function(d) { return x(d) ;})
+      .attr("y", h)
+//      .attr("transform", "rotate(45)")
+      .attr("text-anchor", "end")
+
 
   }
 }

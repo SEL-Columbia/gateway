@@ -423,7 +423,7 @@ class ManageHandler(object):
         csvReader = csv.reader(self.request.params['csv'].file, delimiter=',')
         batch = TokenBatch()
         self.session.add(batch)
-        header = csvReader.next()
+        csvReader.next()
         for line in csvReader:
             self.session.add(Token(
                     token=line[1],
@@ -855,6 +855,8 @@ class CircuitHandler(object):
 
     @action(renderer='circuit/index.mako', permission='view')
     def index(self):
+        """
+        """
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.extend([
                     {'text': 'Meter Overview', 'url': self.meter.getUrl()},
@@ -898,7 +900,11 @@ class CircuitHandler(object):
             .order_by(desc(PrimaryLog.created))\
             .limit(200)
         return json_response([{'id': l.id,
-                               'str': str(l)} for l in logs])
+                               'status': l.status,
+                               'use_time': l.use_time,
+                               'date': l.created.ctime(),
+                               'watthours': l.watthours,
+                               'credit': l.credit} for l in logs])
 
     @action()
     def show_graphing_logs(self):
@@ -933,7 +939,7 @@ class CircuitHandler(object):
             {'total': reduce(lambda total, p: total + p.credit, payments, 0),
              'payments': [{'id': p.id,
                            'credit': p.credit,
-                           'date': p.start,
+                           'date': p.start.ctime(),
                            'state': p.state} for p in payments]})
 
     @action(permission='admin')
