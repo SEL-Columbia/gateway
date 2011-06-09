@@ -69,6 +69,17 @@ function loadGraph(options) {
         start = new Date($("#start").val()),
         end = new Date($("#end").val());
 
+
+
+    /* 
+     * FIX ME !!! we need to deal with time zones.
+     */ 
+      
+    start.setHours(start.getHours() - 4); 
+    end.setHours(end.getHours() - 4);
+
+
+
     var dateRange =  new Array();    
     dateRange.push((start.valueOf()/1000));
 
