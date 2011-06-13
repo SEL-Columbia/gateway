@@ -117,7 +117,7 @@ def test_meter_messages():
         response = urllib2.urlopen(
             make_request("(job=delete&status=1&tu=2256&ts=20110107192318&wh=9.7&cr=475.95&jobid=90&ct=CIRCUIT)", phone="13474594669"))
         print("----------------------------")
-        print("testing primary log")
+        print("Testing job delete message")
         print(response.read())
         print("----------------------------")
 
@@ -185,12 +185,12 @@ def test_meter_messages():
         print("----------------------------")
 
     #test_pp()
-    #test_job_delete()
+    test_job_delete()
     #test_alert_meter_down()
     #test_alert_sdc()
-    test_alert_low_credit()
-    test_alert_no_credit()
-    test_alert_emax()
+    #test_alert_low_credit()
+    #test_alert_no_credit()
+    #test_alert_emax()
     #test_circuit_compontent_failure()
 
 #test_consumer_messages()

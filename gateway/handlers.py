@@ -1028,8 +1028,7 @@ class JobHandler(object):
     @action(permission='view')
     def delete(self):
         jobids = simplejson.loads(self.request.body)
-        print(jobids)
-        return Response('Hi Rajesh')
+        return Response(jobids)
 
     @action(permission='view')
     def job(self):

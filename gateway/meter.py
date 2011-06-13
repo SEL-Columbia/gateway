@@ -38,6 +38,7 @@ def make_delete(msgDict, session):
         circuit = job.circuit
         interface = circuit.meter.communication_interface
         job.state = False
+        job.end = datetime.now()
         messageBody = None
         # update circuit
         circuit.status = int(msgDict.get("status", circuit.status))
@@ -99,11 +100,10 @@ def make_nocw(message, circuit, session):
         circuit.account.phone,
         make_message_body("nocw-alert.txt",
                      lang=circuit.account.lang,
-                     account=circuit.pin),
-        incoming=message['meta'].uuid)
+                     account=circuit.pin))
     session.flush()
     log = SystemLog(
-        "Low credit alert for circuit %s sent to %s" % (circuit.pin,
+        "No credit alert for circuit %s sent to %s" % (circuit.pin,
                                                         circuit.account.phone))
     session.add(log)
 

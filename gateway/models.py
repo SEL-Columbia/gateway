@@ -802,7 +802,7 @@ class Job(Base):
     __mapper_args__ = {'polymorphic_on': _type}
     uuid = Column(String)
     start = Column(DateTime)
-    end = Column(String)
+    end = Column(DateTime)
     state = Column(Boolean)
     circuit_id = Column(Integer, ForeignKey('circuit.id'))
     circuit = relation(Circuit,
@@ -827,10 +827,13 @@ class Job(Base):
         return "jobs/job/%s/" % self.id
 
     def toDict(self):
-        return {"uuid": self.uuid,
-                "state": self.state,
-                "date": self.start,
-                "type": self._type}
+        return {
+            'uuid': self.uuid,
+            'state': self.state,
+            'start': str(self.start.ctime()),
+            'end': str(self.end.ctime()),
+            'type': self._type
+            }
 
     def __str__(self):
         return "job"
