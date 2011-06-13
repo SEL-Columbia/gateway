@@ -830,8 +830,8 @@ class Job(Base):
         return {
             'uuid': self.uuid,
             'state': self.state,
-            'start': str(self.start.ctime()),
-            'end': str(self.end.ctime()),
+            'start': str(self.start),
+            'end': str(self.end),
             'type': self._type
             }
 
@@ -845,10 +845,13 @@ class AddCredit(Job):
     description = "This job adds energy credit to the remote circuit"
     id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
     credit = Column(Integer)
+    token_id = Column(Integer, ForeignKey('token.id'))
+    token = relation(Token, primaryjoin=token_id == Token.id)
 
-    def __init__(self, credit=None, circuit=None):
+    def __init__(self, credit=None, circuit=None, token=None):
         Job.__init__(self, circuit)
         self.credit = credit
+        self.token = token
 
     def __str__(self):
         return "job=cr&jobid=%s&cid=%s&amt=%s;" % (self.id,
@@ -990,6 +993,7 @@ def initialize_sql(db_string, db_echo=False):
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
     try:
-        populate()
+        pass
+        #populate()
     except IntegrityError:
         pass
