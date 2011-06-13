@@ -156,11 +156,20 @@ def test_meter_messages():
     def test_alert_no_credit():
         """ Test circuit no credit
         """
-        msg = '(job=alert&mid=" + meter_name + "&cid=" + cid + "&alert=nocw&cr=00.00)'
+        msg = '(job=alert&mid=' + meter_name + '&cid=' + cid + '&alert=nocw&cr=00.00)'
         response = urllib2.urlopen(
-            make_request(msg, phone='18185846103'))
+            make_request(msg))
         print("----------------------------")
         print("testing alert no credit")
+        print(response.read())
+        print("----------------------------")
+
+    def test_alert_emax():
+        msg = '(job=alert&mid=' + meter_name + '&cid=' + cid + '&alert=emax&cr=00.00)'
+        response = urllib2.urlopen(
+            make_request(msg))
+        print("----------------------------")
+        print("testing emac alert")
         print(response.read())
         print("----------------------------")
 
@@ -180,7 +189,8 @@ def test_meter_messages():
     #test_alert_meter_down()
     #test_alert_sdc()
     test_alert_low_credit()
-    #test_alert_no_credit()
+    test_alert_no_credit()
+    test_alert_emax()
     #test_circuit_compontent_failure()
 
 #test_consumer_messages()
