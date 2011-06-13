@@ -3,10 +3,10 @@ import urllib2
 import urllib
 
 
-def make_request(msg, phone="18182124554"):
-    data = urllib.urlencode({"message": msg,
-                              "number": phone,
-                              "uuid": str(uuid.uuid4()) })
+def make_request(msg, phone="+22365489009"):
+    data = urllib.urlencode({'message': msg,
+                             'number': phone,
+                             'uuid': str(uuid.uuid4()) })
     return urllib2.Request(
         data=data, url="http://localhost:6543/interface/send/3")
 
@@ -100,63 +100,88 @@ def test_meter_messages():
 
     cid = "192.168.1.201"
     meter_name = "demo001"
-#    test primary log
-    response = urllib2.urlopen(
-        make_request("(job=pp&cid=" + cid  + "&mid=" + meter_name + "&wh=10.00&tu=12.12&ts=20110107192318&cr=20.10&status=1)", phone="18185846103"))
-    print("----------------------------")
-    print("testing primary log")
-    print(response.read())
-    print("----------------------------")
 
-    response = urllib2.urlopen(
-        make_request("(job=delete&status=1&tu=2256&ts=20110107192318&wh=9.7&cr=475.95&jobid=90&ct=CIRCUIT)", phone="13474594669"))
-    print("----------------------------")
-    print("testing primary log")
-    print(response.read())
-    print("----------------------------")
+    def test_pp():
+        """ test primary log
+        """
+        response = urllib2.urlopen(
+            make_request("(job=pp&cid=" + cid  + "&mid=" + meter_name + "&wh=10.00&tu=12.12&ts=20110107192318&cr=20.10&status=1)", phone="18185846103"))
+        print("----------------------------")
+        print("testing primary log")
+        print(response.read())
+        print("----------------------------")
 
-    response = urllib2.urlopen(
-        make_request("(job=alerts&mid=" +
+    def test_job_delete():
+        """ Test job delete message
+        """
+        response = urllib2.urlopen(
+            make_request("(job=delete&status=1&tu=2256&ts=20110107192318&wh=9.7&cr=475.95&jobid=90&ct=CIRCUIT)", phone="13474594669"))
+        print("----------------------------")
+        print("testing primary log")
+        print(response.read())
+        print("----------------------------")
+
+    def test_alert_meter_down():
+        response = urllib2.urlopen(
+            make_request("(job=alert&mid=" +
                      meter_name + "&cid=" + cid + "&alert=md)", phone="18185846103"))
-    print("----------------------------")
-    print("testing alert meter down")
-    print(response.read())
-    print("----------------------------")
-    # test meter sd card not found
-    response = urllib2.urlopen(
-        make_request("(job=alerts&mid=" +
-                     meter_name + "&cid=" + cid + "&alert=sdc)", phone="18185846103"))
-    print("----------------------------")
-    print("testing alert test meter sd card not found")
-    print(response.read())
-    print("----------------------------")
-    # test circuit low credit
-    response = urllib2.urlopen(
-        make_request("(job=alerts&mid=" +
-                     meter_name + "&cid=" + cid
-                     + "&alert=lcw&cr=10.00)", phone="18185846103"))
-    print("----------------------------")
-    print("testing alert low credit")
-    print(response.read())
-    print("----------------------------")
+        print("----------------------------")
+        print("testing alert meter down")
+        print(response.read())
+        print("----------------------------")
 
-    # test circuit no credit
-    response = urllib2.urlopen(
-        make_request("(job=alerts&mid="
-                     + meter_name + "&cid="
-                     + cid + "&alert=nocw&cr=00.00)", phone="18185846103"))
-    print("----------------------------")
-    print("testing alert no credit")
-    print(response.read())
-    print("----------------------------")
-    # test circuit compontent failure
-    response = urllib2.urlopen(
-        make_request("(job=alerts&mid="
-                     + meter_name + "&cid=" + cid + "&alert=ce)",phone="18185846103"))
-    print("----------------------------")
-    print("testing alert ce")
-    print(response.read())
-    print("----------------------------")
+    def test_alert_sdc():
+        """ Test meter sd card not found
+        """
+        response = urllib2.urlopen(
+            make_request("(job=alert&mid=" +
+                     meter_name + "&cid=" + cid + "&alert=sdc)", phone="18185846103"))
+        print("----------------------------")
+        print("testing alert test meter sd card not found")
+        print(response.read())
+        print("----------------------------")
+
+    def test_alert_low_credit():
+        """ Test circuit low credit
+        """
+        response = urllib2.urlopen(
+            make_request("(job=alert&mid=" +
+                     meter_name + "&cid=" + cid
+                     + "&alert=lcw&cr=10.00)"))
+        print("----------------------------")
+        print("testing alert low credit")
+        print(response.read())
+        print("----------------------------")
+
+    def test_alert_no_credit():
+        """ Test circuit no credit
+        """
+        msg = '(job=alert&mid=" + meter_name + "&cid=" + cid + "&alert=nocw&cr=00.00)'
+        response = urllib2.urlopen(
+            make_request(msg, phone='18185846103'))
+        print("----------------------------")
+        print("testing alert no credit")
+        print(response.read())
+        print("----------------------------")
+
+    def test_circuit_compontent_failure():
+        """ Test circuit compontent failure
+        """
+        response = urllib2.urlopen(
+            make_request("(job=alert&mid="
+                         + meter_name + "&cid=" + cid + "&alert=ce)", phone="18185846103"))
+        print("----------------------------")
+        print("testing alert ce")
+        print(response.read())
+        print("----------------------------")
+
+    #test_pp()
+    #test_job_delete()
+    #test_alert_meter_down()
+    #test_alert_sdc()
+    test_alert_low_credit()
+    #test_alert_no_credit()
+    #test_circuit_compontent_failure()
 
 #test_consumer_messages()
 test_meter_messages()
