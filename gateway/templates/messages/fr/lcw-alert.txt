@@ -1,4 +1,5 @@
+## -*- coding: utf-8 -*-
 <%!
   import datetime
 %> 
-Votre compte d'électricité ${account} compte l'équilibre est faible. Votre solde est inférieur à 10, du $ {datetime.datetime.now().ctime ()}.
+Votre compte d'electricite ${account} compte l'equilibre est faible. Votre solde est inferieur a 10, du ${datetime.datetime.now().ctime()}.
