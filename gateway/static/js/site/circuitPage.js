@@ -198,7 +198,10 @@ function loadBillingHistory(options) {
   var columns = [ 
     {id: "id", name:"Database Id", width: 200, field: "id", sortable: true },
     {id: "credit", name:"Credit amount", width: 200, field: "credit", sortable: true },
-    {id: "date", name:"Date", width: 200, field: "date", sortable: true },
+    {id: "start", name:"Start of job", width: 200, field: "start", sortable: true },
+    {id: "end", name:"End of job", width: 200, field: "end", sortable: true },
+    {id: "state", name:"State of job", width: 200, field: "state", sortable: true }
+
   ]
 
   var logDataView = new Slick.Data.DataView();

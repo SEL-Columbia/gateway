@@ -921,8 +921,10 @@ class CircuitHandler(object):
         return json_response(
             {'total': reduce(lambda total, p: total + p.credit, payments, 0),
              'payments': [{'id': p.id,
+                           'status': p.state,
+                           'start': str(p.start),
                            'credit': p.credit,
-                           'date': p.start.ctime(),
+                           'end': str(p.end),
                            'state': p.state} for p in payments]})
 
     @action(permission='admin')
