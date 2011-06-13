@@ -8,12 +8,12 @@ def make_request(msg, phone="+22365489009"):
                              'number': phone,
                              'uuid': str(uuid.uuid4()) })
     return urllib2.Request(
-        data=data, url="http://localhost:6543/interface/send/3")
+        data=data, url="http://localhost:6543/interface/send/6")
 
 
 def test_consumer_messages():
     account = "iwn578"
-
+    token = '35621166542'
     response = urllib2.urlopen(make_request("bal." + account))
     print("----------------------------")
     print("testing english balance")
@@ -57,12 +57,12 @@ def test_consumer_messages():
     # print(response.read())
     # print("----------------------------")
 
-    # response = urllib2.urlopen(
-    #     make_request("recharge." + account  +"." + str(token)))
-    # print("----------------------------")
-    # print("add credit in fr")
-    # print(response.read())
-    # print("----------------------------")
+    response = urllib2.urlopen(
+        make_request("recharge." + account  + "." + str(token)))
+    print("----------------------------")
+    print("add credit in fr")
+    print(response.read())
+    print("----------------------------")
 
     # response = urllib2.urlopen(make_request("on." + account))
     # print("----------------------------")
@@ -105,7 +105,7 @@ def test_meter_messages():
         """ test primary log
         """
         response = urllib2.urlopen(
-            make_request("(job=pp&cid=" + cid  + "&mid=" + meter_name + "&wh=10.00&tu=12.12&ts=20110107192318&cr=20.10&status=1)", phone="18185846103"))
+            make_request("(job=pp&cid=" + cid  + "&mid=" + meter_name + "&wh=10.00&tu=12.12&ts=20110107192318&cr=20.10&status=1)", phone="+22365271087"))
         print("----------------------------")
         print("testing primary log")
         print(response.read())
@@ -115,7 +115,7 @@ def test_meter_messages():
         """ Test job delete message
         """
         response = urllib2.urlopen(
-            make_request("(job=delete&status=1&tu=2256&ts=20110107192318&wh=9.7&cr=475.95&jobid=90&ct=CIRCUIT)", phone="13474594669"))
+            make_request("(job=delete&status=1&tu=2256&ts=20110107192318&wh=9.7&cr=475.95&jobid=2200&ct=CIRCUIT)", phone="13474594669"))
         print("----------------------------")
         print("Testing job delete message")
         print(response.read())
@@ -193,5 +193,5 @@ def test_meter_messages():
     #test_alert_emax()
     #test_circuit_compontent_failure()
 
-#test_consumer_messages()
-test_meter_messages()
+test_consumer_messages()
+#test_meter_messages()
