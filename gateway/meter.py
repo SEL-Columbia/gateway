@@ -18,51 +18,88 @@ def valid(test, against):
     return True
 
 
+def respond_to_add_credit(job, circuit):
+    """
+    Function to excute the actions need after the gateways gets a job
+    delete about a add credit job.
+    """
+    return make_message_body("credit.txt",
+                             lang=circuit.account.lang,
+                             account=circuit.pin,
+                             status=circuit.get_rich_status(),
+                             credit=circuit.credit)
+
+
+def find_job_message(job, session):
+    """
+    Function to look up a job's creating message
+    Takes a job and a db session
+    Returns a message object or none
+    """
+    try:
+        if len(job.job_message) is not 0:
+            incoming_uuid = job.job_message[0].incoming
+        elif len(job.kannel_job_message) is not 0:
+            incoming_uuid = job.kannel_job_message[0].incoming
+        return session.query(IncomingMessage)\
+            .filter_by(uuid=incoming_uuid).first()
+    except Exception, e:
+        print(e)
+
+
+def update_circuit(msgDict, circuit, session):
+    """
+    Function to update circuit based on message dictionary parsed from job delete.
+    Takes message dictionary, circuit object and session object.
+    """
+    circuit.status = int(msgDict.get("status", circuit.status))
+    circuit.credit = float(msgDict.get("cr", circuit.credit))
+    session.merge(circuit)
+    session.flush()
+
+
+def update_job(job, session):
+    """
+    Function to update job to current time and change the job state
+    Takes a job and a db session
+    Returns none
+    """
+    job.state = False
+    job.end = datetime.now()
+    session.merge(job)
+    session.flush()
+
+
 def make_delete(msgDict, session):
     """
     Responses to a delete messsage from the meter.
     """
     originMsg = None
-    session.add(SystemLog("%s" % msgDict))
+    messageBody = None
+    # locate the job from the job id
     job = session.query(Job).get(msgDict["jobid"])
-    if job:
-        try:
-            if len(job.job_message) is not 0:
-                incoming_uuid = job.job_message[0].incoming
-            elif len(job.kannel_job_message) is not 0:
-                incoming_uuid = job.kannel_job_message[0].incoming
-            originMsg = session.query(IncomingMessage)\
-                        .filter_by(uuid=incoming_uuid).first()
-        except Exception, e:
-            print(e)
-        circuit = job.circuit
-        interface = circuit.meter.communication_interface
-        job.state = False
-        job.end = datetime.now()
-        messageBody = None
-        # update circuit
-        circuit.status = int(msgDict.get("status", circuit.status))
-        circuit.credit = float(msgDict.get("cr", circuit.credit))
-        session.merge(circuit)
-        session.flush()
-        if job._type == "addcredit":
-            messageBody = make_message_body("credit.txt",
-                                       lang=circuit.account.lang,
-                                       account=circuit.pin,
-                                       status=circuit.get_rich_status(),
-                                       credit=circuit.credit)
-        elif job._type == "turnon" or job._type == "turnoff":
-            messageBody = make_message_body("toggle.txt",
-                                       lang=circuit.account.lang,
-                                       account=circuit.pin,
-                                       status=circuit.get_rich_status(),
-                                       credit=circuit.credit)
+    circuit = job.circuit
+    interface = circuit.meter.communication_interface
+
+    originMsg = find_job_message(job, session)
+    update_job(job, session)
+    update_circuit(msgDict, circuit, session)
+    if job._type == "addcredit":
+        messageBody = respond_to_add_credit(job, circuit)
+    elif job._type == "turnon" or job._type == "turnoff":
+        messageBody = make_message_body("toggle.txt",
+                                        lang=circuit.account.lang,
+                                        account=circuit.pin,
+                                        status=circuit.get_rich_status(),
+                                        credit=circuit.credit)
+    else:
+        pass
         # double to check we have a message to send
-        if messageBody and originMsg:
-            interface.sendMessage(
-                originMsg.number,
-                messageBody,
-                incoming=originMsg.uuid)
+    if messageBody and originMsg:
+        interface.sendMessage(
+            originMsg.number,
+            messageBody,
+            incoming=originMsg.uuid)
         session.merge(job)
     else:
         pass
