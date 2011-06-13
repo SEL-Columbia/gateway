@@ -54,9 +54,6 @@ from gateway.models import Mping
 from gateway.models import MeterConfigKey
 from gateway.models import Users
 from gateway.models import Groups
-from gateway.models import KannelInterface
-from gateway.models import NetbookInterface
-from gateway.models import AirtelInterface
 from gateway.models import MeterChangeSet
 from gateway.models import CommunicationInterface
 
@@ -599,19 +596,9 @@ class InterfaceHandler(object):
 
     @action()
     def send(self):
-        if isinstance(self.interface, KannelInterface)\
-                or isinstance(self.interface, AirtelInterface):
-            msg = self.save_and_parse_message(self.request.params['number'],
-                                              self.request.params['message'])
-            return Response(msg.uuid)
-
-        if isinstance(self.interface, NetbookInterface):
-            message = simplejson.loads(self.request.body)
-            msg = self.save_and_parse_message(message['number'],
-                                          message['message'])
-            return Response(msg.uuid)
-        else:
-            return Response("error")
+        msg = self.save_and_parse_message(self.request.params['number'],
+                                          self.request.params['message'])
+        return Response(msg.uuid)
 
     @action(permission='admin')
     def remove(self):
@@ -928,7 +915,9 @@ class CircuitHandler(object):
         A view to render a circuit's payment history as a json object.
         """
         session = DBSession()
-        payments = session.query(AddCredit).filter_by(circuit=self.circuit)
+        payments = session.query(AddCredit)\
+            .filter_by(circuit=self.circuit).order_by(AddCredit.start)
+
         return json_response(
             {'total': reduce(lambda total, p: total + p.credit, payments, 0),
              'payments': [{'id': p.id,
