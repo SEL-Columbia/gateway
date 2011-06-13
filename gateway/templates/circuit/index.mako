@@ -40,6 +40,9 @@
     <p>${circuit.id}</p>
   </li>        
   <li>
+    <h4>Circuit meter</h4>
+    <p> <a href="${a_url}/meter/index/${circuit.meter.id}">${circuit.meter}</a>
+  <li>
     <h4>Circuit credit</h4>
     <p>${circuit.credit}</p>
   </li>
@@ -71,7 +74,7 @@
          value="${last_week.strftime("%m/%d/%Y")}" />
   <input id="end" type="text" name="end" value="${now.strftime("%m/%d/%Y")}" />
 </form>
-<a id="update-graph" href="#">Update Graph</a>
+<a id="update-graph">Update Graph</a>
 
 
 <div id="graph">
