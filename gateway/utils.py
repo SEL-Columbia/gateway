@@ -9,6 +9,7 @@ from datetime import timedelta
 from gateway.models import PrimaryLog
 from pyramid.threadlocal import get_current_registry
 
+
 def nice_print(model):
     """Function for printing  """
     collector = {}
@@ -88,7 +89,7 @@ class Widget(object):
                 return []
 
 
-def make_message_body(template='error.txt', lang='fr',**kwargs):
+def make_message_body(template='error.txt', lang='fr', **kwargs):
     """Builds a template based on name and langauge with kwargs passed
     to the template..  Returns a template object
     """
@@ -96,7 +97,9 @@ def make_message_body(template='error.txt', lang='fr',**kwargs):
     mako_dirs = registry.settings['mako.directories']
     templateName = '%s/messages/%s/%s' % (mako_dirs,
                                           lang, template)
-    template = Template(filename=templateName).render(**kwargs)
+    template = Template(filename=templateName)\
+        .render_unicode(**kwargs)\
+        .encode('utf-8', 'replace')
     return template
 
 
