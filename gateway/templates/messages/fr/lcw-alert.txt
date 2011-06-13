@@ -1,0 +1,4 @@
+<%!
+  import datetime
+%> 
+Votre compte d'électricité ${account} compte l'équilibre est faible. Votre solde est inférieur à 10, du $ {datetime.datetime.now().ctime ()}.
