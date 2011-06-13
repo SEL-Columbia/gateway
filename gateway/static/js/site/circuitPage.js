@@ -144,7 +144,6 @@ function loadGraph(options) {
       .attr("y2", function(d) { return y(d)})
       .attr("class","yGrid")
  
-
     
     g.selectAll(".yLabel")
       .data(y.ticks(10))

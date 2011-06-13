@@ -842,7 +842,6 @@ class AddCredit(Job):
     description = "This job adds energy credit to the remote circuit"
     id = Column(Integer, ForeignKey('jobs.id'), primary_key=True)
     credit = Column(Integer)
-    
 
     def __init__(self, credit=None, circuit=None):
         Job.__init__(self, circuit)
