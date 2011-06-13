@@ -4,7 +4,6 @@
 
 <%def name="header()">
    <title>Dashboard SharedSolar Gateway</title>
-   ${headers.deformStyles(request)}
 </%def>
 
 <%def name="content()"> 
