@@ -770,7 +770,7 @@ class MeterHandler(object):
     @action(permission='view')
     def circuits(self):
         """Dumps the circuits assoicted with Meter to a json file.
-        Used in SlickGrid
+           Used in SlickGrid
         """
         return Response(
             content_type="application/json",
@@ -911,13 +911,8 @@ class CircuitHandler(object):
         import time
         session = DBSession()
         value = self.request.params.get('value', 'watthours')
-        start = datetime\
-            .strptime(self.request\
-                          .params.get('start', '05/01/2011'), '%m/%d/%Y')
-        end = datetime\
-            .strptime(self.request\
-                          .params.get('end', '06/01/2011'), '%m/%d/%Y')
-
+        start = datetime.strptime(self.request.params.get('start', '05/01/2011'), '%m/%d/%Y')
+        end = datetime.strptime(self.request.params.get('end', '06/01/2011'), '%m/%d/%Y')
         logs = session.query(PrimaryLog)\
                       .filter(PrimaryLog.circuit == self.circuit)\
                       .filter(PrimaryLog.date > start)\
@@ -925,8 +920,7 @@ class CircuitHandler(object):
                       .order_by(PrimaryLog.created)
         return json_response(
             {'dates': map(lambda x: time.mktime(x.date.timetuple()), logs),
-             'values': map(lambda x: getattr(x, value), logs)
-             })
+             'values': map(lambda x: getattr(x, value), logs)})
 
     @action(permission='view')
     def get_payment_logs(self):
