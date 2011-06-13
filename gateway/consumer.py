@@ -23,7 +23,7 @@ def get_circuit(message):
         interface = message.communication_interface
         interface.sendMessage(
             message.number,
-            make_message_body("no-circuit.txt",lang=message.langauge),
+            make_message_body("no-circuit.txt", lang=message.langauge),
             incoming=message.uuid)
         return False
 
@@ -96,12 +96,12 @@ def add_credit(message):
     if circuit:
         interface = circuit.meter.communication_interface
         if token:
-            job = AddCredit(circuit=circuit, credit=token.value)
+            job = AddCredit(circuit=circuit, credit=token.value, token=token)
             session.add(job)
             session.flush()
             interface.sendJob(job,
                               incoming=message.uuid)
-            token.state = "used"
+            token.state = "processed"
             session.merge(token)
             session.merge(circuit)
 
