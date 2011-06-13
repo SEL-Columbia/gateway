@@ -69,7 +69,6 @@ def parse_meter_message(message):
     """
     session = DBSession()
     meter = findMeter(message)
-
     # compressed primary logs
     if re.match("^\(l.*\)$", message.text):
         inflatedlogs = compactsms.inflatelogs([message.text])
