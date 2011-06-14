@@ -12,7 +12,6 @@ from gateway.messaging import findMeter
 dispatcher = Dispatcher()
 dispatcher.addMatcher(findMeter,
                       'gateway.messaging.parse_meter_message')
-
 dispatcher.addMatcher(r'^job=test', 'gateway.messaging.add_test_message')
 
 # Allow consumers to check their balance
@@ -21,7 +20,7 @@ dispatcher.addMatcher(r'^(bal).(\w+)',
 dispatcher.addMatcher(r'^(solde).(\w+)',
                       'gateway.consumer.get_balance', langauge='fr')
 dispatcher.addMatcher(r'^(2).(\w+)',
-                    'gateway.consumer.get_balance')
+                    'gateway.consumer.get_balance', language='fr')
 
 # Allow consumers to add credit to their account
 dispatcher.addMatcher(r'^(add).(\w+).(\d+)',
@@ -29,13 +28,13 @@ dispatcher.addMatcher(r'^(add).(\w+).(\d+)',
 dispatcher.addMatcher(r'^(recharge).(\w+).(\d+)',
                       'gateway.consumer.add_credit', langauge='fr')
 dispatcher.addMatcher(r'^(9).(\w+).(\w+)',
-                    'gateway.consumer.add_credit')
+                    'gateway.consumer.add_credit', langauge='fr')
 
 # Allow consumers to turn the circuit on
 dispatcher.addMatcher(r'^(on).(\w+)',
                       'gateway.consumer.turn_circuit_on', langauge='fr')
 dispatcher.addMatcher(r'^(1).(\w+)',
-                      'gateway.consumer.turn_circuit_on')
+                      'gateway.consumer.turn_circuit_on', language='fr')
 
 # Allow consumers to turn the circuit off
 dispatcher.addMatcher(r'^(off).(\w+)',
