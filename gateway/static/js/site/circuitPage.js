@@ -50,11 +50,19 @@ function loadGraph(options) {
     method: 'GET',
     dataType: 'json',
     success: function(d) { 
+      
       buildGraph(d);
     }
   })
-  
-  
+
+  var offsetSeconds = new Date().getTimezoneOffset() * 60; 
+  function buildDate(string) { 
+    var year = parseInt(string.split("/")[2]); 
+    var month = parseInt(string.split("/")[0]) - 1; 
+    var date = +string.split("/")[1];
+    return (Date.UTC(year, month, date) / 1000) + offsetSeconds;
+  }
+
 
   function buildGraph(d){
     $('#graph').empty();
@@ -66,33 +74,19 @@ function loadGraph(options) {
         bottom_margin = 100,
         dataY = d.values,
         dataX = d.dates,
-        start = new Date($("#start").val()),
-        end = new Date($("#end").val());
+        start = buildDate($("#start").val()),
+        end = buildDate($("#end").val());
+
+    var dateRange =  new Array();
+    var current = start;
+    while (current <= end) {
+      dateRange.push(current);
+      current = current + (24 * 60 * 60);
+    };     
 
 
-
-    /* 
-     * FIX ME !!! we need to deal with time zones.
-     */ 
-      
-    start.setHours(start.getHours() - 4); 
-    end.setHours(end.getHours() - 4);
-
-
-
-    var dateRange =  new Array();    
-    dateRange.push((start.valueOf()/1000));
-
-    var current = start;     
-    while (current < end ) { 
-      var date = current.getDate() + 1; 
-      var current = new Date(current.getFullYear(), current.getMonth(), date, current.getHours());
-      dateRange.push((current.valueOf() / 1000)); 
-    }; 
-        
     var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([h - bottom_margin ,top_margin]);
-    var x = d3.scale.linear().domain([(start.valueOf() / 1000),
-                                      (end.valueOf() /1000)]).range([left_margin, w - right_margin]);
+    var x = d3.scale.linear().domain([start, end]).range([left_margin, w - right_margin]);
 
     var vis = d3.select("#graph")
       .append("svg:svg")
@@ -100,7 +94,6 @@ function loadGraph(options) {
       .attr("height", h);
     
     var g = vis.append("svg:g")
-
 
     g.selectAll(".xTicks")
       .data(dateRange)
@@ -112,7 +105,6 @@ function loadGraph(options) {
       .attr("class","xTicks")
       .attr("stroke", "#808080")
 
-
     g.selectAll(".xGrid")
       .data(dateRange)
       .enter().append("svg:line")
@@ -122,7 +114,6 @@ function loadGraph(options) {
       .attr("y1", top_margin)
       .attr("y2", h - bottom_margin)
       .attr("class","xGrid")
-
 
     g.selectAll(".yTicks")
       .data(y.ticks(10))
@@ -143,8 +134,7 @@ function loadGraph(options) {
       .attr("y1", function(d) { return y(d)})
       .attr("y2", function(d) { return y(d)})
       .attr("class","yGrid")
- 
-    
+     
     g.selectAll(".yLabel")
       .data(y.ticks(10))
       .enter().append("svg:text")
@@ -156,8 +146,9 @@ function loadGraph(options) {
       .attr("dy", ".25em")
       .attr("dx","-0.5em")
 
+
     function prettyDateString(d){
-      var local_date = new Date(d * 1000);      
+      var local_date = new Date(d * 1000);
       return local_date.getDate() + " " +
         ("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(' ')[local_date.getMonth()]) + " " +
         local_date.getFullYear();
@@ -206,7 +197,8 @@ function loadBillingHistory(options) {
   ]
 
   var logDataView = new Slick.Data.DataView();
-  var logGrid = new Slick.Grid("#billing-history",logDataView, columns, globalGridOptions)
+  var logGrid = new Slick.Grid("#billing-history",logDataView, columns,
+                               globalGridOptions)
   
   $.getJSON("/circuit/get_payment_logs/" + options.circuit, function(d) { 
     logDataView.beginUpdate();

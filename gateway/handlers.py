@@ -918,8 +918,7 @@ class CircuitHandler(object):
         payments = session.query(AddCredit)\
             .filter_by(circuit=self.circuit).order_by(desc(AddCredit.start))
         return json_response(
-            {'total': reduce(lambda total, p: total + p.credit, payments, 0),
-             'payments': [{'id': p.id,
+            {'payments': [{'id': p.id,
                            'status': p.state,
                            'token': str(p.token),
                            'start': str(p.start),
