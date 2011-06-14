@@ -16,39 +16,39 @@ dispatcher.addMatcher(r'^job=test', 'gateway.messaging.add_test_message')
 
 # Allow consumers to check their balance
 dispatcher.addMatcher(r'^(bal).(\w+)',
-                      'gateway.consumer.get_balance', langauge='en')
+                      'gateway.consumer.get_balance', language='en')
 dispatcher.addMatcher(r'^(solde).(\w+)',
-                      'gateway.consumer.get_balance', langauge='fr')
+                      'gateway.consumer.get_balance', language='fr')
 dispatcher.addMatcher(r'^(2).(\w+)',
-                    'gateway.consumer.get_balance', langauge='fr')
+                    'gateway.consumer.get_balance', language='fr')
 
 # Allow consumers to add credit to their account
 dispatcher.addMatcher(r'^(add).(\w+).(\d+)',
-                      'gateway.consumer.add_credit', langauge='en')
+                      'gateway.consumer.add_credit', language='en')
 dispatcher.addMatcher(r'^(recharge).(\w+).(\d+)',
-                      'gateway.consumer.add_credit', langauge='fr')
+                      'gateway.consumer.add_credit', language='fr')
 dispatcher.addMatcher(r'^(9).(\w+).(\w+)',
-                    'gateway.consumer.add_credit', langauge='fr')
+                    'gateway.consumer.add_credit', language='fr')
 
 # Allow consumers to turn the circuit on
 dispatcher.addMatcher(r'^(on).(\w+)',
-                      'gateway.consumer.turn_circuit_on', langauge='fr')
+                      'gateway.consumer.turn_circuit_on', language='fr')
 dispatcher.addMatcher(r'^(1).(\w+)',
-                      'gateway.consumer.turn_circuit_on', langauge='fr')
+                      'gateway.consumer.turn_circuit_on', language='fr')
 
 # Allow consumers to turn the circuit off
 dispatcher.addMatcher(r'^(off).(\w+)',
-                      'gateway.consumer.turn_circuit_off', langauge='fr')
+                      'gateway.consumer.turn_circuit_off', language='fr')
 dispatcher.addMatcher(r'^(0).(\w+)',
-                      'gateway.consumer.turn_circuit_off', langauge='fr')
+                      'gateway.consumer.turn_circuit_off', language='fr')
 
 # Allow consumers to set their telephone numbers
 dispatcher.addMatcher(r'(prim).(\w+)',
-                      'gateway.consumer.set_primary_contact', langauge='en')
+                      'gateway.consumer.set_primary_contact', language='en')
 dispatcher.addMatcher(r'(tel).(\w+)',
-                      'gateway.consumer.set_primary_contact', langauge='fr')
+                      'gateway.consumer.set_primary_contact', language='fr')
 dispatcher.addMatcher(r'(4).(\w+)',
-                      'gateway.consumer.set_primary_contact', langauge='fr')
+                      'gateway.consumer.set_primary_contact', language='fr')
 
 
 def main(global_config, **settings):

@@ -23,7 +23,7 @@ def get_circuit(message):
         interface = message.communication_interface
         interface.sendMessage(
             message.number,
-            make_message_body("no-circuit.txt", lang=message.langauge),
+            make_message_body("no-circuit.txt", lang=message.language),
             incoming=message.uuid)
         return False
 
@@ -40,7 +40,7 @@ def get_token(message):
         interface = message.communication_interface
         interface.sendMessage(
             message.number,
-            make_message_body("no-token.txt", lang=message.langauge),
+            make_message_body("no-token.txt", lang=message.language),
             incoming=message.uuid)
         return False
 
@@ -48,13 +48,13 @@ def get_token(message):
 def get_balance(message):
     """Allows users to check blance"""
     circuit = get_circuit(message)
-    langauge = message.langauge
+    language = message.language
     if circuit:
         interface = circuit.meter.communication_interface
         interface.sendMessage(
             message.number,
             make_message_body("bal.txt",
-                              lang=langauge,
+                              lang=language,
                               account=circuit.pin,
                               credit=circuit.credit),
             incoming=message.uuid)
@@ -69,7 +69,7 @@ def set_primary_contact(message):
         new_number = message.text.split(delimiter)[2]
         old_number = circuit.account.phone
         messageBody = make_message_body("tel.txt",
-                                        lang=message.langauge,
+                                        lang=message.language,
                                         old_number=old_number,
                                         new_number=new_number)
         interface.sendMessage(
