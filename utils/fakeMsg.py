@@ -12,13 +12,23 @@ def make_request(msg, phone="+22365489009"):
 
 
 def test_consumer_messages():
-    account = "iwn578"
-    token = '35621166542'
-    response = urllib2.urlopen(make_request("bal." + account))
-    print("----------------------------")
-    print("testing english balance")
-    print(response.read())
-    print("-----------------------------")
+    account = 'beu754'
+    token = '95021282753'
+
+    def test_balance_english():
+        response = urllib2.urlopen(make_request("bal." + account))
+        print("----------------------------")
+        print("testing english balance")
+        print(response.read())
+        print("-----------------------------")
+
+    def test_balance_num():
+        response = urllib2.urlopen(make_request("2." + account))
+        print("----------------------------")
+        print("testing balance with numeric command")
+        print(response.read())
+        print("-----------------------------")
+
 
     # response = urllib2.urlopen(make_request("bal.1234"))
     # print("----------------------------")
@@ -57,12 +67,13 @@ def test_consumer_messages():
     # print(response.read())
     # print("----------------------------")
 
-    response = urllib2.urlopen(
-        make_request("recharge." + account  + "." + str(token)))
-    print("----------------------------")
-    print("add credit in fr")
-    print(response.read())
-    print("----------------------------")
+    def test_add_credit_french():
+        response = urllib2.urlopen(
+            make_request("recharge." + account  + "." + str(token)))
+        print("----------------------------")
+        print("add credit in fr")
+        print(response.read())
+        print("----------------------------")
 
     # response = urllib2.urlopen(make_request("on." + account))
     # print("----------------------------")
@@ -88,12 +99,17 @@ def test_consumer_messages():
     # print(response.read())
     # print("----------------------------")
 
+    def test_fail_message():
+        response = urllib2.urlopen(make_request("this should fail" + account))
+        print("----------------------------")
+        print("test failure with a response")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("this should fail" + account))
-    # print("----------------------------")
-    # print("test failure with a response")
-    # print(response.read())
-    # print("----------------------------")
+    test_balance_num()
+    #test_balance_english()
+    #test_add_credit_french()
+    #test_fail_message()
 
 
 def test_meter_messages():
@@ -115,7 +131,7 @@ def test_meter_messages():
         """ Test job delete message
         """
         response = urllib2.urlopen(
-            make_request("(job=delete&status=1&tu=2256&ts=20110107192318&wh=9.7&cr=475.95&jobid=2200&ct=CIRCUIT)", phone="13474594669"))
+            make_request("(job=delete&status=1&tu=2256&ts=20110107192318&wh=9.7&cr=475.95&jobid=2205&ct=CIRCUIT)", phone="13474594669"))
         print("----------------------------")
         print("Testing job delete message")
         print(response.read())
