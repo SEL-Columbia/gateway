@@ -921,6 +921,7 @@ class CircuitHandler(object):
             {'total': reduce(lambda total, p: total + p.credit, payments, 0),
              'payments': [{'id': p.id,
                            'status': p.state,
+                           'token': str(p.token),
                            'start': str(p.start),
                            'credit': p.credit,
                            'end': str(p.end),
@@ -1056,7 +1057,7 @@ class TokenHandler(object):
     @action(permission="view")
     def show_batch(self):
         return Response(simplejson.dumps(
-                [x.toDict() for x in self.batch.get_tokens()]))
+                [x.toDict() for x in self.batch.getTokens()]))
 
     @action(permission="admin")
     def export_batch(self):

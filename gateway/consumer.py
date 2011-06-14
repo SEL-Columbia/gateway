@@ -33,7 +33,7 @@ def get_token(message):
     session = DBSession()
     tokenNumber = message.text.split(delimiter)[2]
     token = session.query(Token).\
-            filter_by(state="new").filter_by(token=tokenNumber).first()
+        filter_by(state="new").filter_by(token=tokenNumber).first()
     if token:
         return token
     else:
@@ -101,9 +101,8 @@ def add_credit(message):
             session.flush()
             interface.sendJob(job,
                               incoming=message.uuid)
-            token.state = "processed"
-            session.merge(token)
             session.merge(circuit)
+            session.flush()
 
 
 def turn_circuit_on(message):

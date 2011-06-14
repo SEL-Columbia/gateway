@@ -2,20 +2,24 @@
 Module for SS Gateway.
 Handles all of the meter communcation
 """
-#from dateutil import parser
 from datetime import datetime
 from gateway.models import Job
 from gateway.models import SystemLog
 from gateway.models import PrimaryLog
 from gateway.models import IncomingMessage
+from gateway.models import AddCredit
 from gateway.utils import make_message_body
 
 
-def respond_to_add_credit(job, circuit):
+def respond_to_add_credit(job, circuit, session):
     """
     Function to excute the actions need after the gateways gets a job
     delete about a add credit job.
     """
+    token = job.token
+    token.state = 'used'
+    session.merge(token)
+    session.flush()
     return make_message_body("credit.txt",
                              lang=circuit.account.lang,
                              account=circuit.pin,
@@ -77,8 +81,8 @@ def make_delete(msgDict, session):
     originMsg = find_job_message(job, session)
     update_job(job, session)
     update_circuit(msgDict, circuit, session)
-    if job._type == "addcredit":
-        messageBody = respond_to_add_credit(job, circuit)
+    if isinstance(job, AddCredit):
+        messageBody = respond_to_add_credit(job, circuit, session)
     elif job._type == "turnon" or job._type == "turnoff":
         messageBody = make_message_body("toggle.txt",
                                         lang=circuit.account.lang,

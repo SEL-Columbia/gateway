@@ -200,8 +200,9 @@ function loadBillingHistory(options) {
     {id: "credit", name:"Credit amount", width: 200, field: "credit", sortable: true },
     {id: "start", name:"Start of job", width: 200, field: "start", sortable: true },
     {id: "end", name:"End of job", width: 200, field: "end", sortable: true },
-    {id: "state", name:"State of job", width: 200, field: "state", sortable: true }
-
+    {id: "state", name:"Job still running?", 
+     width: 200, field: "state", sortable: true },
+    {id: "token", name: "Token used", width: 200, field: "token", sortable: true}
   ]
 
   var logDataView = new Slick.Data.DataView();

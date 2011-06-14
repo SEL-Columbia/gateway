@@ -690,6 +690,9 @@ class Token(Base):
         if r > 10 ** 10: return r
         else: return Token.get_random()
 
+    def __str__(self):
+        return '%s' % self.token
+
     def toDict(self):
         return {
             "id": self.id,
