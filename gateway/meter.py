@@ -11,13 +11,6 @@ from gateway.models import IncomingMessage
 from gateway.utils import make_message_body
 
 
-def valid(test, against):
-    for key in against:
-        if key not in test:
-            return False
-    return True
-
-
 def respond_to_add_credit(job, circuit):
     """
     Function to excute the actions need after the gateways gets a job
