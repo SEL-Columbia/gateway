@@ -20,7 +20,7 @@ dispatcher.addMatcher(r'^(bal).(\w+)',
 dispatcher.addMatcher(r'^(solde).(\w+)',
                       'gateway.consumer.get_balance', langauge='fr')
 dispatcher.addMatcher(r'^(2).(\w+)',
-                    'gateway.consumer.get_balance', language='fr')
+                    'gateway.consumer.get_balance', langauge='fr')
 
 # Allow consumers to add credit to their account
 dispatcher.addMatcher(r'^(add).(\w+).(\d+)',
@@ -34,7 +34,7 @@ dispatcher.addMatcher(r'^(9).(\w+).(\w+)',
 dispatcher.addMatcher(r'^(on).(\w+)',
                       'gateway.consumer.turn_circuit_on', langauge='fr')
 dispatcher.addMatcher(r'^(1).(\w+)',
-                      'gateway.consumer.turn_circuit_on', language='fr')
+                      'gateway.consumer.turn_circuit_on', langauge='fr')
 
 # Allow consumers to turn the circuit off
 dispatcher.addMatcher(r'^(off).(\w+)',
