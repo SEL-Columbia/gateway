@@ -8,7 +8,6 @@ README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-    'dispatch',
     'psycopg2',
     'shapely',
     'WebTest',
