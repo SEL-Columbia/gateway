@@ -8,7 +8,7 @@ def make_request(msg, phone="+22365489009"):
                              'number': phone,
                              'uuid': str(uuid.uuid4()) })
     return urllib2.Request(
-        data=data, url="http://localhost:6543/interface/send/6")
+        data=data, url="http://localhost:6543G/interface/send/6")
 
 
 def test_consumer_messages():
@@ -29,43 +29,48 @@ def test_consumer_messages():
         print(response.read())
         print("-----------------------------")
 
+    def test_balance_failure():
+        response = urllib2.urlopen(make_request("bal.1234"))
+        print("----------------------------")
+        print("testing english balance fail conition")
+        print(response.read())
+        print("-----------------------------")
 
-    # response = urllib2.urlopen(make_request("bal.1234"))
-    # print("----------------------------")
-    # print("testing english balance fail conition")
-    # print(response.read())
-    # print("-----------------------------")
+    def test_balance_french():
+        response = urllib2.urlopen(make_request("solde." + account))
+        print("----------------------------")
+        print("testing french balance")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("solde." + account))
-    # print("----------------------------")
-    # print("testing french balance")
-    # print(response.read())
-    # print("----------------------------")
+    def test_balance_french_failure():
+        response = urllib2.urlopen(make_request("solde.12345"))
+        print("----------------------------")
+        print("testing french balance fail conition")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("solde.12345"))
-    # print("----------------------------")
-    # print("testing french balance fail conition")
-    # print(response.read())
-    # print("----------------------------")
+    def test_change_primary_phone():
+        response = urllib2.urlopen(make_request("prim." + account + ".18182124554"))
+        print("----------------------------")
+        print("set primary number english")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("prim." + account + ".18182124554"))
-    # print("----------------------------")
-    # print("set primary number english")
-    # print(response.read())
-    # print("----------------------------")
+    def test_primary_phone_french():
+        response = urllib2.urlopen(make_request("tel." + account + ".18185846103"))
+        print("----------------------------")
+        print("set primary number fr")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("tel." + account +  ".18185846103"))
-    # print("----------------------------")
-    # print("set primary number fr")
-    # print(response.read())
-    # print("----------------------------")
-
-    # response = urllib2.urlopen(
-    #     make_request("add." + account + "." + str(token)))
-    # print("----------------------------")
-    # print("add credit in en")
-    # print(response.read())
-    # print("----------------------------")
+    def test_add_credit_english():
+        response = urllib2.urlopen(
+            make_request("add." + account + "." + str(token)))
+        print("----------------------------")
+        print("add credit in en")
+        print(response.read())
+        print("----------------------------")
 
     def test_add_credit_french():
         response = urllib2.urlopen(
@@ -75,29 +80,33 @@ def test_consumer_messages():
         print(response.read())
         print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("on." + account))
-    # print("----------------------------")
-    # print("turn the circuit on fr/en ")
-    # print(response.read())
-    # print("----------------------------")
+    def test_on_message():
+        response = urllib2.urlopen(make_request("on." + account))
+        print("----------------------------")
+        print("turn the circuit on fr/en ")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("off." + account))
-    # print("----------------------------")
-    # print("turn the circuit off fr/en ")
-    # print(response.read())
-    # print("----------------------------")
+    def test_off_message():
+        response = urllib2.urlopen(make_request("off." + account))
+        print("----------------------------")
+        print("turn the circuit off fr/en ")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("use." + account))
-    # print("----------------------------")
-    # print("testing use en")
-    # print(response.read())
-    # print("----------------------------")
+    def test_usage_english():
+        response = urllib2.urlopen(make_request("use." + account))
+        print("----------------------------")
+        print("testing use en")
+        print(response.read())
+        print("----------------------------")
 
-    # response = urllib2.urlopen(make_request("conso." + account))
-    # print("----------------------------")
-    # print("testing use fr")
-    # print(response.read())
-    # print("----------------------------")
+    def test_usage_french():
+        response = urllib2.urlopen(make_request("conso." + account))
+        print("----------------------------")
+        print("testing use fr")
+        print(response.read())
+        print("----------------------------")
 
     def test_fail_message():
         response = urllib2.urlopen(make_request("this should fail" + account))
@@ -106,10 +115,18 @@ def test_consumer_messages():
         print(response.read())
         print("----------------------------")
 
-    test_balance_num()
-    #test_balance_english()
-    #test_add_credit_french()
-    #test_fail_message()
+    # test_balance_num()
+    # test_balance_english()
+    # test_balance_failure()
+    # test_balance_french()
+    # test_balance_french_failure()
+    # test_change_primary_phone()
+    # test_primary_phone_french()
+    test_add_credit_english()
+    # test_add_credit_french()
+    # test_usage_english()
+    # test_usage_french()
+    # test_fail_message()
 
 
 def test_meter_messages():

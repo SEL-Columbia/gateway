@@ -1,11 +1,18 @@
 """
 
 """
+from os import path
+import shutil
+
 from paver.easy import task
 from paver.easy import options
 from paver.easy import Bunch
 from paver.easy import needs
-#import paver.doctools
+from paver.easy import pushd
+from paver.easy import sh
+from paver import setuputils
+from clint.textui import colored
+from clint.textui import puts
 
 requires = [
     'psycopg2',
@@ -40,8 +47,9 @@ options(
         ),
     virtualenv=Bunch(
         packages_to_install=[
-            'pip'
-            'virtualenv'
+            'pip',
+            'clint',
+            'virtualenv',
         ],
         dest_dir='./',
         install_paver=True,
@@ -50,13 +58,118 @@ options(
     ),
 )
 
+setuputils.install_distutils_tasks()
+
+
+# location of javascript folder on gateway
+javascript_folder = 'gateway/static/js'
+
+
+def warning(msg):
+    puts('--------------------')
+    puts(colored.red(msg))
+    puts('--------------------')
+
+
+def info(msg):
+    """
+    Function to print a info message
+    """
+    puts('--------------------')
+    puts(colored.green(msg))
+    puts('--------------------')
+
 
 @task
+def clean():
+    """
+    Task to remove javascript folders.
+    """
+    with pushd(javascript_folder):
+        if path.exists('openlayers'):
+            warning('Removing openlayers')
+            shutil.rmtree('openlayers')
+        if path.exists('d3'):
+            warning('Removing d3')
+            shutil.rmtree('d3')
+        if path.exists('SlickGrid'):
+            warning('Removing SlickGrid')
+            shutil.rmtree('SlickGrid')
+
+
+@task
+def check_os():
+    """
+    Task to check the user's system
+    """
+    try:
+        info('Start of postgresql config')
+        sh('pg_config')
+        info('End of postgresl config')
+    except:
+        warning('You must have postgresql installed to run the gateway')
+
+
+@task
+def build_openlayers():
+    """
+    Task to install and build a compressed version of OpenLayers from github
+    """
+    info('Installing Openlayers')
+    with pushd(javascript_folder):
+        sh('git clone git://github.com/openlayers/openlayers.git', capture=True)
+        with pushd('openlayers/build/'):
+            info('Building OpenLayers into a compressed file')
+            sh('python build.py', capture=True)
+            shutil.copy('OpenLayers.js', '../')
+
+
+@task
+def build_d3():
+    """
+    Task to install d3.js, a graphing lib, from github.
+    """
+    info('Installing d3.js')
+    with pushd(javascript_folder):
+        sh('git clone https://github.com/mbostock/d3.git', capture=True)
+
+
+@task
+def build_slick_grid():
+    """
+    Task to install slick grid from github
+    """
+    info('Install SlickGrid')
+    with pushd(javascript_folder):
+        sh('git clone https://github.com/mleibman/SlickGrid.git', capture=True)
+
+
+@task
+@needs(['build_openlayers', 'build_d3', 'build_slick_grid'])
 def build_javascript():
-    print 'building javascript'
+    """
+    Task that builds all of the javascript libraries requried by the Gateway
+    """
+    pass
 
 
 @task
-@needs(['build_javascript'])
+def install_python_reqs():
+    info('Installing python requirements')
+    sh('pip install --upgrade git+git://github.com/iwillig/dispatch.git#egg=dispatch')
+    info('Installing Gateway egg')
+    sh('python setup.py develop', capture=True)
+
+
+@task
+@needs(['check_os', 'install_python_reqs', 'build_javascript'])
 def build():
-    print 'Building SharedSolar Gateway'
+    puts('----------------------------------------')
+    puts(colored.green('Finished building the SharedSolar Gateway'))
+    puts(colored.green('Please run paster serve development --reload'))
+
+
+@task
+@needs(['build'])
+def post_bootstrap():
+    pass

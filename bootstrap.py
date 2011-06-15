@@ -1514,7 +1514,9 @@ def after_install(options, home_dir):
     else:
         bin_dir = join(home_dir, 'bin')
     subprocess.call([join(bin_dir, 'easy_install'), 'paver==1.0.4'])
-    subprocess.call([join(bin_dir, 'easy_install'), 'pipvirtualenv'])
+    subprocess.call([join(bin_dir, 'easy_install'), 'pip'])
+    subprocess.call([join(bin_dir, 'easy_install'), 'clint'])
+    subprocess.call([join(bin_dir, 'easy_install'), 'virtualenv'])
     subprocess.call([join(bin_dir, 'paver'),'post_bootstrap'])
 
 def convert(s):

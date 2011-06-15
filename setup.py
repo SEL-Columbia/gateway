@@ -28,9 +28,9 @@ requires = [
     'WebError',
 ]
 
-if sys.version_info[:3] < (2,5,0):
+if sys.version_info[:3] < (2, 5, 0):
     requires.append('pysqlite')
-    
+
 setup(name='gateway',
       version='0.0',
       description='gateway',
@@ -56,4 +56,3 @@ setup(name='gateway',
       main = gateway:main
       """
       )
-
