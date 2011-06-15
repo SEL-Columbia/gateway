@@ -103,9 +103,9 @@ def check_os():
     Task to check the user's system
     """
     try:
-        info('Start of postgresql config')
-        sh('pg_config')
-        info('End of postgresl config')
+        info('Checking Postgresql version')
+        sh('pg_config --version')
+        puts('--------------------')
     except:
         warning('You must have postgresql installed to run the gateway')
 
@@ -156,9 +156,9 @@ def build_javascript():
 @task
 def install_python_reqs():
     info('Installing python requirements')
-    sh('pip install --upgrade git+git://github.com/iwillig/dispatch.git#egg=dispatch')
+    sh('bin/pip install --upgrade git+git://github.com/iwillig/dispatch.git#egg=dispatch')
     info('Installing Gateway egg')
-    sh('python setup.py develop', capture=True)
+    sh('bin/python setup.py develop', capture=True)
 
 
 @task
