@@ -58,16 +58,13 @@ function loadGraph(options) {
       // offsetSeconds is opposite sign of usual offset
       // i.e. EDT(GMT-4) -> offsetSeconds = +14400
   var offsetSeconds = new Date().getTimezoneOffset() * 60; 
-  console.log("offset : " + offsetSeconds);
   function buildDate(string) { 
     var year = parseInt(string.split("/")[2]); 
     var month = parseInt(string.split("/")[0]) - 1; 
     var date = +string.split("/")[1];
     var midnightLocal = new Date(year, month, date);
-    console.log(midnightLocal);
     var midnightLocalMilliseconds = midnightLocal.getTime();
     var midnightGMTSeconds = midnightLocalMilliseconds / 1000 - offsetSeconds;
-    console.log(midnightGMTSeconds);
     return midnightGMTSeconds;
   }
 
