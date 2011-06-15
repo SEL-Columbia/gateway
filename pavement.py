@@ -158,7 +158,7 @@ def install_python_reqs():
     info('Installing python requirements')
     sh('bin/pip install --upgrade git+git://github.com/iwillig/dispatch.git#egg=dispatch')
     info('Installing Gateway egg')
-    sh('bin/python setup.py develop', capture=True)
+    sh('bin/python setup.py develop')
 
 
 @task
