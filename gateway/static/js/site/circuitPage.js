@@ -55,12 +55,20 @@ function loadGraph(options) {
     }
   })
 
+      // offsetSeconds is opposite sign of usual offset
+      // i.e. EDT(GMT-4) -> offsetSeconds = +14400
   var offsetSeconds = new Date().getTimezoneOffset() * 60; 
+  console.log("offset : " + offsetSeconds);
   function buildDate(string) { 
     var year = parseInt(string.split("/")[2]); 
     var month = parseInt(string.split("/")[0]) - 1; 
     var date = +string.split("/")[1];
-    return (Date.UTC(year, month, date) / 1000) + offsetSeconds;
+    var midnightLocal = new Date(year, month, date);
+    console.log(midnightLocal);
+    var midnightLocalMilliseconds = midnightLocal.getTime();
+    var midnightGMTSeconds = midnightLocalMilliseconds / 1000 - offsetSeconds;
+    console.log(midnightGMTSeconds);
+    return midnightGMTSeconds;
   }
 
 
@@ -74,19 +82,19 @@ function loadGraph(options) {
         bottom_margin = 100,
         dataY = d.values,
         dataX = d.dates,
-        start = buildDate($("#start").val()),
-        end = buildDate($("#end").val());
+        startDateSeconds = buildDate($("#start").val()),
+        endDateSeconds = buildDate($("#end").val());
 
     var dateRange =  new Array();
-    var current = start;
-    while (current <= end) {
-      dateRange.push(current);
-      current = current + (24 * 60 * 60);
+    var currentDateSeconds = startDateSeconds;
+    while (currentDateSeconds <= endDateSeconds) {
+      dateRange.push(currentDateSeconds);
+      currentDateSeconds += 24 * 60 * 60;
     };     
 
-
     var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([h - bottom_margin ,top_margin]);
-    var x = d3.scale.linear().domain([start, end]).range([left_margin, w - right_margin]);
+    var x = d3.scale.linear().domain([startDateSeconds, endDateSeconds])
+                             .range([left_margin, w - right_margin]);
 
     var vis = d3.select("#graph")
       .append("svg:svg")
@@ -148,10 +156,11 @@ function loadGraph(options) {
 
 
     function prettyDateString(d){
-      var local_date = new Date(d * 1000);
-      return local_date.getDate() + " " +
-        ("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(' ')[local_date.getMonth()]) + " " +
-        local_date.getFullYear();
+      var UTCDateTick = new Date(d * 1000);
+      // getUTC methods are necessary to keep date from being interpreted locally  
+      return UTCDateTick.getUTCDate() + " " +
+       ("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(' ')[UTCDateTick.getUTCMonth()])
+       + " " + UTCDateTick.getUTCFullYear();
     }
     
     g.selectAll(".xLabel")
