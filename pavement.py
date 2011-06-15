@@ -137,7 +137,7 @@ def build_openlayers():
         sh('git clone git://github.com/openlayers/openlayers.git', capture=True)
         with pushd('openlayers/build/'):
             info('Building OpenLayers into a compressed file')
-            sh('bin/python build.py', capture=True)
+            sh('python build.py', capture=True)
             shutil.copy('OpenLayers.js', '../')
 
 
