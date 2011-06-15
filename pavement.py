@@ -174,6 +174,8 @@ def build_javascript():
 def install_python_reqs():
     info('Installing python requirements')
     sh('bin/pip install --upgrade git+git://github.com/iwillig/dispatch.git#egg=dispatch')
+    sh('bin/pip install fabric')
+    sh('bin/pip install markdown')
     info('Installing Gateway egg')
     sh('bin/python setup.py develop')
 
