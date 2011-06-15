@@ -10,6 +10,7 @@ from paver.easy import Bunch
 from paver.easy import needs
 from paver.easy import pushd
 from paver.easy import sh
+from paver.tasks import BuildFailure
 from paver import setuputils
 from clint.textui import colored
 from clint.textui import puts
@@ -98,16 +99,32 @@ def clean():
 
 
 @task
+def check_postgres():
+    info('Checking your version of postgresql')
+    try:
+        sh('pg_config --version')
+        puts('--------------------')
+    except:
+        raise BuildFailure('You don\'t have postgresql installed')
+
+
+@task
+def check_geos():
+    info('Checking your version of geos')
+    try:
+        sh('geos-config --version')
+        puts('--------------------')
+    except:
+        raise BuildFailure('You don\'t have geos installed')
+
+
+@task
+@needs(['check_postgres', 'check_geos'])
 def check_os():
     """
     Task to check the user's system
     """
-    try:
-        info('Checking Postgresql version')
-        sh('pg_config --version')
-        puts('--------------------')
-    except:
-        warning('You must have postgresql installed to run the gateway')
+    pass
 
 
 @task
@@ -120,7 +137,7 @@ def build_openlayers():
         sh('git clone git://github.com/openlayers/openlayers.git', capture=True)
         with pushd('openlayers/build/'):
             info('Building OpenLayers into a compressed file')
-            sh('python build.py', capture=True)
+            sh('bin/python build.py', capture=True)
             shutil.copy('OpenLayers.js', '../')
 
 
