@@ -1,7 +1,9 @@
 """
 
 """
+import os
 from os import path
+from datetime import datetime
 import shutil
 
 from paver.easy import task
@@ -10,6 +12,7 @@ from paver.easy import Bunch
 from paver.easy import needs
 from paver.easy import pushd
 from paver.easy import sh
+from paver.ssh import scp
 from paver.tasks import BuildFailure
 from paver import setuputils
 from clint.textui import colored
@@ -186,6 +189,44 @@ def build():
     puts('----------------------------------------')
     puts(colored.green('Finished building the SharedSolar Gateway'))
     puts(colored.green('Please run paster serve development --reload'))
+
+
+db_name = 'gateway'
+
+
+@task
+def drop_and_create_db():
+    """Task to drop and create gateway db
+    """
+    info('Dropping and recreating database')
+    try:
+        sh('dropdb ' + db_name)
+        sh('createdb ' + db_name)
+    except:
+        raise BuildFailure('Unable to drop database, try stopping the development server')
+
+
+@task
+@needs(['drop_and_create_db'])
+def syncdb():
+    """
+    Task that downloads a zip file from the production server and the
+    data into your local machine. This is destructive as it first
+    removes your local copy of the database and then updates your
+    database.
+    """
+    tmp_folder = 'tmp'
+    try:
+        shutil.rmtree(tmp_folder)
+    except:
+        pass
+    now = datetime.now().strftime("%y%m%d")
+    os.mkdir(tmp_folder)
+    with pushd(tmp_folder):
+        scp('root@gateway.sharedsolar.org:/var/lib/postgresql/backups/gateway.' + now + '.sql.zip', '.')
+        sh('unzip gateway.' + now + '.sql.zip')
+        sh('psql -d ' + db_name + ' -f var/lib/postgresql/backups/gateway.' + now + '.sql')
+    shutil.rmtree(tmp_folder)
 
 
 @task

@@ -1,6 +1,6 @@
 *pyc
-/bin/* 
-/lib/* 
+/bin/**
+/lib/**
 /include/*
 /gateway.egg-info/*
 /gateway/static/favicon.ico
@@ -8,11 +8,8 @@
 /build/*
 /docs/*
 /dist/*
-/data/*
 
 
-/gateway/static/js/#maps.js#
 /gateway/static/js/SlickGrid/
 /gateway/static/js/openlayers/
-/utils/wifi_access.log
 /gateway/static/js/d3/
