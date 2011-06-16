@@ -25,6 +25,8 @@ from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 
+import matplotlib
+matplotlib.use('Agg')
 
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
