@@ -165,7 +165,7 @@ def build_slick_grid():
 
 
 @task
-@needs(['build_openlayers', 'build_d3', 'build_slick_grid'])
+@needs(['clean', 'build_openlayers', 'build_d3', 'build_slick_grid'])
 def build_javascript():
     """
     Task that builds all of the javascript libraries requried by the Gateway
@@ -188,7 +188,7 @@ def install_python_reqs():
 def build():
     puts('----------------------------------------')
     puts(colored.green('Finished building the SharedSolar Gateway'))
-    puts(colored.green('Please run paster serve development --reload'))
+    puts(colored.green('Please run paster serve development.ini --reload'))
 
 
 db_name = 'gateway'
@@ -204,6 +204,17 @@ def drop_and_create_db():
         sh('createdb ' + db_name)
     except:
         raise BuildFailure('Unable to drop database, try stopping the development server')
+
+
+@task
+@needs(['drop_and_create_db'])
+def testing_db():
+    with pushd('migrations'):
+        puts('--------------------')
+        puts('Creating test tables')
+        sh('psql -d gateway -f create_tables.sql')
+        puts('Loading test data')
+        sh('psql -d gateway -f load_testing_env.sql')
 
 
 @task

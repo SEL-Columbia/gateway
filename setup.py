@@ -9,6 +9,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'psycopg2',
+    'twilio',
     'shapely',
     'WebTest',
     'pyramid_mailer',

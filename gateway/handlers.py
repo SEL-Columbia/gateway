@@ -786,6 +786,10 @@ class MeterHandler(object):
                             'properties': {}
                             }]}))
 
+    @action(renderer='meter/grid_graph.mako')
+    def grid_graph(self):
+        return {'meter': self.meter}
+
     @action(request_method='POST', permission="admin")
     def add_circuit(self):
         """A view that allows users to add an circuit to an

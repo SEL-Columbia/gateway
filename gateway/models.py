@@ -26,7 +26,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker, relation
 from zope.sqlalchemy import ZopeTransactionExtension
-
+import twilio
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
@@ -113,6 +113,63 @@ class CommunicationInterface(Base):
 
     def __str__(self):
         return "Communication Interface %s" % self.name
+
+
+class TwilioInterface(CommunicationInterface):
+    __tablename__ = 'twilio_interface'
+    __mapper_args__ = {'polymorphic_identity': 'twilio_interface'}
+
+    id = Column(Integer,
+                ForeignKey('communication_interface.id'),
+                primary_key=True)
+    host = Column(String)
+    account_id = Column(String)
+    token = Column(String)
+    api_version = Column(String)
+
+    def __init__(self, name=None,
+                 location=None,
+                 api_version=None,
+                 provider=None,
+                 host=None,
+                 account_id=None,
+                 token=None):
+        CommunicationInterface.__init__(self, name, provider, location)
+        self.host = host
+        self.account_id = account_id
+        self.token = token
+        self.api_version = api_version
+
+    def send_message(self, account, data):
+        url = '/%s/Accounts/%s/SMS/Messages' % \
+            (self.api_version, self.account_id)
+        return account.request(url, 'POST', data)
+
+    def sendData(self, message):
+        account = twilio.Account(self.account_id, self.token)
+        data = {'From': self.phone,
+                'To': message.number,
+                'Body': message.text}
+        return self.send_message(account, data)
+
+    def sendMessage(self, number, text, incoming=None):
+        session = DBSession()
+        msg = OutgoingMessage(
+            number,
+            text,
+            incoming)
+        session.add(msg)
+        session.flush()
+        self.sendData(msg)
+        return msg
+
+    def sendJob(self, job, incoming=None):
+        session = DBSession()
+        msg = JobMessage(job,
+                         incoming=incoming)
+        session.add(msg)
+        session.flush()
+        return self.sendData(msg)
 
 
 class KannelInterface(CommunicationInterface):
