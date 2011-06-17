@@ -100,10 +100,6 @@ def main(global_config, **settings):
                      permission='view',
                      view='gateway.handlers.DeleteJobs')
 
-    config.add_route('graph',
-                     '/graph/{class}/{id}',
-                     view='gateway.handlers.GraphView')
-
     config.add_route('edit',
                      '/edit/{class}/{id}',
                      renderer='edit.mako',
@@ -114,6 +110,10 @@ def main(global_config, **settings):
                      '/',
                      renderer='index.mako',
                      view='gateway.handlers.Index')
+
+    config.add_handler('twilio',
+                       'twilio/{action}',
+                       handler='gateway.handlers:TwilioHandler')
 
     config.add_handler('alerts',
                        '/alerts/{action}',

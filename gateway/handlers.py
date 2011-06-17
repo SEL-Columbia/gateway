@@ -25,16 +25,6 @@ from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 
-import matplotlib
-matplotlib.use('Agg')
-
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-from matplotlib.dates import date2num
-from matplotlib.dates import DateFormatter
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-
-
 from shapely.wkt import loads
 
 from gateway import dispatcher
@@ -58,6 +48,7 @@ from gateway.models import Users
 from gateway.models import Groups
 from gateway.models import MeterChangeSet
 from gateway.models import CommunicationInterface
+from gateway.models import TwilioInterface
 
 # random junk that needs to be cleaned up.
 from gateway.utils import get_fields
@@ -92,6 +83,34 @@ def json_response(data):
     return Response(
         content_type='application/json',
         body=simplejson.dumps(data))
+
+
+def save_and_parse_message(interface, origin, text, id=None):
+    """
+    """
+    session = DBSession()
+    if id is None:
+        id = str(uuid.uuid4())
+    message = IncomingMessage(origin, text, id, interface)
+    session.add(message)
+    session.flush()
+    dispatcher.matchMessage(message)
+    return message
+
+
+class TwilioHandler(object):
+    def __init__(self, request):
+        self.request = request
+
+    @action()
+    def send(self):
+        session = DBSession()
+        twilio = session.query(TwilioInterface).first()
+        msg = save_and_parse_message(twilio,
+                                     self.request.params['From'],
+                                     self.request.params['Body'],
+                                     id=self.request.params['SmsMessageSid'])
+        return Response(msg.uuid)
 
 
 class Index(object):
@@ -195,78 +214,6 @@ class EditModel(RestView):
             fs.sync()
             self.session.flush()
             return HTTPFound(location=fs.model.getUrl())
-
-
-class GraphView(RestView):
-    """
-    """
-    def __init__(self, request):
-        self.now = datetime.now()
-        self.days30 = timedelta(days=30)
-        self.request = request
-        self.session = DBSession()
-        self.cls = self.look_up_class()
-        self.instance = self.look_up_instance()
-        self.column = self.request.params.get('column', None)
-        self.figsize = tuple(map(lambda item: int(item),
-                                 self.request.params.get('figsize',
-                                                         "1,2").split(",")))
-        self.columns = self.request.params.get('columns', None)
-        self.start = self.request.params.get('start', None)
-        self.end = self.request.params.get('end', None)
-        if self.end is not None:
-            self.end = parser.parse(self.end)
-        if self.end is None:
-            self.end = self.now
-        if self.start is not None:
-            self.start = parser.parse(self.start)
-        if self.start is None:
-            self.start = self.end - self.days30
-
-    def get_circuit_logs(self, circuit):
-        return self.session.query(PrimaryLog).filter_by(circuit=circuit)\
-               .filter(PrimaryLog.created > self.start)\
-               .filter(PrimaryLog.created < self.end).order_by(PrimaryLog.date)
-
-    def get_ylabel(self):
-        """
-        """
-        return {'credit': 'Credit',
-                'watthours': 'Energy (Wh)',
-                'use_time': 'Time used (sec)'}[self.column]
-
-    def graphCircuit(self):
-        fig = Figure(figsize=self.figsize)
-        canvas = FigureCanvasAgg(fig)
-        ax = fig.add_subplot(111,
-                             title='%s graph for %s' % (FieldSet.prettify(
-                                 self.column), self.instance))
-        logs = self.get_circuit_logs(self.instance)
-        x = [date2num(log.date) for log in logs]
-        y = [getattr(log, self.column) for log in logs]
-        ax.plot_date(x, y, 'x-')
-        ax.set_ylabel(self.get_ylabel())
-        ax.xaxis.set_major_formatter(DateFormatter('%b %d'))
-        ax.set_ylim(ymin=0)
-        ax.grid(True, linestyle='-', color='#e0e0e0')
-        fig.autofmt_xdate()
-        ax.set_xlabel('Date')
-        output = cStringIO.StringIO()
-        canvas.print_figure(output)
-        return Response(
-            body=output.getvalue(),
-            content_type='image/png')
-
-    def graphMeter(self):
-        return Response()
-
-    def get(self):
-        if isinstance(self.instance, Circuit):
-            return self.graphCircuit()
-        elif isinstance(self.instance, Meter):
-            return self.graphMeter()
-        else:
-            return Response("Class not supported")
 
 
 class AlertHandler(object):
@@ -536,11 +483,11 @@ class UserHandler(object):
         if 'form.submitted' in self.request.params:
             name = self.request.params['name']
             hash = hashlib.md5(self.request.params['password']).hexdigest()
-            print(name, hash)
             user = session.query(Users)\
                 .filter_by(name=name)\
                 .filter_by(password=unicode(hash)).first()
             if user:
+                print(name, hash)
                 headers = remember(self.request, user.name)
                 return HTTPFound(
                     location="%s" % came_from,
@@ -585,21 +532,12 @@ class InterfaceHandler(object):
                 'messages': messages,
                 'fields': get_fields(self.interface)}
 
-    def save_and_parse_message(self, origin, text, id=None):
-        """
-        """
-        if id is None:
-            id = str(uuid.uuid4())
-        message = IncomingMessage(origin, text, id, self.interface)
-        self.session.add(message)
-        self.session.flush()
-        dispatcher.matchMessage(message)
-        return message
-
     @action()
     def send(self):
-        msg = self.save_and_parse_message(self.request.params['number'],
-                                          self.request.params['message'])
+        msg = save_and_parse_message(
+            self.interface,
+            self.request.params['number'],
+            self.request.params['message'])
         return Response(msg.uuid)
 
     @action(permission='admin')
