@@ -229,7 +229,6 @@ def run_tests():
 
 
 @task
-@needs(['drop_and_create_db'])
 def syncdb():
     """
     Task that downloads a zip file from the production server and the
@@ -238,6 +237,7 @@ def syncdb():
     database.
     """
     tmp_folder = 'tmp'
+    drop_and_create_db('gateway')
     try:
         shutil.rmtree(tmp_folder)
     except:
