@@ -26,12 +26,7 @@ requires = [
     'fa.jquery',
     'distribute',
     'pyramid_formalchemy',
-    'pyramid_handlers',
-    'python-dateutil',
-    'simplejson',
-    'pyramid',
-    'pyramid_beaker',
-    'formalchemy',
+    'pyramid_handlers', 'python-dateutil', 'simplejson', 'pyramid', 'pyramid_beaker', 'formalchemy',
     'SQLAlchemy==0.6.8',
     'transaction',
     'repoze.tm2',
@@ -201,20 +196,37 @@ def drop_and_create_db():
     info('Dropping and recreating database')
     try:
         sh('dropdb ' + db_name)
+    except:
+        pass
+    try:
         sh('createdb ' + db_name)
     except:
-        raise BuildFailure('Unable to drop database, try stopping the development server')
+        raise BuildFailure('Unable to create db table')
 
 
 @task
 @needs(['drop_and_create_db'])
 def testing_db():
+    from gateway.models import initialize_sql
+    import ConfigParser
+    config = ConfigParser.ConfigParser()
+    config.readfp(open('testing.ini'))
+    db_string = config.get('app:gateway', 'db_string')
+    initialize_sql(db_string)
     with pushd('migrations'):
         puts('--------------------')
         puts('Creating test tables')
-        sh('psql -d gateway -f create_tables.sql')
         puts('Loading test data')
-        sh('psql -d gateway -f load_testing_env.sql')
+        sh('psql -d testing -f load_testing_env.sql')
+
+
+@task
+#@needs(['testing_db'])
+def run_tests():
+    import unittest
+    from gateway.tests import FunctionalTests
+    suite = unittest.TestLoader().loadTestsFromTestCase(FunctionalTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
 
 @task
