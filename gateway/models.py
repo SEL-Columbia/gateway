@@ -86,6 +86,19 @@ class Users(Base):
         return "%s" % self.name
 
 
+class Device(Base):
+    """
+    """
+    __tablename__ = 'devices'
+    id = Column(Integer, primary_key=True)
+    device_id = Column(Unicode(100))
+    password = Column(Unicode(100))
+
+    def __init__(self, device_id, password):
+        self.device_id = device_id
+        self.password = password
+
+
 class CommunicationInterface(Base):
     """
     Configures how the Gateway communicates with a Meter
@@ -728,23 +741,6 @@ class Alert(Base):
         self.message = message
 
 
-class Log(Base):
-    __tablename__ = "log"
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
-    uuid = Column(String)
-    _type = Column('type', String(50))
-    __mapper_args__ = {'polymorphic_on': _type}
-    circuit_id = Column(Integer, ForeignKey('circuit.id'))
-    circuit = relation(Circuit, lazy=False,
-                       primaryjoin=circuit_id == Circuit.id)
-
-    def __init__(self, date=None, circuit=None):
-        self.date = date
-        self.uuid = str(uuid.uuid4())
-        self.circuit = circuit
-
-
 class SystemLog(Base):
     __tablename__ = "system_log"
     id = Column(Integer, primary_key=True)
@@ -761,6 +757,60 @@ class SystemLog(Base):
         return ""
 
 
+class Log(Base):
+    __tablename__ = "log"
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime)
+    _type = Column('type', String(50))
+    __mapper_args__ = {'polymorphic_on': _type}
+
+    def __init__(self, date=None):
+        self.date = date
+
+
+class PCLog(Log):
+    """
+    (pcu#<ts>#
+    <cumltve-kwh-sol>,
+    <cumltve-kwh-bat-charge>,
+    <cumltve-kwh-discharge>,
+    <BatteryV(V)>,
+    <Bat charge>,
+    <Bat discharge>,
+    <Sol A(A)>,
+    <SolarVolt>
+    """
+    __tablename__ = "pcu_log"
+    __mapper_args__ = {'polymorphic_identity': 'pcu_log'}
+    id = Column(Integer, ForeignKey('log.id'), primary_key=True)
+    timestamp = Column(DateTime)
+    cumulative_khw_solar = Column(Float)
+    cumulative_kwh_battery_charge = Column(Float)
+    cumulative_kwh_discharge = Column(Float)
+    battery_volts = Column(Float)
+    battery_charge = Column(Float)
+    battery_discharge = Column(Float)
+    solar_amps = Column(Float)
+    solar_volts = Column(Float)
+    meter_id = Column(Integer, ForeignKey('meter.id'))
+    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
+
+    def __init__(self, timestamp, cumulative_khw_solar,
+                 cumulative_kwh_battery_charge, cumulative_kwh_discharge,
+                 battery_volts, battery_charge, battery_discharge, solar_amps,
+                 solar_volts, meter):
+        self.timestamp = timestamp
+        self.cumulative_khw_solar = cumulative_khw_solar
+        self.cumulative_kwh_battery_charge = cumulative_kwh_battery_charge
+        self.cumulative_kwh_discharge = cumulative_kwh_discharge
+        self.battery_volts = battery_volts
+        self.battery_charge = battery_charge
+        self.battery_discharge = battery_discharge
+        self.solar_amps = solar_amps
+        self.solar_volts = solar_volts
+        self.meter = meter
+
+
 class PrimaryLog(Log):
     __tablename__ = "primary_log"
     __mapper_args__ = {'polymorphic_identity': 'primary_log'}
@@ -770,16 +820,20 @@ class PrimaryLog(Log):
     status = Column(Integer)
     created = Column(DateTime)
     credit = Column(Float, nullable=True)
+    circuit_id = Column(Integer, ForeignKey('circuit.id'))
+    circuit = relation(Circuit, lazy=False,
+                       primaryjoin=circuit_id == Circuit.id)
 
     def __init__(self, date=None, circuit=None, watthours=None,
                  use_time=None, status=None, credit=0):
-        Log.__init__(self, date, circuit)
+        Log.__init__(self, date)
         self.circuit = circuit
         self.watthours = watthours
         self.use_time = use_time
         self.credit = credit
         self.created = get_now()
         self.status = status
+        self.circuit = circuit
 
     def getUrl(self):
         return ""
