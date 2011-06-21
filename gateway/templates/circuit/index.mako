@@ -4,22 +4,20 @@
 <%def name="header()"> 
 
     <title>Circuit Page</title>
-
     ${headers.loadSlickGrid(request)}
-
     <script type="text/javascript" 
             src="${a_url}/static/js/d3/d3.js">
     </script>
-
     <script type="text/javascript"
-            src="${a_url}/static/js/site/circuitPage.js"></script>
-
+            src="${a_url}/static/js/site/circuitPage.js">
+    </script>
     <script type="text/javascript">
       $(function() { 
          loadPage({circuit: "${circuit.id}" });
          $("#update-graph").button();
       });      
     </script>
+
     <style type="text/css" media="screen">
       #graph { 
         margin-top: 80px;
@@ -33,7 +31,6 @@
 
 <%def name="content()"> 
 <h3>Circuit overview page</h3>
-
 <ul class="overview">
   <li>
     <h4>Circuit id</h4>
@@ -116,6 +113,11 @@
     <li>
       <a href="#">Add credit to account</a>
       <p>Sends a job to meter to add credit to a circuit</p>
+      <form method="POST" id=""
+            action="${a_url}/circuit/add_credit/${circuit.id}">
+        <input type="text" name="amount" value="" />
+        <input type="submit" name="" value="Add credit to account" />
+      </form>
     </li>
   </ul>
 </div>

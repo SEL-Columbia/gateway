@@ -8,7 +8,7 @@ def make_request(msg, phone="+22365489009"):
                              'number': phone,
                              'uuid': str(uuid.uuid4()) })
     return urllib2.Request(
-        data=data, url="http://localhost:6543G/interface/send/6")
+        data=data, url="http://localhost:6543/interface/send/1")
 
 
 def test_consumer_messages():
@@ -115,14 +115,14 @@ def test_consumer_messages():
         print(response.read())
         print("----------------------------")
 
-    # test_balance_num()
-    # test_balance_english()
-    # test_balance_failure()
-    # test_balance_french()
+    test_balance_num()
+    test_balance_english()
+    test_balance_failure()
+    test_balance_french()
     # test_balance_french_failure()
     # test_change_primary_phone()
     # test_primary_phone_french()
-    test_add_credit_english()
+    # test_add_credit_english()
     # test_add_credit_french()
     # test_usage_english()
     # test_usage_french()

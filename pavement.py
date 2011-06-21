@@ -5,6 +5,7 @@ import os
 from os import path
 from datetime import datetime
 import shutil
+import ConfigParser
 
 from paver.easy import task
 from paver.easy import options
@@ -189,26 +190,24 @@ def build():
 db_name = 'gateway'
 
 
-@task
-def drop_and_create_db():
+def drop_and_create_db(db_name):
     """Task to drop and create gateway db
     """
     info('Dropping and recreating database')
     try:
         sh('dropdb ' + db_name)
     except:
-        pass
+        raise BuildFailure('Unable to drop ' + db_name)
     try:
         sh('createdb ' + db_name)
     except:
-        raise BuildFailure('Unable to create db table')
+        raise BuildFailure('Unable to create ' + db_name)
 
 
 @task
-@needs(['drop_and_create_db'])
 def testing_db():
     from gateway.models import initialize_sql
-    import ConfigParser
+    drop_and_create_db('testing')
     config = ConfigParser.ConfigParser()
     config.readfp(open('testing.ini'))
     db_string = config.get('app:gateway', 'db_string')

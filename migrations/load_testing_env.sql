@@ -31,8 +31,8 @@ DELETE FROM meter;
 INSERT INTO meter VALUES 
 (1 , 
    '6b7a5d09-b73e-4ae1-b4ba-cf5d6dab85a0', 
-    '+13474594049',
    'demo001',
+   '+13474594049',
    'New York City' , 
    't', 
    '2010-12-18 19:31:17', 
