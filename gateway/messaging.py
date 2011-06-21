@@ -7,6 +7,7 @@ from gateway.models import Meter
 from gateway.models import SystemLog
 from gateway.models import TestMessage
 from gateway import meter as meter_funcs
+from gateway.meter import make_pcu_logs
 import compactsms
 
 
@@ -78,23 +79,26 @@ def parse_meter_message(message):
             meter_funcs.make_pp(m, circuit, session)
     # old messages
     elif re.match("^\(.*\)$", message.text.lower()):
-        messageDict = clean_message(message)
-        if messageDict["job"] == "delete":
-            getattr(meter_funcs,
-                    "make_" + messageDict["job"])(messageDict, session)
+        if message.text.startswith('(pcu'):
+            make_pcu_logs(message, meter, session)
         else:
-            circuit = findCircuit(messageDict, meter)
-            if circuit:  # double check that we have a circuit
-                if messageDict['job'] == "pp":
-                    getattr(meter_funcs,
-                            "make_" + messageDict["job"])(messageDict,
-                                                         circuit,
-                                                         session)
-                elif messageDict['job'] == "alert":
-                    getattr(meter_funcs,
-                            "make_" + messageDict["alert"])(messageDict,
-                                                           circuit,
-                                                           session)
+            messageDict = clean_message(message)
+            if messageDict["job"] == "delete":
+                getattr(meter_funcs,
+                        "make_" + messageDict["job"])(messageDict, session)
+            else:
+                circuit = findCircuit(messageDict, meter)
+                if circuit:  # double check that we have a circuit
+                    if messageDict['job'] == "pp":
+                        getattr(meter_funcs,
+                                "make_" + messageDict["job"])(messageDict,
+                                                             circuit,
+                                                             session)
+                    elif messageDict['job'] == "alert":
+                        getattr(meter_funcs,
+                                "make_" + messageDict["alert"])(messageDict,
+                                                               circuit,
+                                                               session)
     else:
         session.add(SystemLog(
                 'Unable to parse message %s' % message.uuid))
