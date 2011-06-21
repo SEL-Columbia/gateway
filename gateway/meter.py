@@ -75,31 +75,32 @@ def make_delete(msgDict, session):
     messageBody = None
     # locate the job from the job id
     job = session.query(Job).get(msgDict["jobid"])
-    circuit = job.circuit
-    interface = circuit.meter.communication_interface
+    if job:
+        circuit = job.circuit
+        interface = circuit.meter.communication_interface
 
-    originMsg = find_job_message(job, session)
-    update_job(job, session)
-    update_circuit(msgDict, circuit, session)
-    if isinstance(job, AddCredit):
-        messageBody = respond_to_add_credit(job, circuit, session)
-    elif job._type == "turnon" or job._type == "turnoff":
-        messageBody = make_message_body("toggle.txt",
-                                        lang=circuit.account.lang,
-                                        account=circuit.pin,
-                                        status=circuit.get_rich_status(),
-                                        credit=circuit.credit)
-    else:
-        pass
-        # double to check we have a message to send
-    if messageBody and originMsg:
-        interface.sendMessage(
-            originMsg.number,
-            messageBody,
-            incoming=originMsg.uuid)
-        session.merge(job)
-    else:
-        pass
+        originMsg = find_job_message(job, session)
+        update_job(job, session)
+        update_circuit(msgDict, circuit, session)
+        if isinstance(job, AddCredit):
+            messageBody = respond_to_add_credit(job, circuit, session)
+        elif job._type == "turnon" or job._type == "turnoff":
+            messageBody = make_message_body("toggle.txt",
+                                            lang=circuit.account.lang,
+                                            account=circuit.pin,
+                                            status=circuit.get_rich_status(),
+                                            credit=circuit.credit)
+        else:
+            pass
+            # double to check we have a message to send
+        if messageBody and originMsg:
+            interface.sendMessage(
+                originMsg.number,
+                messageBody,
+                incoming=originMsg.uuid)
+            session.merge(job)
+        else:
+            pass
 
 
 def make_pp(message, circuit, session):
