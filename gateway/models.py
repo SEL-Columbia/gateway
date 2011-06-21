@@ -114,6 +114,28 @@ class CommunicationInterface(Base):
     def __str__(self):
         return "Communication Interface %s" % self.name
 
+    def sendData(self, message):
+        raise NotImplementedError
+
+    def sendMessage(self, number, text, incoming=None):
+        session = DBSession()
+        msg = OutgoingMessage(
+            number,
+            text,
+            incoming)
+        session.add(msg)
+        session.flush()
+        self.sendData(msg)
+        return msg
+
+    def sendJob(self, job, incoming=None):
+        session = DBSession()
+        msg = JobMessage(job,
+                         incoming=incoming)
+        session.add(msg)
+        session.flush()
+        return self.sendData(msg)
+
 
 class TwilioInterface(CommunicationInterface):
     __tablename__ = 'twilio_interface'
@@ -151,25 +173,6 @@ class TwilioInterface(CommunicationInterface):
                 'To': message.number,
                 'Body': message.text}
         return self.send_message(account, data)
-
-    def sendMessage(self, number, text, incoming=None):
-        session = DBSession()
-        msg = OutgoingMessage(
-            number,
-            text,
-            incoming)
-        session.add(msg)
-        session.flush()
-        self.sendData(msg)
-        return msg
-
-    def sendJob(self, job, incoming=None):
-        session = DBSession()
-        msg = JobMessage(job,
-                         incoming=incoming)
-        session.add(msg)
-        session.flush()
-        return self.sendData(msg)
 
 
 class KannelInterface(CommunicationInterface):
@@ -214,25 +217,6 @@ class KannelInterface(CommunicationInterface):
                                                         data))
         return urllib2.urlopen(request)
 
-    def sendMessage(self, number, text, incoming=None):
-        session = DBSession()
-        msg = KannelOutgoingMessage(
-            number,
-            text,
-            incoming)
-        session.add(msg)
-        session.flush()
-        self.sendData(msg)
-        return msg
-
-    def sendJob(self, job, incoming=None):
-        session = DBSession()
-        msg = KannelJobMessage(job,
-                               incoming=incoming)
-        session.add(msg)
-        session.flush()
-        self.sendData(msg)
-
 
 class AirtelInterface(CommunicationInterface):
     __tablename__ = 'airtel_interface'
@@ -254,25 +238,6 @@ class AirtelInterface(CommunicationInterface):
         request = urllib2.Request(url)
         return urllib2.urlopen(request)
 
-    def sendMessage(self, number, text, incoming=None):
-        session = DBSession()
-        msg = OutgoingMessage(
-            number,
-            text,
-            incoming)
-        session.add(msg)
-        session.flush()
-        self.sendData(msg)
-        return msg
-
-    def sendJob(self, job, incoming=None):
-        session = DBSession()
-        msg = JobMessage(job, incoming=incoming)
-        session.add(msg)
-        session.flush()
-        self.sendData(msg)
-        return msg
-
 
 class NetbookInterface(CommunicationInterface):
     """
@@ -287,22 +252,8 @@ class NetbookInterface(CommunicationInterface):
     def __init__(self, name=None, provider=None, location=None):
         CommunicationInterface.__init__(self, name, provider, location)
 
-    def sendMessage(self, number, text, incoming=None):
-        session = DBSession()
-        msg = OutgoingMessage(number,
-                        text,
-                        incoming=incoming)
-        session.add(msg)
-        session.flush()
-        return msg
-
-    def sendJob(self, job, incoming=None):
-        session = DBSession()
-        msg = JobMessage(job,
-                         incoming=incoming)
-        session.add(msg)
-        session.flush()
-        return msg
+    def sendData(self, message):
+        pass
 
 
 class Meter(Base):
