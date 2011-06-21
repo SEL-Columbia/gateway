@@ -103,6 +103,12 @@ def make_delete(msgDict, session):
             pass
 
 
+def make_pcu_logs(message, meter, session):
+    """
+    """
+    print meter, message
+
+
 def make_pp(message, circuit, session):
     """
     Saves primary parameter to the database.
