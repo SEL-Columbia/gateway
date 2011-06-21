@@ -288,7 +288,7 @@ class ManageHandler(object):
         return {
             'breadcrumbs': self.breadcrumbs}
 
-    @action(renderer='manage/meters.mako')
+    @action(renderer='manage/meters.mako', permission='view')
     def show_meters(self):
         session = DBSession()
         return {
