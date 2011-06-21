@@ -7,28 +7,24 @@ INSERT INTO groups VALUES
 
 DELETE FROM users;
 INSERT INTO users VALUES
-(1 , 'admin', '48dc53f1fe20e666d2dadb1aeb0ce431', 'iwillig@gmail.com', 1);
+(1 , 'admin', '48dc53f1fe20e666d2dadb1aeb0ce431', 'iwillig@gmail.com', 't', 1);
 
 -- load commuication interface
 DELETE FROM communication_interface;
 INSERT INTO communication_interface  VALUES 
 (
-   'twilio_interface',  
+   'netbook_interface',  
     1, 
-    'Testing Twilio', 
-    'Twilio', 
+    'Testing Interface', 
+    'Modi Labs', 
     'New York City' , 
     '13473529231'
 );
 
 -- add the twilio type
-DELETE FROM twilio_interface;
-INSERT INTO twilio_interface VALUES 
-(1 , 
-   'https://api.twilio.com', 
-   'ACd4793dc8d2433f93e219d69ff19364da', 
-   '35f483e85e563736ec6f3ffcbe39e22e', 
-   '2010-04-01' );
+DELETE FROM netbook_interface;
+INSERT INTO netbook_interface VALUES
+(1); 
 
 
 DELETE FROM meter;
@@ -42,7 +38,7 @@ INSERT INTO meter VALUES
    '2010-12-18 19:31:17', 
    100, 
    100, 
-   'POINT', 1);
+   'POINT (1 1)', 1);
 
 DELETE FROM account;
 INSERT INTO account VALUES (28, 'default', '', 'en');
