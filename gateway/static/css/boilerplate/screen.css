@@ -27,13 +27,18 @@ a { color: #004276; }
 .navigation { 
     font-size: 120%;
 } 
-#clock { 
-   top: 10;
+#system-status { 
+   bottom: 10;
+   padding: 10px;
+   border: 1px dashed #808080;
    right: 10;
    z-index: 1001;
    background: #fff;
    position:fixed;
 } 
+#system-status h4 { 
+  margin: 0px;
+}
 .menu { 
     list-style-position:inside;    
     list-style-type: none;

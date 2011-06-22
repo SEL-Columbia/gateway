@@ -2,6 +2,7 @@ from pyramid.threadlocal import get_current_request
 from pyramid.exceptions import ConfigurationError
 from pyramid.security import authenticated_userid
 from pyramid.url import route_url
+from git import Repo
 
 
 def add_renderer_globals(event):
@@ -15,7 +16,8 @@ def add_renderer_globals(event):
         'url': route_url,
         'h': None,
         'a_url': request.application_url,
-        'user': authenticated_userid(request)
+        'user': authenticated_userid(request),
+        'repo': Repo(request.registry.settings.get('git_repo', '.'))
         }
     if request is not None:
         tmpl_context = request.tmpl_context

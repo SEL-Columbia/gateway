@@ -8,10 +8,14 @@
   </head>
   <body>
       <%! 
-         from datetime import datetime         
+         from datetime import datetime
       %>
-      <div id="clock">        
-        <p><strong>${datetime.now().ctime()}</strong></p>
+      <div id="system-status">
+        <h4>System status</h4>
+        <p>Server time (GMT): <strong>${datetime.now().ctime()}</strong></p>
+        <p>Git commit : ${repo.commit()}</p>
+        <p>Git commit author: ${repo.commit().author.name}</p>
+        <p>Git commit message : ${repo.commit().message}</p>
       </div>
 
     <div class="container">
