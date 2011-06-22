@@ -40,6 +40,10 @@ INSERT INTO meter VALUES
    100, 
    'POINT (1 1)', 1);
 
+DELETE FROM devices; 
+INSERT INTO devices VALUES
+(1, 'abc123', '48dc53f1fe20e666d2dadb1aeb0ce431');
+
 DELETE FROM account;
 INSERT INTO account VALUES (28, 'default', '', 'en');
 INSERT INTO account VALUES (26, 'default', '+13479440686', 'en');
