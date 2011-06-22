@@ -147,8 +147,21 @@ def inflatelogs(logs):
         for circuits in [c for c in consection.split(';') if c]:
             status = 1
             messageparts = circuits.split(',')
-
-            if len(messageparts) == 1: # mains
+            if len(messageparts) == 2:  #mains
+                ct = "MAINS"
+                wh = base36decode(messageparts[0]) / Globals.factor_wh
+                tu = base36decode(messageparts[1])
+                cid = "192.168.1.2%02d" % (0,)  #192.168.1.200
+                kv = (("job", "pp"),
+                      ("status", status),
+                      ("ts", timestamp),
+                      ("cid", cid),
+                      ("tu", tu),
+                      ("wh", wh),
+                      ("cr", 0),
+                      ("ct", ct))
+                uncompressedmessages.append(urllib.urlencode(kv))
+            if len(messageparts) == 1:  # mains
                 ct = "MAINS"
                 wh = base36decode(messageparts[0]) / Globals.factor_wh
                 cid = "192.168.1.2%02d" % (0,) # 192.168.1.200
