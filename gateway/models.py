@@ -758,6 +758,9 @@ class SystemLog(Base):
 
 
 class Log(Base):
+    """
+    Base class for all logs in the gateway.
+    """
     __tablename__ = "log"
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)
@@ -768,7 +771,7 @@ class Log(Base):
         self.date = date
 
 
-class PCLog(Log):
+class PCULog(Log):
     """
     (pcu#<ts>#
     <cumltve-kwh-sol>,
@@ -795,10 +798,17 @@ class PCLog(Log):
     meter_id = Column(Integer, ForeignKey('meter.id'))
     meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
-    def __init__(self, timestamp, cumulative_khw_solar,
-                 cumulative_kwh_battery_charge, cumulative_kwh_discharge,
-                 battery_volts, battery_charge, battery_discharge, solar_amps,
-                 solar_volts, meter):
+    def __init__(self, date, timestamp,
+                 cumulative_khw_solar,
+                 cumulative_kwh_battery_charge,
+                 cumulative_kwh_discharge,
+                 battery_volts,
+                 battery_charge,
+                 battery_discharge,
+                 solar_amps,
+                 solar_volts,
+                 meter):
+        Log.__init__(self, date)
         self.timestamp = timestamp
         self.cumulative_khw_solar = cumulative_khw_solar
         self.cumulative_kwh_battery_charge = cumulative_kwh_battery_charge

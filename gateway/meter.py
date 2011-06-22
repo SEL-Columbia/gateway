@@ -8,6 +8,7 @@ from gateway.models import SystemLog
 from gateway.models import PrimaryLog
 from gateway.models import IncomingMessage
 from gateway.models import AddCredit
+from gateway.models import PCULog
 from gateway.utils import make_message_body
 
 
@@ -105,8 +106,33 @@ def make_delete(msgDict, session):
 
 def make_pcu_logs(message, meter, session):
     """
+    (pcu#
+    timestamp: 11062200#
+    cumltve-kwh-solar: 0.00,
+    cumltve-khw-bat-charge :0.00,
+    cumltve-kwh-dischage: 0.00,
+    battery_volds: 0.00,
+    battery_charge: 48.01,
+    battery_discharge: 0.00,
+    solar_amps: 0.00,
+    solar_volts: 0.00)
     """
-    print meter, message
+    data = message.text.strip('(').strip(')').split(',')
+    header = data[0].split("#")
+    timestamp = datetime.strptime(header[1], '%Y%m%d%H')
+    log = PCULog(datetime.now(),
+                 timestamp,
+                 float(header[2]),
+                 float(data[1]),
+                 float(data[2]),
+                 float(data[3]),
+                 float(data[4]),
+                 float(data[5]),
+                 float(data[6]),
+                 float(data[7]),
+                 meter)
+    session.add(log)
+    session.flush()
 
 
 def make_pp(message, circuit, session):
