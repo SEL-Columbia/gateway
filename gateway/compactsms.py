@@ -161,7 +161,7 @@ def inflatelogs(logs):
                       ("cr", 0),
                       ("ct", ct))
                 uncompressedmessages.append(urllib.urlencode(kv))
-            if len(messageparts) == 1:  # mains
+            elif len(messageparts) == 1:  # mains
                 ct = "MAINS"
                 wh = base36decode(messageparts[0]) / Globals.factor_wh
                 cid = "192.168.1.2%02d" % (0,) # 192.168.1.200
