@@ -102,7 +102,7 @@ class Device(Base):
         return "/edit/Device/%s" % self.id
 
     def __str__(self):
-        return "Device id: %s" % self.id
+        return "Device id: %s" % self.device_id
 
 
 class CommunicationInterface(Base):
