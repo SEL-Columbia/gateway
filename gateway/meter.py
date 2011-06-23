@@ -120,7 +120,7 @@ def make_pcu_logs(message, meter, session):
     """
     data = message.text.strip('(').strip(')').split(',')
     header = data[0].split("#")
-    timestamp = datetime.strptime(header[1], '%Y%m%d%H')
+    timestamp = datetime.strptime(header[1], '%y%m%d%H')
     log = PCULog(datetime.now(),
                  timestamp,
                  float(header[2]),
