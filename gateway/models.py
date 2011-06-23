@@ -99,7 +99,10 @@ class Device(Base):
         self.password = password
 
     def getUrl(self):
-        return ""
+        return "/edit/Device/%s" % self.id
+
+    def __str__(self):
+        return "Device id: %s" % self.id
 
 
 class CommunicationInterface(Base):

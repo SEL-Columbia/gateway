@@ -16,6 +16,7 @@
       <ul class="index-list">
         <li><a href="${a_url}/manage/show_meters">Meters</a></li>
         <li><a href="${a_url}/manage/show?class=Circuit">Circuits</a></li>
+        <li><a href="${a_url}/manage/show?class=Device">Devices</a></li>
         <ul>
           <li><a href="${a_url}/manage/show?class=KannelInterface">
               Communication Kannel</a></li>
