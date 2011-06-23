@@ -94,7 +94,7 @@ class Device(Base):
     device_id = Column(Unicode(100))
     password = Column(Unicode(100))
 
-    def __init__(self, device_id, password):
+    def __init__(self, device_id=None, password=None):
         self.device_id = device_id
         self.password = password
 
