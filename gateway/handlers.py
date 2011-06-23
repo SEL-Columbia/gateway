@@ -325,7 +325,7 @@ class ManageHandler(object):
         grid.configure(readonly=True, exclude=[grid._get_fields()[0]])
         grid.insert(grid._get_fields()[1],
             Field('%s overview page' % cls.__name__,
-                  value=lambda item:'<a href=%s>%s</a>' % (item.getUrl(), str(item))))
+                  value=lambda item: '<a href=%s>%s</a>' % (item.getUrl(), str(item))))
         return {'grid': grid,
                 'cls': cls,
                 'breadcrumbs': breadcrumbs}
@@ -398,19 +398,23 @@ class ManageHandler(object):
         data = simplejson.loads(self.request.body)
         if not 'device_id' in data:
             return Response('You must provide an device_id')
-        if not 'tokens' in data:
-            return Response('You must provide an amount of tokens')
-        print '\n\n\n'
-        for group in data['tokens']:
-            for i in range(0, group['count']):
-                token = Token(Token.get_random(),
-                              batch=batch,
-                              value=group['denomination'])
-                session.add(token)
-                session.flush()
-        return Response(simplejson.dumps(
-                [{'token_id': int(token.token),
-                  'denomination': float(token.value)} for token in batch.getTokens()]))
+        else:
+            device = session.query(Device).filter_by(device_id=data['device_id']).first()
+            if device:
+                if not 'tokens' in data:
+                    return Response('You must provide an amount of tokens')
+                for group in data['tokens']:
+                    for i in range(0, group['count']):
+                        token = Token(Token.get_random(),
+                                      batch=batch,
+                                      value=group['denomination'])
+                        session.add(token)
+                        session.flush()
+                return json_response(
+                    [{'token_id': int(token.token),
+                      'denomination': float(token.value)} for token in batch.getTokens()])
+            else:
+                return json_response('Not a valid device')
 
     @action()
     def update_tokens(self):
