@@ -10,22 +10,16 @@ import simplejson
 from datetime import datetime
 import collections
 import hashlib
-
-from dateutil import parser
 from webob import Response
 from webob.exc import HTTPFound
-
 from pyramid_handlers import action
 from pyramid.security import authenticated_userid
 from pyramid.security import remember
 from pyramid.security import forget
-
 from sqlalchemy import or_, desc
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
-
 from shapely.wkt import loads
-
 from gateway import dispatcher
 from gateway import models
 from gateway.models import DBSession

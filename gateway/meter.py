@@ -17,10 +17,11 @@ def respond_to_add_credit(job, circuit, session):
     Function to excute the actions need after the gateways gets a job
     delete about a add credit job.
     """
-    token = job.token
-    token.state = 'used'
-    session.merge(token)
-    session.flush()
+    if hasattr(job, 'token'):
+        token = job.token
+        token.state = 'used'
+        session.merge(token)
+        session.flush()
     return make_message_body("credit.txt",
                              lang=circuit.account.lang,
                              account=circuit.pin,
