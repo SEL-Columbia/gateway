@@ -98,6 +98,9 @@ class Device(Base):
         self.device_id = device_id
         self.password = password
 
+    def getUrl(self):
+        return ""
+
 
 class CommunicationInterface(Base):
     """
