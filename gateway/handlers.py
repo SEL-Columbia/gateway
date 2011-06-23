@@ -396,6 +396,8 @@ class ManageHandler(object):
         session.add(batch)
         session.flush()
         data = simplejson.loads(self.request.body)
+        print '\n\n %s' % self.request.body
+        print '\n\n %s' % data
         if not 'device_id' in data:
             return Response('You must provide an device_id')
         else:
@@ -420,6 +422,8 @@ class ManageHandler(object):
     def update_tokens(self):
         session = DBSession()
         data = simplejson.loads(self.request.body)
+        print '\n\n %s' % self.request.body
+        print '\n\n %s' % data
         if not 'device_id' in data:
             return json_response('You must provide an device_id')
         device = session.query(Device).filter_by(device_id=data['device_id']).first()
@@ -427,8 +431,9 @@ class ManageHandler(object):
         if device:
             for i in data['tokens']:
                 token = session.query(Token).filter_by(token=i['token_id']).first()
-                token.state = 4
-                session.merge(token)
+                if token:
+                    token.state = 5
+                    session.merge(token)
             session.flush()
             return json_response('ok')
         else:
