@@ -43,6 +43,7 @@ from gateway.models import MeterChangeSet
 from gateway.models import CommunicationInterface
 from gateway.models import TwilioInterface
 from gateway.models import Device
+from gateway.models import Alert
 # random junk that needs to be cleaned up.
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
@@ -296,6 +297,10 @@ class ManageHandler(object):
                          'location': m.location
                          }
                         for m in session.query(Meter).all()])}
+
+    @action(renderer='manage/add_meter.mako', permission='admin')
+    def add_meter(self):
+        return {}
 
     @action()
     def metersAsGeoJson(self):
@@ -623,6 +628,12 @@ class MeterHandler(object):
         dates = [d[0] for d in data]
         watthours = [d[1] for d in data]
         return dates, watthours
+
+    @action(renderer='meter/alerts.mako', permission='view')
+    def alerts(self):
+        session = DBSession()
+        alerts = session.query(Alert).filter_by(meter=self.meter)
+        return {'alerts': alerts}
 
     @action()
     def overview_graph(self):
