@@ -910,7 +910,7 @@ class AccountHandler(object):
         account = model_from_request(self.request,
                                      self.account)
         self.session.add(account)
-        return Response()
+        return HTTPFound(location='%s/circuit/index/%s' % (self.request.application_url, account.circuit[0].id))
 
 
 class LoggingHandler(object):
@@ -1080,6 +1080,10 @@ class SMSHandler(object):
             "messages": messages,
             "table_headers": make_table_header(OutgoingMessage),
             "breadcrumbs": breadcrumbs}
+
+    @action(permission='view')
+    def meter_message(self):
+        return Response()
 
     @action(permission="view")
     def remove_all(self):
