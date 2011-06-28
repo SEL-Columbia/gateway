@@ -9,6 +9,10 @@ from gateway.models import PrimaryLog
 from gateway.models import IncomingMessage
 from gateway.models import AddCredit
 from gateway.models import PCULog
+from gateway.models import NoCredit
+from gateway.models import LowCredit
+from gateway.models import PowerMax
+from gateway.models import EnergyMax
 from gateway.utils import make_message_body
 
 
@@ -164,16 +168,14 @@ def make_nocw(message, circuit, session):
     Sends a no credit alert to the consumer
     """
     interface = circuit.meter.communication_interface
-    interface.sendMessage(
+    msg = interface.sendMessage(
         circuit.account.phone,
         make_message_body("nocw-alert.txt",
                      lang=circuit.account.lang,
                      account=circuit.pin))
+    alert = NoCredit(datetime.now(), circuit.meter, circuit, message['meta'], msg)
+    session.add(alert)
     session.flush()
-    log = SystemLog(
-        "No credit alert for circuit %s sent to %s" % (circuit.pin,
-                                                        circuit.account.phone))
-    session.add(log)
 
 
 def make_lcw(message, circuit, session):
@@ -181,12 +183,14 @@ def make_lcw(message, circuit, session):
     Sends a low credit alert to the consumer.
     """
     interface = circuit.meter.communication_interface
-    interface.sendMessage(
+    msg = interface.sendMessage(
         circuit.account.phone,
         make_message_body("lcw-alert.txt",
                      lang=circuit.account.lang,
                      account=circuit.pin),
         incoming=message['meta'].uuid)
+    alert = LowCredit(datetime.now(), circuit.meter, circuit, message['meta'], msg)
+    session.add(alert)
     session.flush()
 
 
@@ -204,22 +208,28 @@ def make_ce(message, circuit, session):
 
 def make_pmax(message, circuit, session):
     interface = circuit.meter.communication_interface
-    interface.sendMessage(
+    msg  = interface.sendMessage(
         circuit.account.phone,
         make_message_body("power-max-alert.txt",
                      lang=circuit.account.lang,
                      account=circuit.pin),
         incoming=message['meta'].uuid)
+    alert = PowerMax(datetime.now(), circuit.meter, circuit, message['meta'], msg)
+    session.add(alert)
+    session.flush()
 
 
 def make_emax(message, circuit, session):
     interface = circuit.meter.communication_interface
-    interface.sendMessage(
+    msg = interface.sendMessage(
         circuit.account.phone,
         make_message_body("energy-max-alert.txt",
                      lang=circuit.account.lang,
                      account=circuit.pin),
         incoming=message['meta'].uuid)
+    alert = EnergyMax(datetime.now(), circuit.meter, circuit, message['meta'], msg)
+    session.add(alert)
+    session.flush()
 
 
 def make_sdc(message, circuit, session):
