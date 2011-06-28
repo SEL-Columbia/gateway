@@ -153,7 +153,8 @@ class CommunicationInterface(Base):
                          incoming=incoming)
         session.add(msg)
         session.flush()
-        return self.sendData(msg)
+        self.sendData(msg)
+        return msg
 
 
 class TwilioInterface(CommunicationInterface):
@@ -729,22 +730,195 @@ class Token(Base):
             "created": self.created.ctime()}
 
 
+class Job(Base):
+    __tablename__ = "jobs"
+    id = Column(Integer, primary_key=True)
+    _type = Column('type', String(50))
+    __mapper_args__ = {'polymorphic_on': _type}
+    uuid = Column(String)
+    start = Column(DateTime)
+    end = Column(DateTime)
+    state = Column(Boolean)
+    circuit_id = Column(Integer, ForeignKey('circuit.id'))
+    circuit = relation(Circuit,
+                       cascade="all,delete",
+                       lazy=False, primaryjoin=circuit_id == Circuit.id)
+
+    def __init__(self, circuit=None, state=True):
+        self.uuid = str(uuid.uuid4())
+        self.start = get_now()
+        self.circuit = circuit
+        self.state = state
+
+    def getMessage(self, session):
+        if len(self.job_message) is not 0:
+            incoming_uuid = self.job_message[0]
+        elif len(self.kannel_job_message) is not 0:
+            incoming_uuid = self.kannel_job_message[0].incoming
+        return session.query(IncomingMessage).\
+                            filter_by(uuid=incoming_uuid).first()
+
+    def url(self):
+        return "jobs/job/%s/" % self.id
+
+    def toDict(self):
+        return {
+            'uuid': self.uuid,
+            'state': self.state,
+            'start': str(self.start),
+            'end': str(self.end),
+            'type': self._type
+            }
+
+    def __str__(self):
+        return "job"
+
+
 class Alert(Base):
-    __tablename__ = 'alert'
+    """
+    Base class for all alerts in the Gateway
+    """
+    LEVEL = 'info'
+    __tablename__ = 'alerts'
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)
-    text = Column(String)
-    message_id = Column(Integer, ForeignKey('message.id'))
-    message = relation(Message, lazy=False,
-                       primaryjoin=message_id == Message.id)
-    circuit_id = Column(Integer, ForeignKey('circuit.id'))
-    circuit = relation(Circuit, lazy=False,
-                       primaryjoin=circuit_id == Circuit.id)
+    _type = Column('type', String(50))
+    __mapper_args__ = {'polymorphic_on': _type}
 
-    def __init__(self, text=None, circuit=None, message=None):
-        self.date = get_now()
+    meter_id = Column(Integer, ForeignKey('meter.id'))
+    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
+
+    circuit_id = Column(Integer, ForeignKey('circuit.id'))
+    circuit = relation(Circuit, primaryjoin=circuit_id == Circuit.id)
+
+    origin_message_id = Column(Integer, ForeignKey('message.id'))
+    origin_message = relation(Message,
+                              primaryjoin=origin_message_id == Message.id)
+
+    consumer_message_id = Column(Integer, ForeignKey('message.id'))
+    consumer_message = relation(Message,
+                                primaryjoin=consumer_message_id == Message.id)
+
+    def __init__(self, date, meter, circuit=None, origin_message=None, consumer_message=None):
+        self.date = date
+        self.meter = meter
         self.circuit = circuit
-        self.message = message
+        self.origin_message = origin_message
+        self.consumer_message = consumer_message
+
+    def toJSON(self):
+        return {'id': self.id,
+                'meter': self.meter.name,
+                'circuit': self.circuit.ip_address,
+                'type': self._type }
+
+    def __str__(self):
+        return "Alert type: %s for circuit: %s" % (self._type, self.circuit)
+
+
+class UnresponsiveCircuit(Alert):
+    """
+    An alert that is sent when a circuit fails to report for
+    more than 2 hours. Sends an email to the gateway admins and logs
+    the event in the UI.
+    """
+    LEVEL = ''
+    id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
+    __tablename__ = 'unresponsive_circuit'
+    __mapper_args__ = {'polymorphic_identity': 'unresponsive_circuit'}
+
+    last_heard_from = Column(Float)
+
+    def __init__(self, date, meter, circuit, last_head_from):
+        Alert.__init__(self, date,)
+        self.last_heard_from = last_head_from
+        self.circuit = circuit
+
+
+class PowerMax(Alert):
+    """
+    An alert that gets sent from the meter when a consumer uses to much
+    power.  A SMS message is sent to the consumer. The event it logged
+    in the Gateway UI.
+    """
+    id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
+    __tablename__ = 'power_max'
+    __mapper_args__ = {'polymorphic_identity': 'power_max'}
+
+    def __init__(self, date, meter, circuit, origin_message, consumer_message):
+        Alert.__init__(self, date, meter, circuit=circuit,
+                       origin_message=origin_message,
+                       consumer_message=consumer_message)
+
+
+class EnergyMax(Alert):
+    """
+    An alert that is sent when a consumer uses over their daily max.
+    A SMS message it sent to the consumer and the event in logged in
+    the Gateway UI.
+    """
+    id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
+    __tablename__ = 'energy_max'
+    __mapper_args__ = {'polymorphic_identity': 'energy_max'}
+
+    def __init__(self, date, meter, circuit, origin_message, consumer_message):
+        Alert.__init__(self, date, meter, circuit=circuit,
+                       origin_message=origin_message,
+                       consumer_message=consumer_message)
+
+
+class LowCredit(Alert):
+    """
+    An alert when the consumer is running low on credit. A SMS is sent
+    to the consumer.
+    """
+    id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
+    __tablename__ = 'low_credit'
+    __mapper_args__ = {'polymorphic_identity': 'low_credit'}
+
+    def __init__(self, date, meter, circuit, origin_message, consumer_message):
+        Alert.__init__(self, date, meter, circuit=circuit,
+                       origin_message=origin_message,
+                       consumer_message=consumer_message)
+
+
+class NoCredit(Alert):
+    """
+    """
+    id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
+    __tablename__ = 'no_credit'
+    __mapper_args__ = {'polymorphic_identity': 'no_credit'}
+
+    def __init__(self, date, meter, circuit, origin_message, consumer_message):
+        Alert.__init__(self, date, meter, circuit=circuit,
+                       origin_message=origin_message,
+                       consumer_message=consumer_message)
+
+
+class UnresponsiveJob(Alert):
+    """
+    """
+    id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
+    __tablename__ = 'unresponsive_job'
+    __mapper_args__ = {'polymorphic_identity': 'unresponsive_job'}
+
+    job_id = Column(Integer, ForeignKey('jobs.id'))
+    job = relation(Job, primaryjoin=job_id == Job.id)
+
+    def __init__(self, date, meter, circuit, job):
+        Alert.__init__(self, date, meter, circuit=circuit)
+        self.job = job
+
+
+class PowerOn(Alert):
+    """
+    """
+    id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
+    __tablename__ = 'power_on'
+    __mapper_args__ = {'polymorphic_identity': 'power_one'}
+
+    def __init__(self, date, meter, origin_message):
+        Alert.__init__(self, date, meter, origin_message=origin_message)
 
 
 class SystemLog(Base):
@@ -874,50 +1048,6 @@ class PrimaryLog(Log):
                            ('cid', self.circuit.ip_address),
                            ('tu', int(self.use_time)),
                            ('wh', float(self.watthours))] + self.getCircuitAndType())
-
-
-class Job(Base):
-    __tablename__ = "jobs"
-    id = Column(Integer, primary_key=True)
-    _type = Column('type', String(50))
-    __mapper_args__ = {'polymorphic_on': _type}
-    uuid = Column(String)
-    start = Column(DateTime)
-    end = Column(DateTime)
-    state = Column(Boolean)
-    circuit_id = Column(Integer, ForeignKey('circuit.id'))
-    circuit = relation(Circuit,
-                       cascade="all,delete",
-                       lazy=False, primaryjoin=circuit_id == Circuit.id)
-
-    def __init__(self, circuit=None, state=True):
-        self.uuid = str(uuid.uuid4())
-        self.start = get_now()
-        self.circuit = circuit
-        self.state = state
-
-    def getMessage(self, session):
-        if len(self.job_message) is not 0:
-            incoming_uuid = self.job_message[0]
-        elif len(self.kannel_job_message) is not 0:
-            incoming_uuid = self.kannel_job_message[0].incoming
-        return session.query(IncomingMessage).\
-                            filter_by(uuid=incoming_uuid).first()
-
-    def url(self):
-        return "jobs/job/%s/" % self.id
-
-    def toDict(self):
-        return {
-            'uuid': self.uuid,
-            'state': self.state,
-            'start': str(self.start),
-            'end': str(self.end),
-            'type': self._type
-            }
-
-    def __str__(self):
-        return "job"
 
 
 class AddCredit(Job):
