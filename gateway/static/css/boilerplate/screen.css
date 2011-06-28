@@ -45,7 +45,7 @@ a { color: #004276; }
     margin: 0px;} 
 
 .menu li { 
-    padding: 5px 20px 4px 20px;
+    padding: 5px 20px 2px 20px;
     margin: 0px ;
     display: inline; } 
 
@@ -238,12 +238,14 @@ code { background: white;
    list-style: none;
 }
  
-#tabs-1 { 
-  
+#map-tab {   
    height: 300px;
    padding: 0px;
 } 
-
+#graph-tab { 
+   height: 300px;
+   padding: 0px;
+}
 #map { 
 
 } 
