@@ -8,7 +8,7 @@
 </%def>    
 
 <%def name="content()">
-<p>These are all of the messages <strong>from</strong> meter configured in the
+<p>These are all of the messages <strong>from</strong> meters configured in the
   system</p>
 <table>
   <tr>

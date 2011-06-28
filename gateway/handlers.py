@@ -17,7 +17,6 @@ from pyramid.security import authenticated_userid
 from pyramid.security import remember
 from pyramid.security import forget
 from sqlalchemy import or_, desc
-from sqlalchemy.orm import join as sqljoin
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 from shapely.wkt import loads
