@@ -8,16 +8,21 @@
    <script type="text/javascript" src="${a_url}/static/js/site/showMeters.js"></script>
    <style type="text/css" media="screen">
      #meterGrid { height: 300px; }
+     #add-meter { margin-bottom: 20px; } 
    </style>   
    <script type="text/javascript">
      $(function() { 
        loadPage(${meters});
+     $("a#add-meter").button();
      });     
    </script>
 
 </%def>
 
 <%def name="content()">
+<a id="add-meter" href="${a_url}/manage/add_meter">
+  Add a new meter and associated circuits</a>
+
 <div id="meterGrid">
 </div>
 

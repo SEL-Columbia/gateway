@@ -1,5 +1,6 @@
-var grid, vector_layer;
-function loadGrid(options) { 
+var vector_layer;
+
+  function loadGridCircuit(options) { 
 
   var gridOptions = {
     forceFitColumns: false,
@@ -27,7 +28,7 @@ function loadGrid(options) {
 
   var dataView = new Slick.Data.DataView();
   
-  grid = new Slick.Grid("#circuit-grid", dataView, columns, gridOptions);
+ var grid = new Slick.Grid("#circuit-grid", dataView, columns, gridOptions);
 
   $.getJSON("/meter/circuits/" + options.meter, function(data){ 
     dataView.beginUpdate();
@@ -104,10 +105,18 @@ function loadMap(div, options) {
 }
  
 
-var map;
+function loadMainGraph(options) { 
+  loadCircuitData({ 
+    selector: "#graph",
+    circuit: options.main
+  });
+
+}
+
 function loadPage(options) {
   
-  map = loadMap("map", options); 
+  var map = loadMap("map", options); 
+  loadMainGraph(options);
 
   $( "#tabs" ).tabs();
   $("#tabs-1").removeClass("ui-corner-bottom");
@@ -124,7 +133,7 @@ function loadPage(options) {
     $("#tool-menu").toggle();
   })
 
-  var grid = loadGrid(options); 
+  var grid = loadGridCircuit(options); 
 
   $('#removeMeter').click(function(){ 
     var remove = confirm("Are you sure that you want to remove this meter?"); 

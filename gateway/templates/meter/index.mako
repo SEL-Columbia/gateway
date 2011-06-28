@@ -3,6 +3,12 @@
 
 <%def name="header()">
 ${headers.loadSlickGrid(request)} 
+
+<script type="text/javascript" 
+        src="${a_url}/static/js/d3/d3.js">
+</script>
+
+
 <link rel="stylesheet" 
       href="${a_url}/static/js/openlayers/theme/default/style.css" type="text/css" />
 
@@ -31,7 +37,9 @@ ${headers.loadSlickGrid(request)}
 
 <script type="text/javascript">
   $(function() { 
-    loadPage({ 'meter' : ${meter.id}, 'geometry': "${meter.geometry}"});
+    loadPage({ 'meter' : ${meter.id}, 
+               'main': ${meter.getMainCircuitId()},
+               'geometry': "${meter.geometry}"});
   });
 </script>
 </%def>
@@ -82,17 +90,34 @@ ${headers.loadSlickGrid(request)}
 
 <div id="tabs" class="tabs-bottom">
 	<ul>
-	  <li><a href="#tabs-1">Map</a></li>          
-	  <li><a href="#tabs-2">Power Graph</a></li>
+	  <li><a href="#map-tab">Map</a></li>          
+	  <li><a href="#graph-tab">Daily Accumulated Energy Graph</a></li>
 	</ul>
-	<div id="tabs-1">
+	<div id="map-tab">
           <div id="map"></div>
 	</div>
-	<div id="tabs-2">
-          <div id="graph">
-            <img 
-               src="${a_url}/graph/Circuit/${meter.getMainCircuitId()}?column=watthours&figsize=8,3" class="" alt="" />
-          </div>
+	<div id="graph-tab">
+          <div>    
+            <form method="GET" id="date-ranges" action="">
+              <select name="value">
+                <option value="watthours">Watt hours</option>
+                <option value="credit">Credit</option>
+                <option value="use_time">Use time</option>
+              </select>
+              <%! 
+                  from datetime import datetime, timedelta
+                  now = datetime.now() + timedelta(days=1)
+                  last_week = now - timedelta(days=7)
+               %>
+              <p>Select date range</p>
+              <input id="start" type="text" name="start"
+                     value="${last_week.strftime("%m/%d/%Y")}" />
+              <input id="end" type="text" name="end" value="${now.strftime("%m/%d/%Y")}" />
+            </form>
+            <div id="graph" style="height: 300px;">
+            </div>
+</div>
+
 	</div>
 </div>
 
@@ -121,8 +146,7 @@ ${headers.loadSlickGrid(request)}
 </ul>
 
 <div class="grid">
-  <h4>Circuits associated
-    with <span class="underline">${meter.name}</span></h4>
+  
   <div id="circuit-grid"></div>
 </div>
 <!-- 
@@ -188,5 +212,6 @@ ${headers.loadSlickGrid(request)}
 </table>
 </form>
 </div> 
+
 
 </%def> 

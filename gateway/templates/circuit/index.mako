@@ -5,9 +5,11 @@
 
     <title>Circuit Page</title>
     ${headers.loadSlickGrid(request)}
+
     <script type="text/javascript" 
             src="${a_url}/static/js/d3/d3.js">
     </script>
+
     <script type="text/javascript"
             src="${a_url}/static/js/site/circuitPage.js">
     </script>
@@ -15,7 +17,7 @@
       $(function() { 
          loadPage({circuit: "${circuit.id}" });
          $("#update-graph").button();
-      });      
+      });
     </script>
 
     <style type="text/css" media="screen">
@@ -54,6 +56,7 @@
 </ul>
 
 <p>Select value to graph</p>
+
 <form method="GET" id="date-ranges" action="">
   <select name="value">
     <option value="watthours">Watt hours</option>
