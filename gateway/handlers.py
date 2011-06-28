@@ -17,9 +17,11 @@ from pyramid.security import authenticated_userid
 from pyramid.security import remember
 from pyramid.security import forget
 from sqlalchemy import or_, desc
+from sqlalchemy.orm import join as sqljoin
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 from shapely.wkt import loads
+
 from gateway import dispatcher
 from gateway import models
 from gateway.models import DBSession
@@ -1081,9 +1083,20 @@ class SMSHandler(object):
             "table_headers": make_table_header(OutgoingMessage),
             "breadcrumbs": breadcrumbs}
 
-    @action(permission='view')
-    def meter_message(self):
-        return Response()
+    @action(renderer='sms/meter_messages.mako', permission='view')
+    def meter_messages(self):
+        from sqlalchemy import create_engine
+        db_string = self.request.registry.settings.get('db_string')
+        engine = create_engine(db_string, echo=False)
+        conn = engine.connect()
+        results = conn.execute(
+"""
+SELECT meter.name, meter.id, incoming_message.text, message.date
+       FROM meter, message, incoming_message
+       WHERE meter.phone = message.number
+       AND message.id = incoming_message.id ORDER BY message.date DESC LIMIT 1000;
+""")
+        return {'results': results}
 
     @action(permission="view")
     def remove_all(self):
