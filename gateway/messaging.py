@@ -65,7 +65,8 @@ def findCircuit(message, meter):
 
 
 def parse_meter_message(message):
-    """ Parse message from the Meter. Takes a message object and returns
+    """
+    Parse message from the Meter. Takes a message object and returns
     nothing. Logs an exception if the message is unable to be parsed.
     """
     session = DBSession()
