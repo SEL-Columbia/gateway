@@ -48,7 +48,7 @@ def get_token(message):
 def get_balance(message):
     """Allows users to check blance"""
     circuit = get_circuit(message)
-    language = message.language
+    language = circuit.account.lang
     if circuit:
         interface = circuit.meter.communication_interface
         interface.sendMessage(
