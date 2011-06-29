@@ -40,7 +40,7 @@ function loadGraph(options) {
       method: 'GET',
       success: function(d) { 
         buildGraph({ 
-          div: $("#graph"),
+          selector: "#graph",
           data: d
         });
       }

@@ -72,8 +72,8 @@ function buildGraph(options){
    */ 
   d = options.data,
   div = $(options.selector);
-  console.log(div);
-  div.empty();
+  $(options.selector).empty();
+  
 
   var w = div.width(),
       h = div.height(),
