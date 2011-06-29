@@ -32,6 +32,8 @@
       <ul class="index-list">
         <li><a href="${a_url}/alerts/make">Manual alerts and test messages</a></li>
         <li><a href="${a_url}/sms/index?limit=100">Check all SMS messages</a></li>
+        <li><a href="${a_url}/sms/meter_messages">Check all messages
+        from meters</a>
         <li><a href="${a_url}/system/download">Download data tables</a></li>
       </ul>
       <hr /> 
