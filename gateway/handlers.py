@@ -46,6 +46,7 @@ from gateway.models import CommunicationInterface
 from gateway.models import TwilioInterface
 from gateway.models import Device
 from gateway.models import Alert
+from gateway.models import PCULog
 # random junk that needs to be cleaned up.
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
@@ -636,6 +637,22 @@ class MeterHandler(object):
         session = DBSession()
         alerts = session.query(Alert).filter_by(meter=self.meter)
         return {'alerts': alerts}
+
+    @action()
+    def show_pculogs(self):
+        session = DBSession()
+        value = self.request.params.get('pcu-value', 'battery_volts')
+        start = datetime.strptime(self.request.params.get('start', '05/01/2011'), '%m/%d/%Y')
+        end = datetime.strptime(self.request.params.get('end', '07/20/2011'), '%m/%d/%Y')
+
+        pculogs = session.query(PCULog)\
+            .filter(PCULog.meter == self.meter)\
+            .filter(PCULog.timestamp >= start)\
+            .filter(PCULog.timestamp <= end)
+        return json_response(
+            {'dates': map(lambda x: time.mktime(x.date.timetuple()), pculogs),
+             'values': map(lambda x: getattr(x, value), pculogs)}
+            )
 
     @action()
     def overview_graph(self):

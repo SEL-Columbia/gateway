@@ -943,7 +943,7 @@ class Log(Base):
     """
     __tablename__ = "log"
     id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
+    date = Column(DateTime)  # gateway_time
     _type = Column('type', String(50))
     __mapper_args__ = {'polymorphic_on': _type}
 
@@ -966,7 +966,7 @@ class PCULog(Log):
     __tablename__ = "pcu_log"
     __mapper_args__ = {'polymorphic_identity': 'pcu_log'}
     id = Column(Integer, ForeignKey('log.id'), primary_key=True)
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime)  # meter time
     cumulative_khw_solar = Column(Float)
     cumulative_kwh_battery_charge = Column(Float)
     cumulative_kwh_discharge = Column(Float)

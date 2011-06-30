@@ -61,7 +61,50 @@ function loadCircuitData(options) {
   })
 };
 
+function graphPCULogs(options) { 
+  var url = options.url;
+  var selector = options.selector;
+  var form = options.form;
+  $.ajax({ 
+    url: url,
+    data: form.serialize(),
+    success: function(d) { 
+      buildGraph({
+        selector: options.selector,
+        data: d
+      })
+    },
+    error: function(e) { 
+      console.log(e);
+    }
+  })
+}
 
+
+
+function updateGraph(options) { 
+  var graph = $(options.selector);
+  $(options.button).click(function() { 
+    $.ajax({ 
+      url: '/circuit/show_graphing_logs/'  + options.circuit,
+      data: options.form.serialize(),
+      beforeSend: function() { 
+        graph.empty();
+        graph.append(
+          $("<div />",{id: "ajax-loader"}).append($('<img>', {src: '/static/images/ajax-loader.gif'})));
+      },
+      method: 'GET',
+      success: function(d) { 
+        buildGraph({ 
+          selector: options.selector,
+          data: d
+        });
+      }
+    })
+  }); 
+
+
+}; 
 
 
 function buildGraph(options){

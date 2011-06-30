@@ -1,3 +1,10 @@
+<%! 
+   from datetime import datetime, timedelta
+   now = datetime.now() + timedelta(days=1)
+   last_week = now - timedelta(days=7)
+%>
+
+
 <%inherit file="../base.mako"/>
 <%namespace name="headers" file="../headers.mako"/>
 
@@ -89,41 +96,37 @@ ${headers.loadSlickGrid(request)}
     <ul>
   </div>
 
-
-
 <h3>Meter overview page for <span class="underline">${meter.name}</span></h3> 
 
 <div id="tabs" class="tabs-bottom">
-	<ul>
-	  <li><a href="#map-tab">Map</a></li>          
-	  <li><a href="#graph-tab">Daily Accumulated Energy Graph</a></li>
-	</ul>
-	<div id="map-tab">
-          <div id="map"></div>
-	</div>
-	<div id="graph-tab">
-          <div>    
-            <form method="GET" id="date-ranges" action="">
-              <select name="value">
-                <option value="watthours">Watt hours</option>
-                <option value="credit">Credit</option>
-                <option value="use_time">Use time</option>
-              </select>
-              <%! 
-                  from datetime import datetime, timedelta
-                  now = datetime.now() + timedelta(days=1)
-                  last_week = now - timedelta(days=7)
-               %>
-              <p>Select date range</p>
-              <input id="start" type="text" name="start"
-                     value="${last_week.strftime("%m/%d/%Y")}" />
-              <input id="end" type="text" name="end" value="${now.strftime("%m/%d/%Y")}" />
-            </form>
-            <div id="graph" style="height: 300px;">
-            </div>
-</div>
+  <ul>
+    <li><a href="#graph-tab">Data Graphs</a></li>
+    <li><a href="#map-tab">Map</a></li>
+  </ul>
+  <div id="graph-tab">
+    <form method="GET" id="date-ranges" action="">
+      <input id="start" type="text" name="start"
+             value="${last_week.strftime("%m/%d/%Y")}" />
+      <input id="end" type="text" name="end" value="${now.strftime("%m/%d/%Y")}" />
+      <a id="update-graph" href="#">Graph Watt-hours</a> | 
+      <a id="graphPCULogs" href="#">Graph PCU Logs</a> 
+<%! 
+   from gateway.models import PCULog
+   columns = PCULog.__table__.columns.keys()[2:-1]
+%>   
 
-	</div>
+      <select name="pcu-value">
+        % for c in columns:
+         <option name="${c}"> ${c} </option>
+        % endfor 
+      </select>
+    </form>
+    <div id="graph" style="height: 270px; width: 900px;"></div>
+  </div>
+  <div id="map-tab">
+    <div id="map"></div>
+  </div>
+
 </div>
 
 
@@ -150,8 +153,7 @@ ${headers.loadSlickGrid(request)}
   </li>
 </ul>
 
-<div class="grid">
-  
+<div class="grid">  
   <div id="circuit-grid"></div>
 </div>
 <!-- 
@@ -217,6 +219,8 @@ ${headers.loadSlickGrid(request)}
 </table>
 </form>
 </div> 
+
+<hr />
 
 
 </%def> 

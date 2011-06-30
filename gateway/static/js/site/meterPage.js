@@ -106,10 +106,28 @@ function loadMap(div, options) {
  
 
 function loadMainGraph(options) { 
-  loadCircuitData({ 
+  $("#date-ranges input").datepicker();
+
+  updateGraph({ 
+    button: $("#update-graph"),
+    form: $("form#date-ranges"),
+    selector: "#graph",
+    circuit: options.main
+  }); 
+  
+  loadCircuitData({
     selector: "#graph",
     circuit: options.main
   });
+  
+  $("#graphPCULogs").click(function() { 
+    graphPCULogs({ 
+      url: '/meter/show_pculogs/' + options.meter,
+      selector: "#graph",
+      form: $("form#date-ranges")
+    });
+  }); 
+  
 
 }
 
