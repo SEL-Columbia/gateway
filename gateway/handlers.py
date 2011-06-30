@@ -84,14 +84,18 @@ def json_response(data):
 
 
 def find_last_message_by_meter(meter):
+    """
+    """
     meter_table = Meter.__table__
     circuit = Circuit.__table__
     primary = PrimaryLog.__table__
-    select = primary.select(from_obj=[circuit, meter_table],
-                            limit=1,
-                            whereclause=(and_(circuit.c.id == primary.c.circuit_id,
-                                              circuit.c.meter == meter_table.c.id,
-                                              meter_table.c.id == meter.id))).with_only_columns([primary.c.created]).order_by(desc(primary.c.created))
+    select = primary.select(
+        from_obj=[circuit, meter_table],
+        limit=1,
+        whereclause=(and_(circuit.c.id == primary.c.circuit_id,
+                          circuit.c.meter == meter_table.c.id,
+                          meter_table.c.id == meter.id)))\
+                          .with_only_columns([primary.c.created]).order_by(desc(primary.c.created))
     try:
         last_logs = [log for log in select.execute()]
         return last_logs[0][0].ctime()
@@ -656,10 +660,6 @@ class MeterHandler(object):
         alerts = session.query(Alert).filter_by(meter=self.meter)
         return {'alerts': alerts}
 
-    def show_last_messages(self):
-        """
-        """
-
     @action()
     def show_pculogs(self):
         session = DBSession()
@@ -797,9 +797,9 @@ class MeterHandler(object):
     def remove(self):
         """Allows users to remove an meter.
         """
+        [self.session.delete(c)
+         for c in self.session.query(Circuit).filter_by(meter=self.meter)]
         self.session.delete(self.meter)
-        [self.session.delete(x)
-         for x in self.session.query(Circuit).filter_by(meter=self.meter)]
         return HTTPFound(location="/manage/show?class=Meter")
 
     @action(permission="admin")
