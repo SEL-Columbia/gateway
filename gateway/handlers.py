@@ -18,6 +18,7 @@ from pyramid.security import authenticated_userid
 from pyramid.security import remember
 from pyramid.security import forget
 from sqlalchemy import or_, desc
+from sqlalchemy.sql.expression import and_
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 from shapely.wkt import loads
@@ -80,6 +81,22 @@ def json_response(data):
     return Response(
         content_type='application/json',
         body=simplejson.dumps(data))
+
+
+def find_last_message_by_meter(meter):
+    meter_table = Meter.__table__
+    circuit = Circuit.__table__
+    primary = PrimaryLog.__table__
+    select = primary.select(from_obj=[circuit, meter_table],
+                            limit=1,
+                            whereclause=(and_(circuit.c.id == primary.c.circuit_id,
+                                              circuit.c.meter == meter_table.c.id,
+                                              meter_table.c.id == meter.id))).with_only_columns([primary.c.created]).order_by(desc(primary.c.created))
+    try:
+        last_logs = [log for log in select.execute()]
+        return last_logs[0][0].ctime()
+    except:
+        return None
 
 
 def save_and_parse_message(interface, origin, text, id=None):
@@ -295,6 +312,7 @@ class ManageHandler(object):
                          'id': m.id,
                          'number_of_circuits': len(m.get_circuits()),
                          'pv': m.panel_capacity,
+                         'last_message': find_last_message_by_meter(m),
                          'phone': m.phone,
                          'battery': m.battery,
                          'location': m.location
@@ -637,6 +655,10 @@ class MeterHandler(object):
         session = DBSession()
         alerts = session.query(Alert).filter_by(meter=self.meter)
         return {'alerts': alerts}
+
+    def show_last_messages(self):
+        """
+        """
 
     @action()
     def show_pculogs(self):
