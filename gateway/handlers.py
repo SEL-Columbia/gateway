@@ -5,6 +5,7 @@ Handler objects of web interface
 import csv
 from urlparse import parse_qs
 import uuid
+import time
 import cStringIO
 import simplejson
 from datetime import datetime
@@ -841,19 +842,25 @@ class CircuitHandler(object):
 
     @action()
     def show_graphing_logs(self):
-        import time
         session = DBSession()
         value = self.request.params.get('value', 'watthours')
+
         start = datetime.strptime(self.request.params.get('start', '05/01/2011'), '%m/%d/%Y')
         end = datetime.strptime(self.request.params.get('end', '06/01/2011'), '%m/%d/%Y')
+
         logs = session.query(PrimaryLog)\
                       .filter(PrimaryLog.circuit == self.circuit)\
                       .filter(PrimaryLog.date > start)\
                       .filter(PrimaryLog.date <= end)\
                       .order_by(PrimaryLog.created)
+        if value == 'use_time':
+            values = map(lambda x: (getattr(x, value) / 3600), logs)
+        else:
+            values = map(lambda x: getattr(x, value), logs)
         return json_response(
             {'dates': map(lambda x: time.mktime(x.date.timetuple()), logs),
-             'values': map(lambda x: getattr(x, value), logs)})
+             'values': values }
+          )
 
     @action(permission='view')
     def get_payment_logs(self):
