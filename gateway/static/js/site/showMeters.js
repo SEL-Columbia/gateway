@@ -15,12 +15,12 @@ function loadPage(data) {
   
   var columns = [ 
     {id: "name", name: "Meter", field: "name", formatter: MeterLinkFormatter, sortable: true},
-    {id: "last_message ", name: "Last Message", field: "last_message"},
-    {id: "location", name: "Location", field: "location"},
-    {id: "number_of_circuits", name: "# Circuits", field: "number_of_circuits"},
-    {id: "pv ", name: "PV (kw)", field: "pv"},
+    {id: "last_message ", name: "Last Message", field: "last_message", sortable: true},
+    {id: "location", name: "Location", field: "location", sortable: true},
+    {id: "number_of_circuits", name: "# Circuits", field: "number_of_circuits", sortable: true},
+    {id: "pv ", name: "PV (kw)", field: "pv", sortable: true},
     {id: "battery", name: "Battery (kWh)", field: "battery", sortable: true},
-    {id: "phone", name: "Phone Number", field: "phone"}
+    {id: "phone", name: "Phone Number", field: "phone", sortable: true}
   ]
 
   var dataView = new Slick.Data.DataView();
