@@ -64,6 +64,11 @@ ${headers.loadSlickGrid(request)}
         information</p>
       </li>
       <li>
+        <a href="${a_url}/meter/alerts/${meter.id}">Meter alerts </a>
+        <p>A page that allows admin users to track alerts by
+        meter.</p>
+      </li>
+      <li>
         <a id="removeMeter" href="#">Remove Meter</a>
         <p>Remove the meter from the databae</p>
       </li>
