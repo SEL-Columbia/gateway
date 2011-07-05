@@ -121,7 +121,7 @@ ${headers.loadSlickGrid(request)}
         % endfor 
       </select>
     </form>
-    <div id="graph" style="height: 270px; width: 900px;"></div>
+    <div id="graph" style="height: 260px; width: 900px;"></div>
   </div>
   <div id="map-tab">
     <div id="map"></div>
@@ -218,9 +218,6 @@ ${headers.loadSlickGrid(request)}
     </tr>
 </table>
 </form>
-</div> 
-
-<hr />
-
+</div>
 
 </%def> 

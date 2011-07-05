@@ -11,11 +11,14 @@
          from datetime import datetime
       %>
       <div id="system-status">
-        <h4>System status</h4>
-        <p>Server time (GMT): <strong>${datetime.now().ctime()}</strong></p>
-        <p>Git commit : ${repo.commit()}</p>
-        <p>Git commit author: ${repo.commit().author.name}</p>
-        <p>Git commit message : ${repo.commit().message}</p>
+        <a href="#" id="toggle-system-status"><h4>System status as
+          of <strong id="time">${datetime.now().ctime()}</strong></h4></a>
+        <div id="git-info" style="display: none">
+          <p>Git commit
+          : <a href="https://github.com/modilabs/gateway/commit/${repo.commit()}">${repo.commit()}</a></p>
+          <p>Git commit author: ${repo.commit().author.name}</p>
+          <p>Git commit message : ${repo.commit().message}</p>
+        </div>
       </div>
 
     <div class="container">
@@ -59,6 +62,25 @@
           ${self.content()}
         </div>
     </div>
+
+   
+   <script type="text/javascript">
+     $(function() { 
+
+       $("#toggle-system-status").click(function() { 
+         $("#git-info").toggle();
+        });
+
+
+     });
+      function clock() {
+        var d=new Date();
+        $("#time").html(d.toString());
+      }; 
+//      setInterval("clock()", 1000);
+
+   </script>
+
   </body>  
 </html>
 

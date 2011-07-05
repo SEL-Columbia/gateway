@@ -1,7 +1,6 @@
 """
 Handler objects of web interface
 """
-
 import csv
 from urlparse import parse_qs
 import uuid
@@ -325,7 +324,21 @@ class ManageHandler(object):
 
     @action(renderer='manage/add_meter.mako', permission='admin')
     def add_meter(self):
-        return {}
+        session = DBSession()
+        if self.request.method == 'GET':
+            comms = session.query(CommunicationInterface).all()
+            return {'comms': comms}
+        elif self.request.method == 'POST':
+            comm = session.\
+                query(CommunicationInterface)\
+                .get(int(self.request.params.get('communication-interface')))
+            meter_name = self.request.params.get('meter-name')
+            meter_phone = self.request.params.get('meter-phone')
+            meter_location = self.request.params.get('meter-location')
+            batter_capacity = self.request.params .get('battery-capacity')
+            for c in range(0, self.request.params.get('number-of-circuits')):
+                print c
+            return Response()
 
     @action()
     def metersAsGeoJson(self):
