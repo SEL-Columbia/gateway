@@ -326,6 +326,10 @@ class Meter(Base):
         return session.query(Circuit).filter_by(meter=self)\
             .filter_by(ip_address='192.168.1.200').first()
 
+    def getConsumerCircuits(self):
+        session = DBSession()
+        return session.query(Circuit).filter_by(meter=self).filter(Circuit.ip_address!='192.168.1.200').order_by(Circuit.ip_address)
+
     def getMainCircuitId(self):
         main = self.getMainCircuit()
         if main:
