@@ -20,8 +20,7 @@
 </%def>
 
 <%def name="content()">
-<a id="add-meter" href="${a_url}/manage/add_meter">
-  Add a new meter and associated circuits</a>
+<a id="add-meter" href="${a_url}/add/Meter">Add a new meter</a>
 
 <div id="meterGrid">
 </div>
