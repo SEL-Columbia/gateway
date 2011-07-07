@@ -35,7 +35,7 @@ session = DBSession()
 error = Template('$circuit last sent a log on $date, over $timediff ago.')
 mailer = Mailer()
 _from = 'admin@sharedsolar.org'
-
+_to = ['ifw2104@gmail.com', 'ds2998@columbia.edu']
 
 def check_circuit(circuit, output):
     now = datetime.now()
@@ -67,9 +67,7 @@ def check_meters():
         msg = Message(subject='Gateway: Alert, Circuit failed',
                       sender=_from,
                       body=output.getvalue(),
-                      recipients=['ifw2104@gmail.com',
-                                  #'rajeshmenon.mrg@gmail.com'
-                                  ])
+                      recipients=_to)
         mailer.send_immediately(msg, fail_silently=False)
 
 application = service.Application(__name__)
