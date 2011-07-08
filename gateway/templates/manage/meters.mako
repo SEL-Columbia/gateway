@@ -10,10 +10,14 @@
      #meterGrid { height: 300px; }
      #add-meter { margin-bottom: 20px; } 
    </style>   
+
    <script type="text/javascript">
+     <%! 
+        import simplejson
+      %>
      $(function() { 
-       loadPage(${meters});
-     $("a#add-meter").button();
+         loadPage();
+        $("a#add-meter").button();
      });     
    </script>
 

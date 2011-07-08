@@ -49,11 +49,25 @@
         % endfor
       </select>
     </td>
+    <tr>
+      <td>
+        <hr /></td>
+      <td>
+        <hr /></td>
+    </tr>
     <tr> 
       <td> 
         <label>Number of circuits to add</label>
       </td>
       <td><input type="text" name="number-of-circuits" value="" /></td>
+    </tr>
+    <tr> 
+      <td><label>Default energy max for new circuits</label></td>
+      <td> <input type="text" name="default-emax" value="" /></td>
+    </tr>
+    <tr>
+      <td><label>Default power max for new circuits</label></td>
+      <td><input type="text" name="default-power" value="" /></td>
     </tr>
     <tr>
       <td><label>Default language for each circuit</label></td>

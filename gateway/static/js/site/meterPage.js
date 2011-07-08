@@ -14,14 +14,10 @@ var vector_layer;
   }; 
   
   var columns = [ 
-    {id: "ip_address",width: 100, name: "Ip Address", 
-     field: "ipaddress", sortable:true},
-    {id: "account", name: "Account", 
-     formatter: CircuitLinkFormatter, field: "account", sortable:true},
-    {id: "last_msg",width: 200, name: "Last Messages", 
-     field: "last_msg", sortable:true},
-    {id: "status", name: "Status",  formatter:BoolCellFormatter, 
-     field: "status", sortable: true },
+    {id: "ip_address",width: 100, name: "Ip Address", field: "ipaddress", sortable:true},
+    {id: "account", name: "Account", formatter: CircuitLinkFormatter, field: "account", sortable:true},
+    {id: "last_msg",width: 200, name: "Last Messages", field: "last_msg", sortable:true},
+    {id: "status", name: "Status",  formatter:BoolCellFormatter, field: "status", sortable: true },
     {id: "language", name: "Language", field: "language", sortable:true},
     {id: "credit", name: "Credit", field: "credit", sortable:true}
   ]; 

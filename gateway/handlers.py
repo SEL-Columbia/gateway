@@ -307,38 +307,69 @@ class ManageHandler(object):
 
     @action(renderer='manage/meters.mako', permission='view')
     def show_meters(self):
+        return {'breadcrumbs': self.breadcrumbs}
+
+    @action(permission='view')
+    def show_meters_json(self):
         session = DBSession()
-        return {
-            'breadcrumbs': self.breadcrumbs,
-            'meters': simplejson\
-                .dumps([{'name': m.name,
-                         'id': m.id,
-                         'number_of_circuits': len(m.get_circuits()),
-                         'pv': m.panel_capacity,
-                         'last_message': find_last_message_by_meter(m),
-                         'phone': m.phone,
-                         'battery': m.battery,
-                         'location': m.location
-                         }
-                        for m in session.query(Meter).all()])}
+        return json_response(
+            [
+                {'name': m.name,
+                 'id': m.id,
+                 'number_of_circuits': len(m.get_circuits()),
+                 'pv': m.panel_capacity,
+                 'last_message': find_last_message_by_meter(m),
+                 'phone': m.phone,
+                 'battery': m.battery,
+                 'location': m.location
+                 } for m in session.query(Meter).all()
+                ]
+            )
 
     @action(renderer='manage/add_meter.mako', permission='admin')
     def add_meter(self):
         session = DBSession()
         if self.request.method == 'GET':
             comms = session.query(CommunicationInterface).all()
-            return {'comms': comms}
+            return {'comms': comms,
+                    'breadcrumbs': self.breadcrumbs
+                    }
         elif self.request.method == 'POST':
-            comm = session.\
-                query(CommunicationInterface)\
+            comm = session.query(CommunicationInterface)\
                 .get(int(self.request.params.get('communication-interface')))
             meter_name = self.request.params.get('meter-name')
             meter_phone = self.request.params.get('meter-phone')
             meter_location = self.request.params.get('meter-location')
-            batter_capacity = self.request.params .get('battery-capacity')
-            for c in range(0, self.request.params.get('number-of-circuits')):
-                print c
-            return Response()
+            batter_capacity = self.request.params.get('battery-capacity')
+            panel_capacity = self.request.params.get('panel-capacity')
+            meter = Meter(name=meter_name,
+                          phone=meter_phone,
+                          location=meter_location,
+                          geometry='POINT(1 1)',
+                          battery=batter_capacity,
+                          status=True,
+                          panel_capacity=panel_capacity,
+                          communication_interface_id=comm.id)
+            # save the meter
+            session.add(meter)
+            session.flush()
+            # start at mains as every meter needs a mains
+            start_ip_address = 200
+            for x in range(0, int(self.request.params.get('number-of-circuits'))):
+                ip_address = '192.168.1.%s' % (start_ip_address + x)
+                # create an account for each circuit
+                account = Account(lang=self.request.params.get('default-language'))
+                session.add(account)
+                session.flush()
+                # create the circuit
+                circuit = Circuit(meter=meter,
+                                  account=account,
+                                  ip_address=ip_address,
+                                  power_max=self.request.params.get('power-emax'),
+                                  energy_max=self.request.params.get('default-emax'))
+                session.add(circuit)
+                session.flush()
+            return HTTPFound(location='/manage/show_meters')
 
     @action()
     def metersAsGeoJson(self):

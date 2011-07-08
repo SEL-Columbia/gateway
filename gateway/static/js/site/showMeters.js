@@ -24,9 +24,6 @@ function loadPage(data) {
   ]
 
   var dataView = new Slick.Data.DataView();
-  dataView.beginUpdate();
-  dataView.setItems(data);
-  dataView.endUpdate();
 
   var grid = new Slick.Grid("#meterGrid", dataView, columns, gridOptions);
   
@@ -40,6 +37,14 @@ function loadPage(data) {
     grid.invalidateRows(args.rows);
     grid.render();
   });
+
+
+  $.getJSON("/manage/show_meters_json", function(d) { 
+    dataView.beginUpdate();
+    dataView.setItems(d);
+    dataView.endUpdate();
+    grid.invalidate();
+  })
 
 
 
