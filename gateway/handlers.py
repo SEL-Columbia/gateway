@@ -795,21 +795,18 @@ class MeterHandler(object):
     # this serialization should be a class method.
     @action(permission='view')
     def circuits(self):
-        """Dumps the circuits assoicted with Meter to a json file.
-           Used in SlickGrid
-        """
-        return Response(
-            content_type="application/json",
-            body=simplejson.dumps(
-                [{'id':x.id,
-                  'ipaddress': x.ip_address,
-                  'language': x.account.lang,
-                  'last_msg': x.getLastLogTime()[0],
-                  'status': x.status,
-                  'account': x.pin,
-                  'credit': x.credit
-                  }
-                 for x in self.meter.get_circuits()]))
+        return json_response(
+            [{'id':x.id,
+              'ipaddress': x.ip_address,
+              'language': x.account.lang,
+              'last_msg': x.getLastLogTime()[0],
+              'status': x.status,
+              'number_of_recharges': x.get_number_of_recharges(),
+              'account': x.pin,
+              'credit': x.credit
+              }
+             for x in self.meter.get_circuits()]
+            )
 
     @action()
     def geometry(self):

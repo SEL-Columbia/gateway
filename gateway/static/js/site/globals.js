@@ -17,7 +17,7 @@ x     y     result
 
 
   var globalGridOptions = {
-    forceFitColumns: true,
+    forceFitColumns: false,
     autoHeight: true,
     enableCellNavigation: true,
     enableColumnReorder: true

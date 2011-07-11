@@ -456,6 +456,14 @@ class Circuit(Base):
         ints = "23456789"
         return "".join(random.sample(ints, 6))
 
+    def get_number_of_recharges(self):
+        now = datetime.datetime.now()
+        last_month = now - datetime.timedelta(days=30)
+        session = DBSession()
+        return session.query(AddCredit)\
+           .filter(AddCredit.end >= last_month)\
+           .filter(AddCredit.circuit == self).count()
+
     def get_jobs(self):
         session = DBSession()
         return session.query(Job).\
