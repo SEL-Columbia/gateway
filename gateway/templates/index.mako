@@ -33,7 +33,10 @@
         <li><a href="${a_url}/alerts/make">Manual alerts and test messages</a></li>
         <li><a href="${a_url}/sms/index?limit=100">Check all SMS messages</a></li>
         <li><a href="${a_url}/sms/meter_messages">Check all messages
-        from meters</a>
+        from meters</a></li>
+        <li> 
+          <a href="${a_url}/manage/show_alerts">View all system
+            alerts</a></a>
         <li><a href="${a_url}/system/download">Download data tables</a></li>
       </ul>
       <hr /> 

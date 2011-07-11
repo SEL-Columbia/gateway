@@ -10,6 +10,8 @@ import itertools
 import transaction
 import hashlib
 import simplejson
+from mako.template import Template
+import twilio
 from sqlalchemy import create_engine
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -25,7 +27,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker, relation
 from zope.sqlalchemy import ZopeTransactionExtension
-import twilio
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
@@ -814,14 +815,25 @@ class Alert(Base):
         self.origin_message = origin_message
         self.consumer_message = consumer_message
 
+    def get_circuit(self):
+        c = self.circuit
+        if c:
+            return c.ip_address
+        else:
+            None
+
     def toJSON(self):
         return {'id': self.id,
                 'meter': self.meter.name,
-                'circuit': self.circuit.ip_address,
+                'date': self.date,
+                'circuit': self.get_circuit(),
                 'type': self._type }
 
     def __str__(self):
         return "Alert type: %s for circuit: %s" % (self._type, self.circuit)
+
+    def render(self):
+        raise NotImplementedError()
 
 
 class UnresponsiveCircuit(Alert):
@@ -927,6 +939,9 @@ class PowerOn(Alert):
 
     def __init__(self, date, meter, origin_message):
         Alert.__init__(self, date, meter, origin_message=origin_message)
+
+    def render(self):
+        return Template("${meter} turned on").render(meter=self.meter)
 
 
 class SystemLog(Base):
@@ -1073,7 +1088,7 @@ class AddCredit(Job):
         self.token = token
 
     def __str__(self):
-        return "job=cr&jobid=%s&cid=%s&amt=%s;" % (self.id,
+        return "(job=cr&jobid=%s&cid=%s&amt=%s)" % (self.id,
                                                 self.circuit.ip_address,
                                                 float(self.credit))
 
@@ -1088,7 +1103,7 @@ class TurnOff(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=coff&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=coff&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class TurnOn(Job):
@@ -1101,7 +1116,7 @@ class TurnOn(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=con&jobid=%s&cid=%s;" % (self.id, self.circuit.ip_address)
+        return "(job=con&jobid=%s&cid=%s)" % (self.id, self.circuit.ip_address)
 
 
 class Mping(Job):
@@ -1118,7 +1133,7 @@ class Mping(Job):
         return meter.get_circuits()[0]
 
     def __str__(self):
-        return "job=mping&jobid=%s;" % self.id
+        return "(job=mping&jobid=%s)" % self.id
 
 
 class Cping(Job):
@@ -1132,7 +1147,7 @@ class Cping(Job):
         Job.__init__(self, circuit)
 
     def __str__(self):
-        return "job=cping&jobid=%s&cid=%s;" % (self.id,
+        return "(job=cping&jobid=%s&cid=%s)" % (self.id,
                                                self.circuit.ip_address)
 
 

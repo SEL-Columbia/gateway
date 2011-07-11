@@ -157,7 +157,7 @@ def test_meter_messages():
     def test_alert_meter_down():
         response = urllib2.urlopen(
             make_request("(job=alert&mid=" +
-                     meter_name + "&cid=" + cid + "&alert=md)", phone="18185846103"))
+                     meter_name + "&cid=" + cid + "&alert=md)", phone="+13474594049"))
         print("----------------------------")
         print("testing alert meter down")
         print(response.read())
@@ -168,7 +168,7 @@ def test_meter_messages():
         """
         response = urllib2.urlopen(
             make_request("(job=alert&mid=" +
-                     meter_name + "&cid=" + cid + "&alert=sdc)", phone="18185846103"))
+                     meter_name + "&cid=" + cid + "&alert=sdc)", phone="+13474594049"))
         print("----------------------------")
         print("testing alert test meter sd card not found")
         print(response.read())
@@ -180,7 +180,7 @@ def test_meter_messages():
         response = urllib2.urlopen(
             make_request("(job=alert&mid=" +
                      meter_name + "&cid=" + cid
-                     + "&alert=lcw&cr=10.00)"))
+                     + "&alert=lcw&cr=10.00)", phone="+13474594049"))
         print("----------------------------")
         print("testing alert low credit")
         print(response.read())
@@ -191,7 +191,7 @@ def test_meter_messages():
         """
         msg = '(job=alert&mid=' + meter_name + '&cid=' + cid + '&alert=nocw&cr=00.00)'
         response = urllib2.urlopen(
-            make_request(msg))
+            make_request(msg, phone='+13474594049'))
         print("----------------------------")
         print("testing alert no credit")
         print(response.read())
@@ -200,7 +200,7 @@ def test_meter_messages():
     def test_alert_emax():
         msg = '(job=alert&mid=' + meter_name + '&cid=' + cid + '&alert=emax&cr=00.00)'
         response = urllib2.urlopen(
-            make_request(msg))
+            make_request(msg, phone='+13474594049'))
         print("----------------------------")
         print("testing emac alert")
         print(response.read())
@@ -211,20 +211,29 @@ def test_meter_messages():
         """
         response = urllib2.urlopen(
             make_request("(job=alert&mid="
-                         + meter_name + "&cid=" + cid + "&alert=ce)", phone="18185846103"))
+                         + meter_name + "&cid=" + cid + "&alert=ce)", phone='+13474594049'))
         print("----------------------------")
         print("testing alert ce")
         print(response.read())
         print("----------------------------")
 
-    #test_pp()
-    test_job_delete()
-    #test_alert_meter_down()
-    #test_alert_sdc()
-    #test_alert_low_credit()
-    #test_alert_no_credit()
-    #test_alert_emax()
-    #test_circuit_compontent_failure()
+    def test_meter_online_message():
+        response = urllib2.urlopen(
+            make_request("ml05 online", phone="+13474594049"))
+        print("----------------------------")
+        print("testing alert ce")
+        print(response.read())
+        print("----------------------------")
 
-test_consumer_messages()
-#test_meter_messages()
+    test_meter_online_message()
+    #test_pp()
+    #test_job_delete()
+    #test_alert_meter_down()
+    test_alert_sdc()
+    test_alert_low_credit()
+    test_alert_no_credit()
+    test_alert_emax()
+    test_circuit_compontent_failure()
+
+#test_consumer_messages()
+test_meter_messages()

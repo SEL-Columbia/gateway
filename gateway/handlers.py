@@ -76,10 +76,14 @@ def json_response(data):
     Helper function to render an json object.  Takes an object that
     can be dumped by simplejson.dumps and returns an WebOb Response
     object.
+    This function is also python datetime object aware.
     """
+    def encode_date(obj):
+        if isinstance(obj, datetime):
+            return obj.ctime()
     return Response(
         content_type='application/json',
-        body=simplejson.dumps(data))
+        body=simplejson.dumps(data, default=encode_date))
 
 
 def find_last_message_by_meter(meter):
@@ -243,6 +247,11 @@ class AlertHandler(object):
         self.session = DBSession()
         self.breadcrumbs = breadcrumbs[:]
 
+    @action()
+    def all(self):
+        session = DBSession()
+        return json_response([a.toJSON() for a in session.query(Alert).all()])
+
     @action(renderer='alerts/make.mako', permission='admin')
     def make(self):
         breadcrumbs = self.breadcrumbs[:]
@@ -304,6 +313,10 @@ class ManageHandler(object):
     def index(self):
         return {
             'breadcrumbs': self.breadcrumbs}
+
+    @action(renderer='manage/show_alerts.mako', permission='view')
+    def show_alerts(self):
+        return {'breadcrumbs': self.breadcrumbs}
 
     @action(renderer='manage/meters.mako', permission='view')
     def show_meters(self):

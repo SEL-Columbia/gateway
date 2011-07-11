@@ -197,7 +197,7 @@ def drop_and_create_db(db_name):
     try:
         sh('dropdb ' + db_name)
     except:
-        raise BuildFailure('Unable to drop ' + db_name)
+        pass
     try:
         sh('createdb ' + db_name)
     except:

@@ -79,6 +79,8 @@ def parse_meter_message(message):
             circuit = findCircuit(m, meter)
             meter_funcs.make_pp(m, circuit, session)
     # old messages
+    elif re.match("(\w+) online", message.text.lower()):
+        meter_funcs.make_meter_online_alert(message, meter, session)
     elif re.match("^\(.*\)$", message.text.lower()):
         if message.text.startswith('(pcu'):
             make_pcu_logs(message, meter, session)

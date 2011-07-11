@@ -13,6 +13,7 @@ from gateway.models import NoCredit
 from gateway.models import LowCredit
 from gateway.models import PowerMax
 from gateway.models import EnergyMax
+from gateway.models import PowerOn
 from gateway.utils import make_message_body
 
 
@@ -204,6 +205,12 @@ def make_ce(message, circuit, session):
     log = SystemLog(
         "Circuit %s just failed, please investagate." % circuit.ip_address)
     session.add(log)
+
+
+def make_meter_online_alert(message, meter, session):
+    alert = PowerOn(datetime.now(), meter, origin_message=message)
+    session.add(alert)
+    session.flush()
 
 
 def make_pmax(message, circuit, session):
