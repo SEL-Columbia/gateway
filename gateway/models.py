@@ -830,11 +830,23 @@ class Alert(Base):
         else:
             None
 
+    def get_circuit_pin(self):
+        c = self.circuit
+        if c:
+            return c.pin
+
+    def get_circuit_number(self):
+        c = self.circuit
+        if c:
+            return c.account.phone
+
     def toJSON(self):
         return {'id': self.id,
                 'meter': self.meter.name,
                 'date': self.date,
                 'circuit': self.get_circuit(),
+                'circuit_pin': self.get_circuit_pin(),
+                'circuit_number': self.get_circuit_number(),
                 'type': self._type }
 
     def __str__(self):

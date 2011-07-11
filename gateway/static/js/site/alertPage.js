@@ -4,7 +4,10 @@ $(function(){
     {id: "type", name: "Alert type", field: "type",sortable:true},
     {id: "date", name: "Date of alert", field: "date", width: 200, sortable:true},
     {id: "meter", name: "Meter associated with alert", width: 200, field: "meter", sortable:true},
-    {id: "circuit", name: "Circuit associated with alert", width:200, field: "circuit", sortable:true}
+
+    {id: "circuit", name: "Circuit associated with alert", width:200, field: "circuit", sortable:true},
+    {id: "circuit_pin", name: "Circuit account number", width:200, field: "circuit_pin", sortable:true},    
+    {id: "circuit_number", name: "Circuit phone number", width:200, field: "circuit_number", sortable:true}
   ]
 
   var alertDataView = new Slick.Data.DataView();
