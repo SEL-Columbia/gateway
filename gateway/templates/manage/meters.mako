@@ -7,7 +7,7 @@
    
    <script type="text/javascript" src="${a_url}/static/js/site/showMeters.js"></script>
    <style type="text/css" media="screen">
-     #meterGrid { height: 300px; }
+     #meterGrid { height: 500px; }
      #add-meter { margin-bottom: 20px; } 
    </style>   
 
@@ -24,7 +24,7 @@
 </%def>
 
 <%def name="content()">
-<a id="add-meter" href="${a_url}/add/Meter">Add a new meter</a>
+<a id="add-meter" href="${a_url}/manage/add_meter">Add a new meter</a>
 
 <div id="meterGrid">
 </div>

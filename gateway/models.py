@@ -9,8 +9,7 @@ import urllib
 import itertools
 import transaction
 import hashlib
-
-
+import simplejson
 from sqlalchemy import create_engine
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -336,7 +335,9 @@ class Meter(Base):
     def getMainCircuitId(self):
         main = self.getMainCircuit()
         if main:
-            return main.id
+            return simplejson.dumps(main.id)
+        else:
+            return simplejson.dumps(0)
 
     def getJobs(self):
         session = DBSession()

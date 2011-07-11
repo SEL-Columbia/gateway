@@ -710,14 +710,14 @@ class MeterHandler(object):
         value = self.request.params.get('pcu-value', 'battery_volts')
         start = datetime.strptime(self.request.params.get('start', '05/01/2011'), '%m/%d/%Y')
         end = datetime.strptime(self.request.params.get('end', '07/20/2011'), '%m/%d/%Y')
-
         pculogs = session.query(PCULog)\
             .filter(PCULog.meter == self.meter)\
             .filter(PCULog.timestamp >= start)\
             .filter(PCULog.timestamp <= end)
         return json_response(
             {'dates': map(lambda x: time.mktime(x.date.timetuple()), pculogs),
-             'values': map(lambda x: getattr(x, value), pculogs)}
+             'values': map(lambda x: getattr(x, value), pculogs)
+             }
             )
 
     @action()
@@ -844,7 +844,7 @@ class MeterHandler(object):
         [self.session.delete(c)
          for c in self.session.query(Circuit).filter_by(meter=self.meter)]
         self.session.delete(self.meter)
-        return HTTPFound(location="/manage/show?class=Meter")
+        return HTTPFound(location="/manage/show_meters")
 
     @action(permission="admin")
     def ping(self):
