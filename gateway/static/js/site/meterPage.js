@@ -19,7 +19,9 @@ var vector_layer;
     {id: "last_msg",width: 200, name: "Last Messages", field: "last_msg", sortable:true},
     {id: "status", name: "Status",  formatter:BoolCellFormatter, field: "status", sortable: true },
     {id: "language", name: "Language", field: "language", sortable:true},
-    {id: "number_of_recharges", name: "Number of recharges", field: "number_of_recharges", sortable:true},
+    {id: "number_of_recharges", name: "Number of recharges within 30 days",
+     width: 250,
+     field: "number_of_recharges", sortable:true},
     {id: "credit", name: "Credit", field: "credit", sortable:true}
   ]; 
 
