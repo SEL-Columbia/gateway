@@ -1,10 +1,10 @@
 $(function(){ 
   var columns = [
     {id: "id", name: "Alert id", field: "id", sortable:true},
-    {id: "type", name: "Alert type", field: "type", sortable:true},
-    {id: "date", name: "Date of alert", field: "date", sortable:true},
-    {id: "meter", name: "Meter associated with alert", field: "meter", sortable:true},
-    {id: "circuit", name: "Circuit associated with alert", field: "circuit", sortable:true}
+    {id: "type", name: "Alert type", field: "type",sortable:true},
+    {id: "date", name: "Date of alert", field: "date", width: 200, sortable:true},
+    {id: "meter", name: "Meter associated with alert", width: 200, field: "meter", sortable:true},
+    {id: "circuit", name: "Circuit associated with alert", width:200, field: "circuit", sortable:true}
   ]
 
   var alertDataView = new Slick.Data.DataView();
