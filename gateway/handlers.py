@@ -8,6 +8,7 @@ import time
 import cStringIO
 import simplejson
 from datetime import datetime
+from datetime import timedelta
 import collections
 import hashlib
 from webob import Response
@@ -795,11 +796,14 @@ class MeterHandler(object):
     # this serialization should be a class method.
     @action(permission='view')
     def circuits(self):
+        now = datetime.now()
+        last_month = now - timedelta(days=30)
         return json_response(
             [{'id':x.id,
               'ipaddress': x.ip_address,
               'language': x.account.lang,
               'last_msg': x.getLastLogTime()[0],
+              'credit_consumed': x.calculateCreditConsumed(last_month, now),
               'status': x.status,
               'number_of_recharges': x.get_number_of_recharges(),
               'account': x.pin,

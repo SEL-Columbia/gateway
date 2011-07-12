@@ -10,6 +10,7 @@ import itertools
 import transaction
 import hashlib
 import simplejson
+import numpy as np
 from mako.template import Template
 import twilio
 from sqlalchemy import create_engine
@@ -461,8 +462,84 @@ class Circuit(Base):
         last_month = now - datetime.timedelta(days=30)
         session = DBSession()
         return session.query(AddCredit)\
-           .filter(AddCredit.end >= last_month)\
+           .filter(AddCredit.start >= last_month)\
            .filter(AddCredit.circuit == self).count()
+
+    # def getDataList(self, dateStart, dateEnd):
+    #     session = DBSession()
+    #     logs = session.query(PrimaryLog)\
+    #         .filter_by(circuit=self)\
+    #         .filter(PrimaryLog.date > dateStart)\
+    #         .filter(PrimaryLog.date <= dateEnd)\
+    #         .order_by(PrimaryLog.date)
+    #     return [l.credit for l in logs]
+
+    def getRawDataListForCircuit(self, quantity, dateStart=None, dateEnd=None):
+        """
+        Get query based on circuit and date
+        and sort by date received by gateway
+        """
+        session = DBSession()
+        logs = session.query(PrimaryLog)\
+                      .filter(PrimaryLog.circuit == self)\
+                      .filter(PrimaryLog.date > dateStart)\
+                      .filter(PrimaryLog.date <= dateEnd)\
+                      .order_by(PrimaryLog.date)
+        # create separate arrays for each of these quantities
+        dates = np.array([l.date for l in logs])
+        data  = np.array([getattr(l, quantity) for l in logs])
+        created = np.array([l.created for l in logs])
+        assert len(data) == len(created)
+        return dates, created, data
+
+    def getDataList(self, dateStart=None, dateEnd=None, quantity='credit'):
+        """
+        for a given circuit_id and date range, this function returns a list of
+        data specified by quantity.  uses set() to remove duplicate entries.
+        also discards entries if the gateway time stamp is more than one hour
+        ahead of the meter time stamp
+        input:
+           circuit_id - circuit database id
+           dateStart - datetime object for day of data.  data returned dateStart < date <= dateEnd
+           dateEnd - datetime object specifying end of data
+           quantity - 'watthours' or 'credit'
+           output:
+                dates - list of date stamps corresponding to data list
+                data - list of reported data
+        """
+        dates, created, data = self.getRawDataListForCircuit(quantity, dateStart, dateEnd)
+        if len(dates) == 0:
+            return [], []
+        mask = []
+        for i in range(len(dates)):
+            if (created[i] - dates[i]).total_seconds() < 3600:
+                mask.append(True)
+            else:
+                mask.append(False)
+        mask = np.array(mask)
+        dates = dates[mask]
+        data = data[mask]
+        dataList = []
+        for i in range(len(dates)):
+            dataList.append((dates[i], data[i]))
+        dataList = list(set(dataList))
+        dataList.sort()
+        dates = [d[0] for d in dataList]
+        data = [d[1] for d in dataList]
+        return dates, data
+
+    def calculateCreditConsumed(self, dateStart, dateEnd, threshold=1000):
+        import numpy as np
+        dates, data = self.getDataList(dateStart, dateEnd)
+        credit_derivative = np.diff(data)
+        # only calculate decreases
+        credit_derivative = np.extract(credit_derivative < 0, credit_derivative)
+        # invert credit derivative
+        credit_derivative *= -1
+        # ignore decreases greater than threshold
+        credit_derivative = np.extract(credit_derivative < threshold, credit_derivative)
+        credit_consumed = sum(credit_derivative)
+        return credit_consumed
 
     def get_jobs(self):
         session = DBSession()
@@ -825,19 +902,17 @@ class Alert(Base):
 
     def get_circuit(self):
         c = self.circuit
-        if c:
+        if hasattr(c, 'ip_address'):
             return c.ip_address
-        else:
-            None
 
     def get_circuit_pin(self):
         c = self.circuit
-        if c:
+        if hasattr(c, 'pin'):
             return c.pin
 
     def get_circuit_number(self):
         c = self.circuit
-        if c:
+        if hasattr(c.account, 'phone'):
             return c.account.phone
 
     def toJSON(self):

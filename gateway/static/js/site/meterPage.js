@@ -22,6 +22,7 @@ var vector_layer;
     {id: "number_of_recharges", name: "Number of recharges within 30 days",
      width: 250,
      field: "number_of_recharges", sortable:true},
+    {id: "credit_consumed", name: "Credit Consumed", width: 200, field: "credit_consumed", sortable:true},
     {id: "credit", name: "Credit", field: "credit", sortable:true}
   ]; 
 
