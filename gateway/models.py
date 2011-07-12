@@ -512,7 +512,9 @@ class Circuit(Base):
             return [], []
         mask = []
         for i in range(len(dates)):
-            if (created[i] - dates[i]).total_seconds() < 3600:
+            total_diff = created[i] - dates[i]
+            total_seconds = total_diff.seconds + total_diff.days * 24 * 3600
+            if total_seconds < 3600:
                 mask.append(True)
             else:
                 mask.append(False)
