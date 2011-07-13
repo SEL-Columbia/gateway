@@ -69,7 +69,7 @@ def set_primary_contact(message):
         new_number = message.text.split(delimiter)[2]
         old_number = circuit.account.phone
         messageBody = make_message_body("tel.txt",
-                                        lang=message.language,
+                                        lang=circuit.account.lang,
                                         old_number=old_number,
                                         new_number=new_number)
         interface.sendMessage(
