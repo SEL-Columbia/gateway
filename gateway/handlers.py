@@ -256,7 +256,7 @@ class AlertHandler(object):
     @action()
     def all(self):
         session = DBSession()
-        return json_response([a.toJSON() for a in session.query(Alert).all()])
+        return json_response([a.toJSON() for a in session.query(Alert).order_by(Alert.id.desc()).all()])
 
     @action(renderer='alerts/make.mako', permission='admin')
     def make(self):

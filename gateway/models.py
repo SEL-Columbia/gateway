@@ -914,7 +914,7 @@ class Alert(Base):
 
     def get_circuit_number(self):
         c = self.circuit
-        if hasattr(c.account, 'phone'):
+        if c:
             return c.account.phone
 
     def toJSON(self):
@@ -1032,7 +1032,7 @@ class PowerOn(Alert):
     """
     id = Column(Integer, ForeignKey('alerts.id'), primary_key=True)
     __tablename__ = 'power_on'
-    __mapper_args__ = {'polymorphic_identity': 'power_one'}
+    __mapper_args__ = {'polymorphic_identity': 'power_on'}
 
     def __init__(self, date, meter, origin_message):
         Alert.__init__(self, date, meter, origin_message=origin_message)
