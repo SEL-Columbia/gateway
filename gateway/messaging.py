@@ -68,6 +68,9 @@ def parse_meter_message(message):
     """
     Parse message from the Meter. Takes a message object and returns
     nothing. Logs an exception if the message is unable to be parsed.
+
+
+    TODO XXX this needs to be cleaned up
     """
     session = DBSession()
     meter = findMeter(message)
@@ -87,21 +90,17 @@ def parse_meter_message(message):
         else:
             messageDict = clean_message(message)
             if messageDict["job"] == "delete":
-                getattr(meter_funcs,
-                        "make_" + messageDict["job"])(messageDict, session)
+                getattr(meter_funcs, "make_" + messageDict["job"])(messageDict, session)
             else:
                 circuit = findCircuit(messageDict, meter)
                 if circuit:  # double check that we have a circuit
                     if messageDict['job'] == "pp":
-                        getattr(meter_funcs,
-                                "make_" + messageDict["job"])(messageDict,
-                                                             circuit,
-                                                             session)
+                        getattr(meter_funcs, "make_" + messageDict["job"])(messageDict, circuit, session)
                     elif messageDict['job'] == "alert":
-                        getattr(meter_funcs,
-                                "make_" + messageDict["alert"])(messageDict,
-                                                               circuit,
-                                                               session)
+                        if messageDict['alert'] == 'online':
+                            meter_funcs.make_meter_online_alert(message, meter, session)
+                        else:
+                            getattr(meter_funcs, "make_" + messageDict["alert"])(messageDict, circuit, session)
     else:
         session.add(SystemLog(
                 'Unable to parse message %s' % message.uuid))
