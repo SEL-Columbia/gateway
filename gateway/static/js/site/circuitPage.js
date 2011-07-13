@@ -8,7 +8,9 @@ function primaryLogGrid(options) {
     {id: "id", name:"Log id", width: 100, field: "id", sortable: true },  
     {id: "status", name:"Circuit Staus", field: "status", sortable: true, width: 100 },
     {id: "use_time", name:"Use time", field: "use_time", sortable: true, width: 100 },
-    {id: "date", name:"Log Date", field: "date", sortable: true,width: 200 },
+    {id: "gateway_date", name:"Gateway Receive Time", field: "gateway_date", sortable: true,width: 200 },
+    {id: "meter_date", name:"Meter Timestamp", field: "meter_date", sortable: true,width: 200 },
+    {id: "time_difference", name:"Time Difference", field: "time_difference", sortable: true,width: 200 },
     {id: "watthours", name:"Watthours", field: "watthours", sortable: true, width: 100 },
     {id: "credit", name:"Credit", field: "credit", sortable: true, width: 100 }
   ]
@@ -99,8 +101,6 @@ function loadPage(options) {
   $("#logs").tabs();
 
   $("#date-ranges input").datepicker();
-
-  
   
   loadBillingHistory(options)
   primaryLogGrid(options);

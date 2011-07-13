@@ -72,6 +72,11 @@ def not_found(request):
     return Response("Unable to find resource")
 
 
+def find_time_different(log):
+    time_diff = log.created - log.date
+    return (time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00
+
+
 def json_response(data):
     """
     Helper function to render an json object.  Takes an object that
@@ -933,7 +938,9 @@ class CircuitHandler(object):
         return json_response([{'id': l.id,
                                'status': l.status,
                                'use_time': l.use_time,
-                               'date': l.created.ctime(),
+                               'gateway_date': l.created,
+                               'meter_date': l.date,
+                               'time_difference': find_time_different(l),
                                'watthours': l.watthours,
                                'credit': l.credit} for l in logs])
 
