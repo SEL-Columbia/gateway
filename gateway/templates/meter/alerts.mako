@@ -17,7 +17,7 @@
 <ul id="alerts">
   % for alert in alerts: 
   <div class="ui-widget">
-      ${alert.render()}
+      ${alert}
   </div>
   % endfor
 </ul>
