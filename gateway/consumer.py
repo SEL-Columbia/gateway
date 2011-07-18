@@ -1,6 +1,8 @@
 """
 Functions to response to consumer messages
 """
+from datetime import datetime
+from datetime import timedelta
 from gateway.models import DBSession
 from gateway.models import Circuit
 from gateway.models import Token
@@ -127,4 +129,18 @@ def set_primary_lang(message, *kwargs):
 def use_history(message, **kwargs):
     """
     Calculates use based on last 30 days of account activity
+    account-number
+    avg watt hours pre day :  (total watthours for time/number of days)
+    max watt hours         :  max(watthours)
+    min watt hours         :  min(watthours)
     """
+    circuit = get_circuit(message)
+    if circuit:
+        now = datetime.now()
+        last_month = now - timedelta(days=30)
+        interface = circuit.meter.communication_interface
+        message = make_message_body('use.txt',
+                                    lang=circuit.account.lang,
+                                    account=circuit.pin,
+                                    amount=circuit.calculateCreditConsumed(dateStart=last_month, dateEnd=now))
+        interface.sendMessage(circuit.account.phone, message)

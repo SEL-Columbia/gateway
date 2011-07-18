@@ -530,7 +530,7 @@ class Circuit(Base):
         data = [d[1] for d in dataList]
         return dates, data
 
-    def calculateCreditConsumed(self, dateStart, dateEnd, threshold=1000):
+    def calculateCreditConsumed(self, dateStart, dateEnd):
         import numpy as np
         dates, data = self.getDataList(dateStart, dateEnd)
         credit_derivative = np.diff(data)
@@ -538,8 +538,6 @@ class Circuit(Base):
         credit_derivative = np.extract(credit_derivative < 0, credit_derivative)
         # invert credit derivative
         credit_derivative *= -1
-        # ignore decreases greater than threshold
-        credit_derivative = np.extract(credit_derivative < threshold, credit_derivative)
         credit_consumed = sum(credit_derivative)
         return credit_consumed
 

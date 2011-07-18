@@ -50,6 +50,11 @@ dispatcher.addMatcher(r'(tel).(\w+)',
 dispatcher.addMatcher(r'(4).(\w+)',
                       'gateway.consumer.set_primary_contact', language='fr')
 
+dispatcher.addMatcher(r'^(use).(\w+)',
+                     'gateway.consumer.use_history')
+dispatcher.addMatcher(r'^(3).(\w+)',
+                     'gateway.consumer.use_history')
+
 
 def main(global_config, **settings):
     """
