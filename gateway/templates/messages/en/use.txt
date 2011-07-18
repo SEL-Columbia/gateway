@@ -1,0 +1,5 @@
+<%!  
+
+%> 
+Over the last 30 days, account ${account} has had the consumed
+${amount} for credit.
