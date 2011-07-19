@@ -139,8 +139,8 @@ def use_history(message, **kwargs):
         now = datetime.now()
         last_month = now - timedelta(days=30)
         interface = circuit.meter.communication_interface
-        message = make_message_body('use.txt',
+        message_response = make_message_body('use.txt',
                                     lang=circuit.account.lang,
                                     account=circuit.pin,
                                     amount=circuit.calculateCreditConsumed(dateStart=last_month, dateEnd=now))
-        interface.sendMessage(circuit.account.phone, message)
+        interface.sendMessage(message.number, message_response)
