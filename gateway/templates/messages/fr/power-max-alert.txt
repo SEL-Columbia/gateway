@@ -2,4 +2,4 @@
 <%!
   import datetime
 %>
-LIGNE COUPEE. La ligne ${account} a ete coupee le ${datetime.datetime.now.ctime()} car la puissance maximale autorisee a ete depassee. Vous devrez la reactiver demain.
+LIGNE COUPEE. La ligne ${account} a ete coupee le ${datetime.datetime.now().ctime()} car la puissance maximale autorisee a ete depassee. Vous devrez la reactiver demain.
