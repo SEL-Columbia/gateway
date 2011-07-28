@@ -10,8 +10,8 @@ function primaryLogGrid(options) {
     {id: "use_time", name:"Use time", field: "use_time", sortable: true, width: 100 },
     {id: "gateway_date", name:"Gateway Receive Time", field: "gateway_date", sortable: true,width: 200 },
     {id: "meter_date", name:"Meter Timestamp", field: "meter_date", sortable: true,width: 200 },
-    {id: "time_difference", name:"Time Difference", field: "time_difference", sortable: true,width: 200 },
-    {id: "watthours", name:"Watthours", field: "watthours", sortable: true, width: 100 },
+    {id: "time_difference", name:"Time Difference", field: "time_difference", sortable: true,width: 100 },
+    {id: "watthours", name:"Daily Watthours", field: "watthours", sortable: true, width: 120 },
     {id: "credit", name:"Credit", field: "credit", sortable: true, width: 100 }
   ]
 
