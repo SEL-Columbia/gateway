@@ -807,6 +807,7 @@ class MeterHandler(object):
             [{'id':x.id,
               'ipaddress': x.ip_address,
               'language': x.account.lang,
+              'watthours': x.getWatthours(),
               'last_msg': x.getLastLogTime()[0],
               'credit_consumed': int(x.calculateCreditConsumed(last_month, now)),
               'status': x.status,

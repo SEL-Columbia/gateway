@@ -559,6 +559,13 @@ class Circuit(Base):
             .filter_by(circuit=self)\
             .order_by(PrimaryLog.created.desc()).first()
 
+    def getWatthours(self):
+        log = self.getLastLog()
+        if log:
+            return log.watthours
+        else:
+            return 0
+
     def getLastLogTime(self):
         log = self.getLastLog()
         if log:
