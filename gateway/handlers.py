@@ -107,7 +107,7 @@ def find_last_message_by_meter(meter):
                           .with_only_columns([primary.c.created]).order_by(desc(primary.c.created))
     try:
         last_logs = [log for log in select.execute()]
-        return last_logs[0][0].ctime()
+        return last_logs[0][0].strftime('%Y-%m-%d %H:%M:%S')
     except:
         return None
 
@@ -827,7 +827,7 @@ class MeterHandler(object):
               'ipaddress': x.ip_address,
               'language': x.account.lang,
               'watthours': x.getWatthours(),
-              'last_msg': x.getLastLogTime()[0],
+              'last_msg': x.getLastLogTime(),
               'credit_consumed': int(x.calculateCreditConsumed(last_month, now)),
               'status': x.status,
               'number_of_recharges': x.get_number_of_recharges(),
@@ -958,8 +958,8 @@ class CircuitHandler(object):
         return json_response([{'id': l.id,
                                'status': l.status,
                                'use_time': l.use_time,
-                               'gateway_date': l.created,
-                               'meter_date': l.date,
+                               'gateway_date': l.created.strftime('%Y-%m-%d %H:%M:%S'),
+                               'meter_date': l.date.strftime('%Y-%m-%d %H:%M:%S'),
                                'time_difference': "{0:.2f}".format(find_time_different(l)),
                                'watthours': l.watthours,
                                'credit': l.credit} for l in logs])

@@ -569,9 +569,9 @@ class Circuit(Base):
     def getLastLogTime(self):
         log = self.getLastLog()
         if log:
-            return [log.created.ctime(), log.date.ctime()]
+            return log.created.strftime('%Y-%m-%d %H:%M:%S')
         else:
-            return [None, None]
+            return None
 
     def genericJob(self, cls, incoming=""):
         session = DBSession()

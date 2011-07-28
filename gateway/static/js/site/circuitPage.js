@@ -24,6 +24,19 @@ function primaryLogGrid(options) {
     logDataView.endUpdate();
     logGrid.invalidate();
   }); 
+
+  logGrid.onSort.subscribe(function(e, args) { 
+    sortdir = args.sortAsc ? 1 : -1;
+    sortcol = args.sortCol.field;
+   logDataView.sort(comparer, args.sortAsc);
+  });
+
+  logDataView.onRowsChanged.subscribe(function(e,args) {
+    logGrid.invalidateRows(args.rows);
+    logGrid.render();
+  });
+
+
   return logGrid;
 
 }
