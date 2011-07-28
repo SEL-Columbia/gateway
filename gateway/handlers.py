@@ -832,7 +832,7 @@ class MeterHandler(object):
               'status': x.status,
               'number_of_recharges': x.get_number_of_recharges(),
               'account': x.pin,
-              'credit': x.credit
+              'credit': int(x.credit)
               }
              for x in self.meter.get_circuits()]
             )
@@ -915,6 +915,7 @@ class CircuitHandler(object):
         """
         breadcrumbs = self.breadcrumbs[:]
         breadcrumbs.extend([
+                    {'text': 'Meters', 'url': '/manage/show_meters'},
                     {'text': 'Meter Overview', 'url': self.meter.getUrl()},
                     {'text': 'Circuit Overview'}])
         return {
@@ -961,8 +962,8 @@ class CircuitHandler(object):
                                'gateway_date': l.created.strftime('%Y-%m-%d %H:%M:%S'),
                                'meter_date': l.date.strftime('%Y-%m-%d %H:%M:%S'),
                                'time_difference': "{0:.2f}".format(find_time_different(l)),
-                               'watthours': l.watthours,
-                               'credit': l.credit} for l in logs])
+                               'watthours': "{0:.1f}".format(l.watthours),
+                               'credit': int(l.credit)} for l in logs])
 
     @action()
     def show_graphing_logs(self):
