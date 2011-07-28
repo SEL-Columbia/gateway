@@ -808,7 +808,7 @@ class MeterHandler(object):
               'ipaddress': x.ip_address,
               'language': x.account.lang,
               'last_msg': x.getLastLogTime()[0],
-              'credit_consumed': x.calculateCreditConsumed(last_month, now),
+              'credit_consumed': int(x.calculateCreditConsumed(last_month, now)),
               'status': x.status,
               'number_of_recharges': x.get_number_of_recharges(),
               'account': x.pin,
