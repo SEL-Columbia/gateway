@@ -941,7 +941,7 @@ class CircuitHandler(object):
                                'use_time': l.use_time,
                                'gateway_date': l.created,
                                'meter_date': l.date,
-                               'time_difference': find_time_different(l),
+                               'time_difference': "{0:.2f}".format(find_time_different(l)),
                                'watthours': l.watthours,
                                'credit': l.credit} for l in logs])
 
