@@ -306,6 +306,24 @@ class Dashboard(object):
         return {
             "logged_in": authenticated_userid(self.request)}
 
+def find_meter_uptime(meter):
+    """
+    cs = # of circuits
+    actual = number messages it did receive
+    possible = Number of messages it should have receive in the last week
+               -> 48 * cs * 7 
+    
+   (* (/ actual possible) 100) 
+
+    """
+    now = datetime.now()
+    last_week = now - timedelta(days=7)
+    session = DBSession()
+    log_count = session.query(PrimaryLog)\
+        .filter_by(circuit=meter.getMainCircuit())\
+        .filter(PrimaryLog.date > last_week).count()
+    return "{0} %".format(int((log_count / (48 * 7.0)) * 100))
+
 
 class ManageHandler(object):
     """
@@ -336,6 +354,7 @@ class ManageHandler(object):
                 {'name': m.name,
                  'id': m.id,
                  'number_of_circuits': len(m.get_circuits()),
+                 'uptime': find_meter_uptime(m),
                  'pv': m.panel_capacity,
                  'last_message': find_last_message_by_meter(m),
                  'phone': m.phone,
