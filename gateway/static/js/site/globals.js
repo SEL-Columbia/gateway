@@ -31,14 +31,15 @@ x     y     result
  
 
 function buildDate(string) { 
-  var offsetSeconds = new Date().getTimezoneOffset() * 60; 
-  var year = parseInt(string.split("/")[2]); 
-  var month = parseInt(string.split("/")[0]) - 1; 
-  var date = +string.split("/")[1];
-  var midnightLocal = new Date(year, month, date);
-  var midnightLocalMilliseconds = midnightLocal.getTime();
-  var midnightGMTSeconds = midnightLocalMilliseconds / 1000 - offsetSeconds;
-  return midnightGMTSeconds;
+  var d = {original:string};  
+  d.offsetSeconds = new Date().getTimezoneOffset() * 60; 
+  d.year = +string.split("/")[2];
+  d.month = +string.split("/")[0] -1;
+  d.date = +string.split("/")[1];
+  d.midnightLocal = new Date(d.year, d.month, d.date);
+  d.midnightLocalMilliseconds = d.midnightLocal.getTime();
+  d.midnightGMTSeconds = d.midnightLocalMilliseconds / 1000 - d.offsetSeconds;
+  return d.midnightGMTSeconds;
 }
 
 function loadCircuitData(options) { 
@@ -131,8 +132,6 @@ function buildGraph(options){
   var startDateSeconds = buildDate($("#start").val());
   var endDateSeconds = buildDate($("#end").val());
 
-
-
   var dateRange =  new Array();
   var currentDateSeconds = startDateSeconds;
   while (currentDateSeconds <= endDateSeconds) {
@@ -140,13 +139,9 @@ function buildGraph(options){
     currentDateSeconds += 24 * 60 * 60;
   };     
  
-
-
   var y = d3.scale.linear().domain([0, d3.max(dataY)]).range([h - bottom_margin ,top_margin]);
   var x = d3.scale.linear().domain([startDateSeconds, endDateSeconds])
     .range([left_margin, w - right_margin]);
-
-
 
 
   var vis = d3.select("#graph")
@@ -210,10 +205,15 @@ function buildGraph(options){
 
   function prettyDateString(d){
     var UTCDateTick = new Date(d * 1000);
-    // getUTC methods are necessary to keep date from being interpreted locally  
-    return UTCDateTick.getUTCDate() + " " +
+    // getUTC methods are necessary to keep date from being
+    // interpreted locally  
+    z = {
+      'date': d,
+      'x':UTCDateTick.getUTCDate() + " " +
       ("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(' ')[UTCDateTick.getUTCMonth()])
-      + " " + UTCDateTick.getUTCFullYear();
+      + " " + UTCDateTick.getUTCFullYear()}
+    
+    return z.x;
   }
     
   g.selectAll(".xLabel")
@@ -235,9 +235,14 @@ function buildGraph(options){
     .data(dataX)      
     .enter().append("svg:circle")
     .attr("cx", function(d,i) {  
-      return x(dataX[i])
+      var value = dataX[i];
+      var cx = x(value);
+      return cx;
     })
-    .attr("cy", function(d, i) { return y(dataY[i])})
+    .attr("cy", function(d, i) { 
+      var cy = y(dataY[i]);
+      return cy;
+    })
     .attr("r", 2)
     .attr("fill", "#000");
 };
