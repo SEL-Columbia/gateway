@@ -5,7 +5,7 @@ This is a mess... Needs to be cleaned up.
 import os
 from collections import defaultdict
 from mako.template import Template
-from datetime import timedelta
+from datetime import timedelta, datetime
 from gateway.models import PrimaryLog
 from pyramid.threadlocal import get_current_registry
 
@@ -15,7 +15,9 @@ def nice_print(model):
     collector = {}
     modelDict = model.__dict__
     for k, v in modelDict.iteritems():
-        if isinstance(v, object):
+        if isinstance(v, datetime):
+            collector.update({k: v.strftime('%Y-%M-%d %H:%M:%S')})
+        elif isinstance(v, object):
             collector.update({k: str(v)})
         else:
             collector.update({k: v})
