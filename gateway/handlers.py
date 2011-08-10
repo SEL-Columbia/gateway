@@ -83,7 +83,7 @@ def find_time_different(log):
         utc = pytz.timezone('UTC') # for now the gateway server is in UTC... 
         meter_time_utc = meter_time_zone.localize(log.date).astimezone(utc) 
         time_diff = utc.localize(log.created) - meter_time_utc
-        return "{:0.1f}".format(((time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00) * 60)
+        return '{0:.1f}'.format(((time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00) * 60)
     else:
         return 'Meter lacking timezone'
 
