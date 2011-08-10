@@ -277,6 +277,18 @@ class NetbookInterface(CommunicationInterface):
         pass
 
 
+class TimeZone(Base):
+    __tablename__ = 'time_zones'
+    id = Column(Integer, primary_key=True)
+    zone = Column(Unicode(256), unique=True)
+
+    def __init__(self, zone=None):
+        self.zone = zone
+        
+    def __str__(self):
+        return '<TimeZone %s>' % self.zone
+
+
 class Meter(Base):
     """
     A class that repsents a meter in the gateway
@@ -293,6 +305,9 @@ class Meter(Base):
     battery = Column(Integer)
     panel_capacity = Column(Integer)
     geometry = Column(Unicode)
+    time_zone_id = Column(Integer, ForeignKey('time_zones.id'))
+    time_zone = relation(TimeZone,primaryjoin=time_zone_id == TimeZone.id)
+
 
     communication_interface_id = Column(
         Integer,
@@ -302,9 +317,15 @@ class Meter(Base):
         lazy=False,
         primaryjoin=communication_interface_id == CommunicationInterface.id)
 
-    def __init__(self, name=None, phone=None, location=None,
+    def __init__(self, 
+                 name=None, 
+                 phone=None, 
+                 location=None,
                  geometry=None,
-                 battery=None, status=None, panel_capacity=None,
+                 battery=None, 
+                 status=None, 
+                 panel_capacity=None,
+                 time_zone=None,
                  communication_interface_id=None):
         self.uuid = str(uuid.uuid4())
         self.name = name
@@ -313,14 +334,18 @@ class Meter(Base):
         self.date = get_now()
         self.battery = battery
         self.communication_interface_id = communication_interface_id
+        self.time_zone = time_zone
         self.panel_capacity = panel_capacity
         self.geometry = geometry
 
     def get_circuits(self):
+        
         session = DBSession()
-        return list(session.\
-                    query(Circuit).\
-                    filter_by(meter=self).order_by(Circuit.ip_address))
+        # Why am I casting this into a list? 
+        ## XXX FIX
+        return list(session\
+                        .query(Circuit)\
+                        .filter_by(meter=self).order_by(Circuit.ip_address))
 
     def getMainCircuit(self):
         session = DBSession()
@@ -1310,17 +1335,19 @@ def populate():
     if viewers is None:
         viewers = Groups(name='view')
         session.add(viewers)
-    #
-    key = session.query(MeterConfigKey).filter_by(key='meter_name').first()
-    if key is None:
-        session.add(MeterConfigKey(key='meter_name'))
-    #
-    key = session.query(MeterConfigKey).filter_by(key='mode').first()
-    if key is None:
-        session.add(MeterConfigKey(key='mode'))
 
+def add_time_zones():
+    session = DBSession()
+    map(lambda z: session.add(TimeZone(z)),[
+            'Africa/Bamako',
+            'Africa/Dar_es_Salaam',
+            'Africa/Kampala',
+            'US/Eastern',
+            'UTC'
+            ])
     DBSession.flush()
     transaction.commit()
+
 
 
 def initialize_sql(db_string, db_echo=False):
@@ -1329,7 +1356,7 @@ def initialize_sql(db_string, db_echo=False):
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
     try:
-        pass
+        add_time_zones()
         #populate()
     except IntegrityError:
         pass
