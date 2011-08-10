@@ -94,6 +94,11 @@ def json_response(data):
 
 def find_last_message_by_meter(meter):
     """
+    Function to find the last message from any circuit on a meter. 
+    Takes a meter object and returns a string repsentation of the time. 
+    
+    XXX TODO, this function is a bit of a mess, clean it up.
+    
     """
     meter_table = Meter.__table__
     circuit = Circuit.__table__
