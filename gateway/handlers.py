@@ -775,6 +775,7 @@ class MeterHandler(object):
         breadcrumbs.append({"text": "Meter Overview"})
         return {
             'meter': self.meter,
+            'last_message': find_last_message_by_meter(self.meter),
             'changesets': session\
                 .query(MeterChangeSet).filter_by(meter=self.meter),
             'meter_config_keys': session.query(MeterConfigKey).all(),

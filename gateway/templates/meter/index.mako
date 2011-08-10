@@ -144,12 +144,16 @@ ${headers.loadSlickGrid(request)}
     <p>${meter.phone}</p>
   </li>
   <li>
+    <h4>Meter time zone</h4>
+    <p>${meter.time_zone}</p>
+  </li>  
+  <li>
     <h4>Meter status</h4>
     <p>${meter.status}</p>       
   </li>
   <li>
     <h4>Time of last report</h4>
-         <p> TBD </p>
+    <p>${last_message}</p>
   </li>
 </ul>
 
