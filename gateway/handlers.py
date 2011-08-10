@@ -754,13 +754,8 @@ class MeterHandler(object):
             .filter(PCULog.timestamp <= end)
         return json_response(
             {'dates': map(lambda x: time.mktime(x.date.timetuple()), pculogs),
-             'values': map(lambda x: getattr(x, value), pculogs)
-             }
+             'values': map(lambda x: getattr(x, value), pculogs)}
             )
-
-    @action()
-    def overview_graph(self):
-        return Response('blah')
 
     @action(renderer="meter/index.mako", permission="view")
     def index(self):
