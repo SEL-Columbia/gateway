@@ -12,6 +12,7 @@ import hashlib
 import simplejson
 import numpy as np
 from mako.template import Template
+import pytz
 import twilio
 from sqlalchemy import create_engine
 from sqlalchemy import Column
@@ -286,7 +287,7 @@ class TimeZone(Base):
         self.zone = zone
         
     def __str__(self):
-        return '<TimeZone %s>' % self.zone
+        return '#<TimeZone %s>' % self.zone
 
 
 class Meter(Base):
@@ -378,6 +379,9 @@ class Meter(Base):
     def getLogs(self):
         return list(itertools.chain(*map(lambda c: c.get_logs().all(),
                                          self.get_circuits())))
+
+    def getTimeZone(self):
+        return pytz.timezone(self.time_zone.zone)
 
     def getUrl(self):
         return "/meter/index/%s" % self.id

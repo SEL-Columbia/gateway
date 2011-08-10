@@ -22,6 +22,7 @@ from sqlalchemy.sql.expression import and_
 from formalchemy import FieldSet, Field
 from formalchemy import Grid
 from shapely.wkt import loads
+import pytz
 
 from gateway import dispatcher
 from gateway import models
@@ -73,8 +74,15 @@ def not_found(request):
 
 
 def find_time_different(log):
-    time_diff = log.created - log.date
-    return (time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00
+    """
+    This function find the difference between when a primary log is
+    sent by the meter and received by the gateway.
+    """
+    meter_time_zone = log.circuit.meter.getTimeZone()
+    utc = pytz.timezone('UTC') # for now the gateway server is in UTC... 
+    meter_time_utc = meter_time_zone.localize(log.date).astimezone(utc) 
+    time_diff = utc.localize(log.created) - meter_time_utc
+    return "{:0.1f}".format(((time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00) * 60)
 
 
 def json_response(data):
@@ -962,7 +970,7 @@ class CircuitHandler(object):
                                'use_time': l.use_time,
                                'gateway_date': l.created.strftime('%Y-%m-%d %H:%M:%S'),
                                'meter_date': l.date.strftime('%Y-%m-%d %H:%M:%S'),
-                               'time_difference': "{0:.2f}".format(find_time_different(l)),
+                               'time_difference': find_time_different(l),
                                'watthours': "{0:.1f}".format(l.watthours),
                                'credit': int(l.credit)} for l in logs])
 
