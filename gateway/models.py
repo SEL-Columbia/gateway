@@ -490,14 +490,6 @@ class Circuit(Base):
            .filter(AddCredit.start >= last_month)\
            .filter(AddCredit.circuit == self).count()
 
-    # def getDataList(self, dateStart, dateEnd):
-    #     session = DBSession()
-    #     logs = session.query(PrimaryLog)\
-    #         .filter_by(circuit=self)\
-    #         .filter(PrimaryLog.date > dateStart)\
-    #         .filter(PrimaryLog.date <= dateEnd)\
-    #         .order_by(PrimaryLog.date)
-    #     return [l.credit for l in logs]
 
     def getRawDataListForCircuit(self, quantity, dateStart=None, dateEnd=None):
         """
