@@ -287,7 +287,7 @@ class TimeZone(Base):
         self.zone = zone
         
     def __str__(self):
-        return '#<TimeZone %s>' % self.zone
+        return 'TimeZone %s ' % self.zone
 
 
 class Meter(Base):
