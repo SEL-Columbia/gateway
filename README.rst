@@ -12,20 +12,22 @@ Requirements::
 
 #. Or in one command line on a debian/ubuntu system.:: 
 
-  sudo apt-get install postgresql-8.4 python-psycopg2 python-matplotlib
+  sudo apt-get install postgresql-8.4 python-psycopg2 
   python-setuptools python-virtualenv git-core
 
+  sudo apt-get install geos libgeos proj libproj
+  
 #. Create a virtual env.:: 
 
-  virtualenv gateway-env && cd gateway-env
 
 #. Check out the gateway.::
 
   git clone git://github.com/modilabs/gateway.git
 
+
+
 #. Activate the virtualenv:: 
 
-  source bin/activate
 
 #. Install the python requirements::
 
