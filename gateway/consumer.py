@@ -33,7 +33,10 @@ def get_circuit(message):
 def get_token(message):
     """Tries to match message to token."""
     session = DBSession()
-    tokenNumber = message.text.split(delimiter)[2]
+    try:
+        tokenNumber = message.text.split(delimiter)[2]
+    except Exception as e:
+        print message, e
     token = session.query(Token).\
         filter_by(state="new").filter_by(token=tokenNumber).first()
     if token:
