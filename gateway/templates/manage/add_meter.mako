@@ -73,8 +73,8 @@
       <td><label>Default language for each circuit</label></td>
       <td>
         <select name="default-language">
-          <option name="en">English</option>
-          <option name="fr">French</option>
+          <option name="en" value="en">English</option>
+          <option name="fr" value="fr">French</option>
         </select>
       </td>
     </tr>
