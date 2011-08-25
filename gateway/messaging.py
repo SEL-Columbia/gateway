@@ -49,20 +49,20 @@ def findMeter(message):
     meter = session.query(Meter).filter_by(phone=str(message.number)).first()
     if meter:
         return meter
-    else:
-        return False
 
 
 def findCircuit(message, meter):
     """Looks up circuit from meter and message.
     """
     session = DBSession()
-    circuit = session.query(Circuit).\
-        filter_by(ip_address=message["cid"]).\
-        filter_by(meter=meter).first()
-    if circuit:
-        return circuit
-
+    try:
+        circuit = session.query(Circuit).\
+            filter_by(ip_address=message["cid"]).\
+            filter_by(meter=meter).first()
+        if circuit:
+            return circuit
+    except Exception as e:
+        print e, message
 
 def parse_meter_message(message):
     """
