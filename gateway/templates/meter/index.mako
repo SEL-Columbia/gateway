@@ -161,10 +161,10 @@ ${headers.loadSlickGrid(request)}
   <div id="circuit-grid"></div>
 </div>
 <!-- 
-     Update meter configuration
+   Update meter configuration
 -->
 <div id="updateMeterConfig" style="display:none;">
-  <p> This form allows users to update the remote configuration on a
+  <p> This form allows users to update the remote confixsguration on a
   meter.</p>
   <form method="" id="configForm" action="">
     <select name="key">

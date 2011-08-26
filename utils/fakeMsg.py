@@ -133,16 +133,28 @@ def test_meter_messages():
 
     cid = "192.168.1.201"
     meter_name = "demo001"
+    pp = "(job=pp&cid=" + cid  + "&mid=" + meter_name + "&wh=10.00&tu=11&ts=20110107192318&cr=20.10&status=1&ct=CIRCUIT)"
 
     def test_pp():
         """ test primary log
         """
         response = urllib2.urlopen(
-            make_request("(job=pp&cid=" + cid  + "&mid=" + meter_name + "&wh=10.00&tu=12.12&ts=20110107192318&cr=20.10&status=1)", phone="+22365271087"))
+            make_request(pp, phone="+22365271087"))
         print("----------------------------")
         print("testing primary log")
         print(response.read())
         print("----------------------------")
+
+    def test_compressed_pp():
+        """ test primary log
+        """
+        from gateway import compactsms
+        
+        print pp
+        print '------------------------------'
+        print compactsms.deflatelogs([pp])
+
+
 
     def test_job_delete():
         """ Test job delete message
@@ -225,15 +237,17 @@ def test_meter_messages():
         print(response.read())
         print("----------------------------")
 
-    test_meter_online_message()
+    test_compressed_pp()
+
+#    test_meter_online_message()
     #test_pp()
     #test_job_delete()
     #test_alert_meter_down()
-    test_alert_sdc()
-    test_alert_low_credit()
-    test_alert_no_credit()
-    test_alert_emax()
-    test_circuit_compontent_failure()
+#    test_alert_sdc()
+#    test_alert_low_credit()
+#    test_alert_no_credit()
+#    test_alert_emax()
+ #   test_circuit_compontent_failure()
 
 #test_consumer_messages()
 test_meter_messages()
