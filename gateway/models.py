@@ -294,7 +294,7 @@ class Meter(Base):
     """
     A class that repsents a meter in the gateway
     """
-    __tablename__ = 'meter'
+    __tablename__ = 'meters'
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String)
@@ -396,32 +396,6 @@ class Meter(Base):
         return "Meter %s" % self.name
 
 
-class MeterConfigKey(Base):
-    """
-    """
-    __tablename__ = 'meterconfigkey'
-    id = Column(Integer, primary_key=True)
-    key = Column(Unicode)
-
-    def __str__(self):
-        return "Key: %s" % self.key
-
-
-class MeterChangeSet(Base):
-    """ Stores changes made to the meter config
-    """
-    __tablename__ = 'meterchangeset'
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
-    meter_id = Column('meter', ForeignKey('meter.id'))
-    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
-    keyid = Column('meterconfigkey', ForeignKey('meterconfigkey.id'))
-    key = relation(MeterConfigKey, primaryjoin=keyid == MeterConfigKey.id)
-    value = Column(Unicode)
-
-    def __str__(self):
-        return "Changset %s" % self.id
-
 
 class Account(Base):
     """ Stores account information for each Circuit
@@ -453,7 +427,7 @@ class Circuit(Base):
     uuid = Column(String)
     date = Column(DateTime)
     pin = Column(String)
-    meter_id = Column("meter", ForeignKey("meter.id"))
+    meter_id = Column("meters", ForeignKey("meters.id"))
     meter = relation(Meter,
                       lazy=False, primaryjoin=meter_id == Meter.id)
     energy_max = Column(Float)
@@ -725,7 +699,7 @@ class MeterMessages(Base):
     id = Column(Integer, primary_key=True)
     message_id = Column(Integer, ForeignKey('message.id'))
     message = relation(Message, primaryjoin=message_id == Message.id)
-    meter_id = Column(Integer, ForeignKey('meter.id'))
+    meter_id = Column(Integer, ForeignKey('meters.id'))
     meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
 
@@ -907,7 +881,7 @@ class Alert(Base):
     _type = Column('type', String(50))
     __mapper_args__ = {'polymorphic_on': _type}
 
-    meter_id = Column(Integer, ForeignKey('meter.id'))
+    meter_id = Column(Integer, ForeignKey('meters.id'))
     meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
     circuit_id = Column(Integer, ForeignKey('circuit.id'))
@@ -1121,7 +1095,7 @@ class PCULog(Log):
     battery_discharge = Column(Float)
     solar_amps = Column(Float)
     solar_volts = Column(Float)
-    meter_id = Column(Integer, ForeignKey('meter.id'))
+    meter_id = Column(Integer, ForeignKey('meters.id'))
     meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
     def __init__(self, date, timestamp,

@@ -40,10 +40,8 @@ from gateway.models import IncomingMessage
 from gateway.models import OutgoingMessage
 from gateway.models import SystemLog
 from gateway.models import Mping
-from gateway.models import MeterConfigKey
 from gateway.models import Users
 from gateway.models import Groups
-from gateway.models import MeterChangeSet
 from gateway.models import CommunicationInterface
 from gateway.models import TwilioInterface
 from gateway.models import Device
