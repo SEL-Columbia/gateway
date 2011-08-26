@@ -339,14 +339,9 @@ class Meter(Base):
         self.panel_capacity = panel_capacity
         self.geometry = geometry
 
-    def get_circuits(self):
-        
+    def get_circuits(self):        
         session = DBSession()
-        # Why am I casting this into a list? 
-        ## XXX FIX
-        return list(session\
-                        .query(Circuit)\
-                        .filter_by(meter=self).order_by(Circuit.ip_address))
+        return session.query(Circuit).filter_by(meter=self).order_by(Circuit.ip_address)
 
     def getMainCircuit(self):
         session = DBSession()
@@ -421,15 +416,14 @@ class Account(Base):
 class Circuit(Base):
     """
     """
-    __tablename__ = "circuit"
+    __tablename__ = "circuits"
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String)
     date = Column(DateTime)
     pin = Column(String)
-    meter_id = Column("meters", ForeignKey("meters.id"))
-    meter = relation(Meter,
-                      lazy=False, primaryjoin=meter_id == Meter.id)
+    meter_id = Column("meter", ForeignKey("meters.id"))
+    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
     energy_max = Column(Float)
     power_max = Column(Float)
     status = Column(Integer)
@@ -438,12 +432,18 @@ class Circuit(Base):
     account_id = Column(Integer, ForeignKey('account.id'))
     account = relation(Account, lazy=False,
                         cascade="all,delete",
-                        backref='circuit',
+                        backref='circuits',
                         primaryjoin=account_id == Account.id)
 
-    def __init__(self, meter=None, account=None,
-                 energy_max=None, power_max=None,
-                 ip_address=None, status=1, credit=0):
+    def __init__(self,
+                 meter=None,
+                 account=None,
+                 energy_max=None,
+                 power_max=None,
+                 ip_address=None,
+                 status=None,
+                 credit=None):
+
         self.date = get_now()
         self.uuid = str(uuid.uuid4())
         self.pin = self.get_pin()
@@ -677,31 +677,6 @@ class Message(Base):
         return
 
 
-class TestMessage(Base):
-    """Test message
-    """
-    __tablename__ = 'test_message'
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
-    text = Column(Unicode)
-
-    def __init__(self, date, text):
-        self.date = date
-        self.text = text
-
-
-class MeterMessages(Base):
-    """
-    Join table that assoicated messages with meters.
-    Takes a message and a meter.
-    """
-    __tablename__ = 'meter_messages'
-    id = Column(Integer, primary_key=True)
-    message_id = Column(Integer, ForeignKey('message.id'))
-    message = relation(Message, primaryjoin=message_id == Message.id)
-    meter_id = Column(Integer, ForeignKey('meters.id'))
-    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
-
 
 class IncomingMessage(Message):
     """
@@ -835,7 +810,7 @@ class Job(Base):
     start = Column(DateTime)
     end = Column(DateTime)
     state = Column(Boolean)
-    circuit_id = Column(Integer, ForeignKey('circuit.id'))
+    circuit_id = Column(Integer, ForeignKey('circuits.id'))
     circuit = relation(Circuit,
                        cascade="all,delete",
                        lazy=False, primaryjoin=circuit_id == Circuit.id)
@@ -884,7 +859,7 @@ class Alert(Base):
     meter_id = Column(Integer, ForeignKey('meters.id'))
     meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
-    circuit_id = Column(Integer, ForeignKey('circuit.id'))
+    circuit_id = Column(Integer, ForeignKey('circuits.id'))
     circuit = relation(Circuit, primaryjoin=circuit_id == Circuit.id)
 
     origin_message_id = Column(Integer, ForeignKey('message.id'))
@@ -1040,28 +1015,11 @@ class PowerOn(Alert):
     def render(self):
         return Template("${meter} turned on").render(meter=self.meter)
 
-
-class SystemLog(Base):
-    __tablename__ = "system_log"
-    id = Column(Integer, primary_key=True)
-    uuid = Column(String)
-    text = Column(String)
-    created = Column(String)
-
-    def __init__(self, text=None):
-        self.uuid = str(uuid.uuid4())
-        self.text = text
-        self.created = get_now()
-
-    def getUrl(self):
-        return ""
-
-
 class Log(Base):
     """
     Base class for all logs in the gateway.
     """
-    __tablename__ = "log"
+    __tablename__ = "logs"
     id = Column(Integer, primary_key=True)
     date = Column(DateTime)  # gateway_time
     _type = Column('type', String(50))
@@ -1085,7 +1043,7 @@ class PCULog(Log):
     """
     __tablename__ = "pcu_log"
     __mapper_args__ = {'polymorphic_identity': 'pcu_log'}
-    id = Column(Integer, ForeignKey('log.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('logs.id'), primary_key=True)
     timestamp = Column(DateTime)  # meter time
     cumulative_khw_solar = Column(Float)
     cumulative_kwh_battery_charge = Column(Float)
@@ -1124,13 +1082,13 @@ class PCULog(Log):
 class PrimaryLog(Log):
     __tablename__ = "primary_log"
     __mapper_args__ = {'polymorphic_identity': 'primary_log'}
-    id = Column(Integer, ForeignKey('log.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('logs.id'), primary_key=True)
     watthours = Column(Float)
     use_time = Column(Float)
     status = Column(Integer)
     created = Column(DateTime)
     credit = Column(Float, nullable=True)
-    circuit_id = Column(Integer, ForeignKey('circuit.id'))
+    circuit_id = Column(Integer, ForeignKey('circuits.id'))
     circuit = relation(Circuit, lazy=False,
                        primaryjoin=circuit_id == Circuit.id)
 

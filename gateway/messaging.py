@@ -4,8 +4,6 @@ from urlparse import parse_qs
 from gateway.models import DBSession
 from gateway.models import Circuit
 from gateway.models import Meter
-from gateway.models import SystemLog
-from gateway.models import TestMessage
 from gateway import meter as meter_funcs
 from gateway.meter import make_pcu_logs
 import compactsms
@@ -21,24 +19,17 @@ def reduce_message(message):
 
 
 def clean_message(messageRaw):
-    """  Does the basic cleaning of meter messages.
+    """  
+    Does the basic cleaning of meter messages.
     Step 1. Removes ()
     Step 2. Returns a new dict with only the first value
-    of each key value pair
+            of each key value pair
     """
     messageBody = messageRaw.text.lower()
     messageBody = messageBody.strip(")").strip("(")
     message = reduce_message(parse_qs(messageBody))
     message['meta'] = messageRaw
     return message
-
-
-def add_test_message(message):
-    session = DBSession()
-    msg = TestMessage(datetime.now(), message.text)
-    session.add(msg)
-    session.flush()
-
 
 def findMeter(message):
     """
@@ -102,5 +93,4 @@ def parse_meter_message(message):
                         else:
                             getattr(meter_funcs, "make_" + messageDict["alert"])(messageDict, circuit, session)
     else:
-        session.add(SystemLog(
-                'Unable to parse message %s' % message.uuid))
+        print 'Unable to parse message %s ' % message

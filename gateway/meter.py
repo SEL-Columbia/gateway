@@ -4,7 +4,6 @@ Handles all of the meter communcation
 """
 from datetime import datetime
 from gateway.models import Job
-from gateway.models import SystemLog
 from gateway.models import PrimaryLog
 from gateway.models import IncomingMessage
 from gateway.models import AddCredit
@@ -196,15 +195,19 @@ def make_lcw(message, circuit, session):
 
 
 def make_md(message, circuit, session):
-    log = SystemLog(
-        "Meter %s just falied, please investagte." % circuit.meter.name)
-    session.add(log)
+    """
+    """
+    #log = SystemLog(
+    #    "Meter %s just falied, please investagte." % circuit.meter.name)
+    #session.add(log)
 
 
 def make_ce(message, circuit, session):
-    log = SystemLog(
-        "Circuit %s just failed, please investagate." % circuit.ip_address)
-    session.add(log)
+    """
+    """
+#    log = SystemLog(
+#        "Circuit %s just failed, please investagate." % circuit.ip_address)
+#    session.add(log)
 
 
 def make_meter_online_alert(message, meter, session):

@@ -38,7 +38,6 @@ from gateway.models import Token
 from gateway.models import Message
 from gateway.models import IncomingMessage
 from gateway.models import OutgoingMessage
-from gateway.models import SystemLog
 from gateway.models import Mping
 from gateway.models import Users
 from gateway.models import Groups
@@ -303,17 +302,6 @@ class Dashboard(object):
         self.breadcrumbs = breadcrumbs[:]
         self.session = DBSession()
 
-    @action(renderer='index.mako', permission='view')
-    def index(self):
-
-        logs = Grid(SystemLog,
-                    self.session.query(SystemLog)\
-                    .order_by(desc(SystemLog.created)).limit(10))
-        logs.configure(readonly=True)
-        return {
-            'logs': logs,
-            'breadcrumbs': self.breadcrumbs}
-
     @action(renderer="dashboard.mako", permission='view')
     def dashboard(self):
         return {
@@ -366,7 +354,7 @@ class ManageHandler(object):
             [
                 {'name': m.name,
                  'id': m.id,
-                 'number_of_circuits': len(m.get_circuits()),
+                 'number_of_circuits': m.get_circuits().count(),
                  'uptime': find_meter_uptime(m),
                  'pv': m.panel_capacity,
                  'last_message': find_last_message_by_meter(m),
@@ -784,9 +772,6 @@ class MeterHandler(object):
         return {
             'meter': self.meter,
             'last_message': find_last_message_by_meter(self.meter),
-            'changesets': session\
-                .query(MeterChangeSet).filter_by(meter=self.meter),
-            'meter_config_keys': session.query(MeterConfigKey).all(),
             'breadcrumbs': breadcrumbs}
 
     @action()
@@ -1229,13 +1214,16 @@ class SMSHandler(object):
         db_string = self.request.registry.settings.get('db_string')
         engine = create_engine(db_string, echo=False)
         conn = engine.connect()
+# Sorry Chris.
+# ++++++++++++++++++++++++++++++
         results = conn.execute(
 """
-SELECT meter.name, meter.id, incoming_message.text, message.date
-       FROM meter, message, incoming_message
-       WHERE meter.phone = message.number
+SELECT metesr.name, meters.id, incoming_message.text, message.date
+       FROM meters, message, incoming_message
+       WHERE meters.phone = message.number
        AND message.id = incoming_message.id ORDER BY message.date DESC LIMIT 1000;
 """)
+# ++++++++++++++++++++++++++++++
         return {'results': results}
 
     @action(permission="view")

@@ -160,28 +160,6 @@ ${headers.loadSlickGrid(request)}
 <div class="grid">  
   <div id="circuit-grid"></div>
 </div>
-<!-- 
-   Update meter configuration
--->
-<div id="updateMeterConfig" style="display:none;">
-  <p> This form allows users to update the remote confixsguration on a
-  meter.</p>
-  <form method="" id="configForm" action="">
-    <select name="key">
-      % for key in meter_config_keys:
-         <option value=${key.id}> ${str(key)} </option>
-      % endfor
-    </select>
-  </form>
-  <hr />
-  <p>Change sets associated with this meter</p>
-  % for change in changesets:
-     ${change}
-  % endfor
-</div>
-<!-- 
-     Added new circuit form
---> 
 
 <div id="addCircuit" style="display: none">
   <form  id="add-circuit">
@@ -212,8 +190,7 @@ ${headers.loadSlickGrid(request)}
     </tr>
     <tr>
       <td><label>Energy Max: <label></td>
-      <td><input type="text" id="energy_max" name="energy_max" value="100"
-      /></td>      
+      <td><input type="text" id="energy_max" name="energy_max" value="100"/></td>      
     </tr>
     <tr>
       <td><label>Power Max: </label></td>
