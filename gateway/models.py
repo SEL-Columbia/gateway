@@ -1015,13 +1015,14 @@ class PowerOn(Alert):
     def render(self):
         return Template("${meter} turned on").render(meter=self.meter)
 
+
 class Log(Base):
     """
     Base class for all logs in the gateway.
     """
     __tablename__ = "logs"
     id = Column(Integer, primary_key=True)
-    date = Column(DateTime)  # gateway_time
+    gateway_time = Column(DateTime)  # gateway_time
     _type = Column('type', String(50))
     __mapper_args__ = {'polymorphic_on': _type}
 
@@ -1056,7 +1057,9 @@ class PCULog(Log):
     meter_id = Column(Integer, ForeignKey('meters.id'))
     meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
-    def __init__(self, date, timestamp,
+    def __init__(self,
+                 gateway_time,
+                 meter_time,
                  cumulative_khw_solar,
                  cumulative_kwh_battery_charge,
                  cumulative_kwh_discharge,
@@ -1066,8 +1069,8 @@ class PCULog(Log):
                  solar_amps,
                  solar_volts,
                  meter):
-        Log.__init__(self, date)
-        self.timestamp = timestamp
+        Log.__init__(self, gateway_time)
+        self.timestamp = meter_time
         self.cumulative_khw_solar = cumulative_khw_solar
         self.cumulative_kwh_battery_charge = cumulative_kwh_battery_charge
         self.cumulative_kwh_discharge = cumulative_kwh_discharge
@@ -1086,20 +1089,26 @@ class PrimaryLog(Log):
     watthours = Column(Float)
     use_time = Column(Float)
     status = Column(Integer)
-    created = Column(DateTime)
+    meter_time = Column(DateTime)
     credit = Column(Float, nullable=True)
     circuit_id = Column(Integer, ForeignKey('circuits.id'))
     circuit = relation(Circuit, lazy=False,
                        primaryjoin=circuit_id == Circuit.id)
 
-    def __init__(self, date=None, circuit=None, watthours=None,
-                 use_time=None, status=None, credit=0):
-        Log.__init__(self, date)
+    def __init__(self,
+                 circuit=None,
+                 gateway_time=None,
+                 meter_time=None,
+                 watthours=None,
+                 use_time=None,
+                 status=None,
+                 credit=None):
+        Log.__init__(self, gateway_time)
         self.circuit = circuit
+        self.meter_time = meter_time
         self.watthours = watthours
         self.use_time = use_time
         self.credit = credit
-        self.created = get_now()
         self.status = status
         self.circuit = circuit
 

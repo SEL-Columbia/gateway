@@ -78,7 +78,7 @@ def find_time_different(log):
     if log.circuit.meter.time_zone is not None:
         meter_time_zone = log.circuit.meter.getTimeZone()
         utc = pytz.timezone('UTC') # for now the gateway server is in UTC... 
-        meter_time_utc = meter_time_zone.localize(log.date).astimezone(utc) 
+        meter_time_utc = meter_time_zone.localize(log.meter_time).astimezone(utc) 
         time_diff = utc.localize(log.created) - meter_time_utc
         return '{0:.1f}'.format(((time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00) * 60)
     else:
@@ -322,7 +322,7 @@ def find_meter_uptime(meter):
     session = DBSession()
     log_count = session.query(PrimaryLog)\
         .filter_by(circuit=meter.getMainCircuit())\
-        .filter(PrimaryLog.date > last_week).count()
+        .filter(PrimaryLog.gateway_time > last_week).count()
     return "{0} %".format(int((log_count / (48 * 7.0)) * 100))
 
 
@@ -724,12 +724,12 @@ class MeterHandler(object):
         # get query based on circuit and date
         logs = session.query(PrimaryLog)\
                       .filter(PrimaryLog.circuit_id == circuit_id)\
-                      .filter(PrimaryLog.date > dateStart)\
-                      .filter(PrimaryLog.date <= dateEnd)\
-                      .order_by(PrimaryLog.date)
+                      .filter(PrimaryLog.meter_time > dateStart)\
+                      .filter(PrimaryLog.meter_time <= dateEnd)\
+                      .order_by(PrimaryLog.meter_time)
 
         # turn query into a sorted list of unique dates and watthour readings
-        data = [(l.date, getattr(l, quantity)) for l in logs]
+        data = [(l.meter_time, getattr(l, quantity)) for l in logs]
         # remove duplicate entries and sort by date
         data = list(set(data))
         data.sort()
@@ -754,7 +754,8 @@ class MeterHandler(object):
             .filter(PCULog.timestamp >= start)\
             .filter(PCULog.timestamp <= end)
         return json_response(
-            {'dates': map(lambda x: time.mktime(x.date.timetuple()), pculogs),
+            {'dates': 
+             map(lambda x: time.mktime(x.meter_time.timetuple()), pculogs),
              'values': map(lambda x: getattr(x, value), pculogs)}
             )
 
@@ -787,7 +788,7 @@ class MeterHandler(object):
         logs = self.meter.getLogs()
         cids = sorted([c.id for c in self.meter.get_circuits()])
         for log in logs:
-            d[log.date.strftime('%Y.%m.%d.%H.%M')].append(log)
+            d[log.meter_time.strftime('%Y.%m.%d.%H.%M')].append(log)
         for key in sorted(d.iterkeys(), reverse=True):
             log_cids = [log.circuit.id for log in d[key]]
             output.write(str(key) + " | ")
@@ -953,8 +954,8 @@ class CircuitHandler(object):
         return json_response([{'id': l.id,
                                'status': l.status,
                                'use_time': l.use_time,
-                               'gateway_date': l.created.strftime('%Y-%m-%d %H:%M:%S'),
-                               'meter_date': l.date.strftime('%Y-%m-%d %H:%M:%S'),
+                               'gateway_date': l.gateway_time.strftime('%Y-%m-%d %H:%M:%S'),
+                               'meter_date': l.meter_time.strftime('%Y-%m-%d %H:%M:%S'),
                                'time_difference': find_time_different(l),
                                'watthours': "{0:.1f}".format(l.watthours),
                                'credit': int(l.credit)} for l in logs])
@@ -969,15 +970,15 @@ class CircuitHandler(object):
 
         logs = session.query(PrimaryLog)\
                       .filter(PrimaryLog.circuit == self.circuit)\
-                      .filter(PrimaryLog.date > start)\
-                      .filter(PrimaryLog.date <= end)\
+                      .filter(PrimaryLog.meter_time > start)\
+                      .filter(PrimaryLog.meter_time <= end)\
                       .order_by(PrimaryLog.created)
         if value == 'use_time':
             values = map(lambda x: (getattr(x, value) / 3600), logs)
         else:
             values = map(lambda x: getattr(x, value), logs)
         return json_response(
-            {'dates': map(lambda x: time.mktime(x.date.timetuple()), logs),
+            {'dates': map(lambda x: time.mktime(x.meter_time.timetuple()), logs),
              'values': values }
           )
 
