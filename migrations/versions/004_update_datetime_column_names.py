@@ -3,13 +3,20 @@ from migrate import *
 
 meta = MetaData()
 
+table = Table('logs',
+               meta,
+               Column('date', DateTime))
 
 
 def upgrade(migrate_engine):
-    # Upgrade operations go here. Don't create your own engine; bind migrate_engine
-    # to your metadata
-    pass
+    """
+    """
+    meta.bind = migrate_engine
+    date = table.c['date']
+    date.alter(name='gateway_time')
+
 
 def downgrade(migrate_engine):
-    # Operations to reverse the above upgrade go here.
-    pass
+    meta.bind = migrate_engine
+    date = table.c['gateway_time']
+    date.alert(name='date')

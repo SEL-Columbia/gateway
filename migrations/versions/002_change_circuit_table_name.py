@@ -16,5 +16,5 @@ def upgrade(migrate_engine):
 def downgrade(migrate_engine):
     # Operations to reverse the above upgrade go here
     meta.bind = migrate_engine
-    table.rename('circuit')G
+    table.rename('circuit')
 
