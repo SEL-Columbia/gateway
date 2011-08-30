@@ -477,13 +477,13 @@ class Circuit(Base):
         session = DBSession()
         logs = session.query(PrimaryLog)\
                       .filter(PrimaryLog.circuit == self)\
-                      .filter(PrimaryLog.date > dateStart)\
-                      .filter(PrimaryLog.date <= dateEnd)\
-                      .order_by(PrimaryLog.date)
+                      .filter(PrimaryLog.meter_time > dateStart)\
+                      .filter(PrimaryLog.meter_time <= dateEnd)\
+                      .order_by(PrimaryLog.meter_time)
         # create separate arrays for each of these quantities
-        dates = np.array([l.date for l in logs])
+        dates = np.array([l.meter_time for l in logs])
         data  = np.array([getattr(l, quantity) for l in logs])
-        created = np.array([l.created for l in logs])
+        created = np.array([l.meter_time for l in logs])
         assert len(data) == len(created)
         return dates, created, data
 
@@ -552,7 +552,7 @@ class Circuit(Base):
         session = DBSession()
         return session.query(PrimaryLog)\
             .filter_by(circuit=self)\
-            .order_by(PrimaryLog.created.desc()).first()
+            .order_by(PrimaryLog.meter_time.desc()).first()
 
     def getWatthours(self):
         log = self.getLastLog()
@@ -564,7 +564,7 @@ class Circuit(Base):
     def getLastLogTime(self):
         log = self.getLastLog()
         if log:
-            return log.created.strftime('%Y-%m-%d %H:%M:%S')
+            return log.meter_time.strftime('%Y-%m-%d %H:%M:%S')
         else:
             return None
 

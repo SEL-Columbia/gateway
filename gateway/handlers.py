@@ -79,7 +79,7 @@ def find_time_different(log):
         meter_time_zone = log.circuit.meter.getTimeZone()
         utc = pytz.timezone('UTC') # for now the gateway server is in UTC... 
         meter_time_utc = meter_time_zone.localize(log.meter_time).astimezone(utc) 
-        time_diff = utc.localize(log.created) - meter_time_utc
+        time_diff = utc.localize(log.gateway_time) - meter_time_utc
         return '{0:.1f}'.format(((time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00) * 60)
     else:
         return 'Meter lacking timezone'
@@ -116,7 +116,7 @@ def find_last_message_by_meter(meter):
         whereclause=(and_(circuit.c.id == primary.c.circuit_id,
                           circuit.c.meter == meter_table.c.id,
                           meter_table.c.id == meter.id)))\
-                          .with_only_columns([primary.c.created]).order_by(desc(primary.c.created))
+                          .with_only_columns([primary.c.meter_time]).order_by(desc(primary.c.meter_time))
     try:
         last_logs = [log for log in select.execute()]
         return last_logs[0][0].strftime('%Y-%m-%d %H:%M:%S')
@@ -949,7 +949,7 @@ class CircuitHandler(object):
         session = DBSession()
         logs = session.query(PrimaryLog)\
             .filter_by(circuit=self.circuit)\
-            .order_by(desc(PrimaryLog.created))\
+            .order_by(desc(PrimaryLog.meter_time))\
             .limit(200)
         return json_response([{'id': l.id,
                                'status': l.status,
@@ -972,7 +972,7 @@ class CircuitHandler(object):
                       .filter(PrimaryLog.circuit == self.circuit)\
                       .filter(PrimaryLog.meter_time > start)\
                       .filter(PrimaryLog.meter_time <= end)\
-                      .order_by(PrimaryLog.created)
+                      .order_by(PrimaryLog.meter_time)
         if value == 'use_time':
             values = map(lambda x: (getattr(x, value) / 3600), logs)
         else:
@@ -1219,7 +1219,7 @@ class SMSHandler(object):
 # ++++++++++++++++++++++++++++++
         results = conn.execute(
 """
-SELECT metesr.name, meters.id, incoming_message.text, message.date
+SELECT meters.name, meters.id, incoming_message.text, message.date
        FROM meters, message, incoming_message
        WHERE meters.phone = message.number
        AND message.id = incoming_message.id ORDER BY message.date DESC LIMIT 1000;
