@@ -33,6 +33,29 @@ from zope.sqlalchemy import ZopeTransactionExtension
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
+# ***************************************************************
+# Ugly SQL used by Circuit.calculateCreditConsumed method in order to
+# speed up calculation by pushing work to DB
+# Formatting looks bad here...but should print more nicely
+# ***************************************************************
+baseSql = """           (select pl.credit, 
+                     extract(epoch from pl.created) created_seconds, 
+                     extract(epoch from l.date) date_seconds 
+              from log l, primary_log pl
+              where l.id=pl.id and
+                    l.date > :start_date and
+                    l.date <= :end_date and
+                    pl.circuit_id = :circuit_id
+              order by l.date) base """
+timeFilterSql = "      (select base.credit from \n" + baseSql + \
+                " where (base.created_seconds - base.date_seconds) < 3600) time_filtered "
+creditRow1Sql = "    (select credit, row_number() over () rownum from \n" + timeFilterSql + ") credit_row1 "
+creditRow2Sql = "    (select credit, ((row_number() over ()) + 1) rownum from \n" + timeFilterSql + ") credit_row2 "
+creditDiffSql = "  (select (credit_row2.credit - credit_row1.credit) diff from \n" + \
+                 creditRow1Sql + ", \n" + creditRow2Sql + \
+                 " where credit_row1.rownum = credit_row2.rownum) credit_diff "
+creditSumSql = "select coalesce(sum(diff), 0) from \n" + creditDiffSql + " where diff > 0"
+
 
 def get_now():
     return datetime.datetime.now()
@@ -550,7 +573,8 @@ class Circuit(Base):
         dates = [d[0] for d in dataList]
         data = [d[1] for d in dataList]
         return dates, data
-
+  
+    """ Old Way...slower
     def calculateCreditConsumed(self, dateStart, dateEnd):
         import numpy as np
         dates, data = self.getDataList(dateStart, dateEnd)
@@ -561,7 +585,18 @@ class Circuit(Base):
         credit_derivative *= -1
         credit_consumed = sum(credit_derivative)
         return credit_consumed
+    """
 
+    # Newer calculateCreditConsumed method...optimized
+    def calculateCreditConsumed(self, dateStart, dateEnd):
+        """ Workaround for performance problem with calculateCreditConsumed
+            method.  This one pushes the work down to the DB """
+        from sqlalchemy.sql import text
+        s = text(creditSumSql)
+        session = DBSession()
+        result = session.connection().execute(s, start_date=dateStart, end_date=dateEnd, circuit_id=self.id)
+        return result.first()[0]
+        
     def get_jobs(self):
         session = DBSession()
         return session.query(Job).\
@@ -1156,9 +1191,9 @@ class PrimaryLog(Log):
     status = Column(Integer)
     created = Column(DateTime)
     credit = Column(Float, nullable=True)
-    circuit_id = Column(Integer, ForeignKey('circuit.id'))
+    circuit_id = Column(Integer, ForeignKey('circuit.id'), index=True)
     circuit = relation(Circuit, lazy=False,
-                       primaryjoin=circuit_id == Circuit.id)
+                   primaryjoin=circuit_id == Circuit.id)
 
     def __init__(self, date=None, circuit=None, watthours=None,
                  use_time=None, status=None, credit=0):
