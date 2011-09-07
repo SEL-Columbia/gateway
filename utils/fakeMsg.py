@@ -8,7 +8,7 @@ def make_request(msg, phone="+22365489009"):
                              'number': phone,
                              'uuid': str(uuid.uuid4()) })
     return urllib2.Request(
-        data=data, url="http://localhost:6543/interface/send/1")
+        data=data, url="http://localhost:6543/interface/send/3")
 
 
 def test_consumer_messages():
@@ -225,15 +225,28 @@ def test_meter_messages():
         print(response.read())
         print("----------------------------")
 
-    test_meter_online_message()
+    #test_meter_online_message()
     #test_pp()
     #test_job_delete()
     #test_alert_meter_down()
-    test_alert_sdc()
-    test_alert_low_credit()
-    test_alert_no_credit()
-    test_alert_emax()
-    test_circuit_compontent_failure()
+    #test_alert_sdc()
+    #test_alert_low_credit()
+    #test_alert_no_credit()
+    #test_alert_emax()
+    #test_circuit_compontent_failure()
+
+def test_phone_message():
+    from datetime import datetime
+    response = urllib2.urlopen(
+        make_request(
+            "(job=gateway-ping&meter-time=%s)" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
+            phone="+13474594049")
+        )
+    print("----------------------------")
+    print(response.read())
+    print("----------------------------")
+    
 
 #test_consumer_messages()
-test_meter_messages()
+#test_meter_messages()
+test_phone_message()
