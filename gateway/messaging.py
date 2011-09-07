@@ -37,7 +37,7 @@ def gateway_ping(message):
     data = reduce_message(parse_qs(message.text.strip('(').strip(')')))
     interface.sendMessage(
         message.number,
-        '(ack&gateway-time=%s&meter-time%s)' \
+        '(ack&gateway-time=%s&meter-time=%s)' \
             % (datetime.now().strftime('%Y-%m-%d-%H:%M:%S'),
                data['meter-time'])
         )
