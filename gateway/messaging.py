@@ -5,7 +5,6 @@ from gateway.models import DBSession
 from gateway.models import Circuit
 from gateway.models import Meter
 from gateway.models import SystemLog
-from gateway.models import TestMessage
 from gateway import meter as meter_funcs
 from gateway.meter import make_pcu_logs
 import compactsms
@@ -33,11 +32,15 @@ def clean_message(messageRaw):
     return message
 
 
-def add_test_message(message):
-    session = DBSession()
-    msg = TestMessage(datetime.now(), message.text)
-    session.add(msg)
-    session.flush()
+def gateway_ping(message):
+    interface = message.communication_interface
+    data = reduce_message(parse_qs(message.text.strip('(').strip(')')))
+    interface.sendMessage(
+        message.number,
+        '(ack&gateway-time=%smeter-time%s)' \
+            % (datetime.now().strftime('%Y-%m-%d-%H:%M:%S'),
+               data['meter-time'])
+        )
 
 
 def findMeter(message):
@@ -63,6 +66,7 @@ def findCircuit(message, meter):
             return circuit
     except Exception as e:
         print e, message
+
 
 def parse_meter_message(message):
     """

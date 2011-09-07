@@ -12,7 +12,8 @@ from gateway.messaging import findMeter
 dispatcher = Dispatcher()
 dispatcher.addMatcher(findMeter,
                       'gateway.messaging.parse_meter_message')
-dispatcher.addMatcher(r'^job=test', 'gateway.messaging.add_test_message')
+
+dispatcher.addMatcher(r'^\(job=gateway-ping', 'gateway.messaging.gateway_ping')
 
 # Allow consumers to check their balance
 dispatcher.addMatcher(r'^(bal).(\w+)',
