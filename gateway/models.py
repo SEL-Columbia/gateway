@@ -33,29 +33,6 @@ from zope.sqlalchemy import ZopeTransactionExtension
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
-# ***************************************************************
-# Ugly SQL used by Circuit.calculateCreditConsumed method in order to
-# speed up calculation by pushing work to DB
-# Formatting looks bad here...but should print more nicely
-# ***************************************************************
-baseSql = """           (select pl.credit, 
-                     extract(epoch from pl.created) created_seconds, 
-                     extract(epoch from l.date) date_seconds 
-              from log l, primary_log pl
-              where l.id=pl.id and
-                    l.date > :start_date and
-                    l.date <= :end_date and
-                    pl.circuit_id = :circuit_id
-              order by l.date) base """
-timeFilterSql = "      (select base.credit from \n" + baseSql + \
-                " where (base.created_seconds - base.date_seconds) < 3600) time_filtered "
-creditRow1Sql = "    (select credit, row_number() over () rownum from \n" + timeFilterSql + ") credit_row1 "
-creditRow2Sql = "    (select credit, ((row_number() over ()) + 1) rownum from \n" + timeFilterSql + ") credit_row2 "
-creditDiffSql = "  (select (credit_row2.credit - credit_row1.credit) diff from \n" + \
-                 creditRow1Sql + ", \n" + creditRow2Sql + \
-                 " where credit_row1.rownum = credit_row2.rownum) credit_diff "
-creditSumSql = "select coalesce(sum(diff), 0) from \n" + creditDiffSql + " where diff > 0"
-
 
 def get_now():
     return datetime.datetime.now()
@@ -574,8 +551,8 @@ class Circuit(Base):
         data = [d[1] for d in dataList]
         return dates, data
   
-    """ Old Way...slower
-    def calculateCreditConsumed(self, dateStart, dateEnd):
+    # Old Way...slower
+    def calculateCreditConsumedOld(self, dateStart, dateEnd):
         import numpy as np
         dates, data = self.getDataList(dateStart, dateEnd)
         credit_derivative = np.diff(data)
@@ -585,14 +562,15 @@ class Circuit(Base):
         credit_derivative *= -1
         credit_consumed = sum(credit_derivative)
         return credit_consumed
-    """
 
     # Newer calculateCreditConsumed method...optimized
     def calculateCreditConsumed(self, dateStart, dateEnd):
         """ Workaround for performance problem with calculateCreditConsumed
             method.  This one pushes the work down to the DB """
         from sqlalchemy.sql import text
-        s = text(creditSumSql)
+	import sqltext
+        s = text(sqltext.credit_sum_query)
+        # s = text(creditSumSql)
         session = DBSession()
         result = session.connection().execute(s, start_date=dateStart, end_date=dateEnd, circuit_id=self.id)
         return result.first()[0]
@@ -1220,6 +1198,28 @@ class PrimaryLog(Log):
             return [('ct', self.getType()), ('cr', 0)]
         else:
             return [('cr', float(self.credit)), ('ct', self.getType())]
+
+    @staticmethod
+    def get_gap_result(date_start, date_end, gap_seconds):
+        """ Query logs for meter reporting 'gaps' between date_start
+	    and date_end where the gap is defined as gap_seconds.
+	    Returns resultset with the following keys:
+
+	    meter_name
+	    end_circuit
+	    start_gateway_time 
+	    end_gateway_time
+	    start_meter_time
+	    end_meter_time
+	    gap_seconds
+
+	"""
+        from sqlalchemy.sql import text
+	import sqltext
+        s = text(sqltext.gap_query)
+        session = DBSession()
+        result = session.connection().execute(s, start_date=date_start, end_date=date_end, gap_seconds=gap_seconds)
+        return result
 
     def __str__(self):
         return urllib\
