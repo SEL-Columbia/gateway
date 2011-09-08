@@ -169,7 +169,10 @@ class CommunicationInterface(Base):
             incoming)
         session.add(msg)
         session.flush()
-        self.sendData(msg)
+        if number is not None and number != '':
+            self.sendData(msg)
+        else:
+            print 'we can\'t send to a null number'
         return msg
 
     def sendJob(self, job, incoming=None):

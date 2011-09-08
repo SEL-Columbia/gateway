@@ -190,7 +190,11 @@ def make_lcw(message, circuit, session):
                      lang=circuit.account.lang,
                      account=circuit.pin),
         incoming=message['meta'].uuid)
-    alert = LowCredit(datetime.now(), circuit.meter, circuit, message['meta'], msg)
+    alert = LowCredit(datetime.now(), 
+                      circuit.meter, 
+                      circuit, 
+                      message['meta'], 
+                      msg)
     session.add(alert)
     session.flush()
 
