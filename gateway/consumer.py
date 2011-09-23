@@ -53,6 +53,9 @@ def get_balance(message):
     """Allows users to check blance"""
     circuit = get_circuit(message)
     if circuit is not None:
+        last_log = circuit.getLastLog()
+        if last_log is not None:
+            last_time = last_log.date
         language = circuit.account.lang
         interface = circuit.meter.communication_interface
         interface.sendMessage(
@@ -60,6 +63,7 @@ def get_balance(message):
             make_message_body("bal.txt",
                               lang=language,
                               account=circuit.pin,
+                              last_time=last_time,
                               credit=circuit.credit),
             incoming=message.uuid)
 

@@ -289,7 +289,7 @@ class TimeZone(Base):
 
     def __init__(self, zone=None):
         self.zone = zone
-        
+
     def __str__(self):
         return 'TimeZone %s ' % self.zone
 
@@ -311,8 +311,7 @@ class Meter(Base):
     panel_capacity = Column(Integer)
     geometry = Column(Unicode)
     time_zone_id = Column(Integer, ForeignKey('time_zones.id'))
-    time_zone = relation(TimeZone,primaryjoin=time_zone_id == TimeZone.id)
-
+    time_zone = relation(TimeZone, primaryjoin=time_zone_id == TimeZone.id)
 
     communication_interface_id = Column(
         Integer,
@@ -322,13 +321,13 @@ class Meter(Base):
         lazy=False,
         primaryjoin=communication_interface_id == CommunicationInterface.id)
 
-    def __init__(self, 
-                 name=None, 
-                 phone=None, 
+    def __init__(self,
+                 name=None,
+                 phone=None,
                  location=None,
                  geometry=None,
-                 battery=None, 
-                 status=None, 
+                 battery=None,
+                 status=None,
                  panel_capacity=None,
                  time_zone=None,
                  communication_interface_id=None):
@@ -344,9 +343,8 @@ class Meter(Base):
         self.geometry = geometry
 
     def get_circuits(self):
-        
         session = DBSession()
-        # Why am I casting this into a list? 
+        # Why am I casting this into a list?
         ## XXX FIX
         return list(session\
                         .query(Circuit)\
@@ -554,7 +552,7 @@ class Circuit(Base):
         dates = [d[0] for d in dataList]
         data = [d[1] for d in dataList]
         return dates, data
-  
+
     # Old Way...slower
     def calculateCreditConsumedOld(self, dateStart, dateEnd):
         import numpy as np
@@ -572,13 +570,17 @@ class Circuit(Base):
         """ Workaround for performance problem with calculateCreditConsumed
             method.  This one pushes the work down to the DB """
         from sqlalchemy.sql import text
-	import sqltext
+        import sqltext
         s = text(sqltext.credit_sum_query)
-        # s = text(creditSumSql)
         session = DBSession()
-        result = session.connection().execute(s, start_date=dateStart, end_date=dateEnd, circuit_id=self.id)
+        result = session.connection().execute(
+            s,
+            start_date=dateStart,
+            end_date=dateEnd,
+            circuit_id=self.id)
+
         return result.first()[0]
-        
+
     def get_jobs(self):
         session = DBSession()
         return session.query(Job).\

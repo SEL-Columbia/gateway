@@ -1,6 +1,3 @@
 ## a french balance message
-
-<%!
-  import datetime
-%> 
-Il restait ${credit} unites surla ligne ${account} le ${datetime.datetime.now().ctime()}.
+Il restait ${credit} unites surla ligne ${account} le
+${last_time.ctime()}.
