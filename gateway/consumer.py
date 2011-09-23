@@ -1,4 +1,4 @@
-"""
+b"""
 Functions to response to consumer messages
 """
 from datetime import datetime
@@ -25,9 +25,8 @@ def get_circuit(message):
         interface = message.communication_interface
         interface.sendMessage(
             message.number,
-            make_message_body("no-circuit.txt", lang=message.language),
+            make_message_body("no-circuit.txt", lang=interface.lang, pin=pin),
             incoming=message.uuid)
-        return False
 
 
 def get_token(message):
@@ -45,7 +44,7 @@ def get_token(message):
         interface = message.communication_interface
         interface.sendMessage(
             message.number,
-            make_message_body("no-token.txt", lang=message.language),
+            make_message_body("no-token.txt", lang=interface.lang),
             incoming=message.uuid)
         return False
 
@@ -53,8 +52,8 @@ def get_token(message):
 def get_balance(message):
     """Allows users to check blance"""
     circuit = get_circuit(message)
-    language = circuit.account.lang
-    if circuit:
+    if circuit is not None:
+        language = circuit.account.lang
         interface = circuit.meter.communication_interface
         interface.sendMessage(
             message.number,

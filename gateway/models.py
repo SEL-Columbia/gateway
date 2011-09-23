@@ -123,6 +123,7 @@ class CommunicationInterface(Base):
     provider = Column(String)
     location = Column(String)
     phone = Column(String)
+    lang = Column(Unicode)
 
     def __init__(self, name=None, provider=None, location=None):
         self.name = name
