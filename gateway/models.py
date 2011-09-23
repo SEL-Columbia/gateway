@@ -1221,6 +1221,12 @@ class PrimaryLog(Log):
         from sqlalchemy.sql import text
 	import sqltext
         s = text(sqltext.gap_query)
+
+        # Use the union query to assess meters that are "currently down" if
+	# date_end is beyond the current datetime
+	if(date_end > datetime.datetime.now()):
+	    s = text(sqltext.gap_query_union)
+
         session = DBSession()
         result = session.connection().execute(s, start_date=date_start, end_date=date_end, gap_seconds=gap_seconds)
         return result

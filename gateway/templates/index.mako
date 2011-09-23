@@ -37,6 +37,7 @@
         <li> 
           <a href="${a_url}/manage/show_alerts">View all system
             alerts</a></a>
+        <li><a href="${a_url}/manage/show_gaps">Check Communication Gaps</a></li>
         <li><a href="${a_url}/system/download">Download data tables</a></li>
       </ul>
       <hr /> 

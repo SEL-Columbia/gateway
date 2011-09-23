@@ -379,6 +379,34 @@ class ManageHandler(object):
                 ]
             )
 
+    @action(renderer='manage/show_gaps.mako', permission='view')
+    def show_gaps(self):
+        return {'breadcrumbs': self.breadcrumbs}
+
+    @action(permission='view')
+    def show_gaps_json(self):
+
+	# import ipdb
+	# ipdb.set_trace()
+	default_end = datetime.now() + timedelta(days=1)
+        end = datetime.strptime(self.request.params.get('end', default_end.strftime("%m/%d/%Y")), '%m/%d/%Y')
+	default_start = end - timedelta(days=7)
+        start = datetime.strptime(self.request.params.get('start', default_start.strftime("%m/%d/%Y")), '%m/%d/%Y')
+	gap_seconds = int(self.request.params.get('gap', '5400'))
+
+	gap_res_set = PrimaryLog.get_gap_result(start, end, gap_seconds)
+	
+        gap_rec_list = [ dict(rec) for rec in gap_res_set ]	
+	for i in range(0, len(gap_rec_list)):
+	    gap_rec_list[i]['id'] = i
+
+	return Response(
+		content_type='application/json', 
+		body=simplejson.dumps(gap_rec_list, 
+		    default = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
+		    )
+		)
+
     @action(renderer='manage/add_meter.mako', permission='admin')
     def add_meter(self):
         session = DBSession()
