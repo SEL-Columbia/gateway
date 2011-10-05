@@ -118,5 +118,15 @@ function loadPage(options) {
   loadBillingHistory(options)
   primaryLogGrid(options);
   loadGraph(options)
-  
+
+    $('#removeCircuit').click(function() { 
+        var remove = confirm('Are you sure you want to remove this circuit?');
+        console.log(options);
+
+        if (remove) { 
+            window.location = '/circuit/remove/' + options.circuit;
+        } else {  }
+
+    });
+
 }
