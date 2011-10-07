@@ -251,6 +251,7 @@ class AirtelInterface(CommunicationInterface):
     id = Column(Integer,
                 ForeignKey('communication_interface.id'),
                 primary_key=True)
+
     host = Column(String)
 
     def __init__(self, name=None, host=None, location=None, provider=None):
@@ -263,6 +264,50 @@ class AirtelInterface(CommunicationInterface):
         print(url)
         request = urllib2.Request(url)
         return urllib2.urlopen(request)
+
+
+class YoInterface(CommunicationInterface):
+    """
+    """
+    __tablename__ = 'yo_interface'
+    __mapper_args__ = {'polymorphic_identity': 'yo_interface'}
+
+    id = Column(Integer,
+                ForeignKey('communication_interface.id'),
+                primary_key=True)
+    host = Column(Unicode)
+    accout = Column(Unicode)
+    username = Column(Unicode)
+    password = Column(Unicode)
+    port = Column(Unicode)
+
+    def __init__(
+        self, name=None, provider=None, location=None, port=None,
+        host=None, account=None, username=None, password=None):
+
+        CommunicationInterface.__init__(self, name, provider, location)
+        self.host = host
+        self.account = account
+        self.username = username
+        self.password = password
+
+    def sendData(self, message):
+        data = urllib.urlencode(
+            {'ybsacctno': self.username,
+             'password': self.password,
+             'origin': self.phone,
+             'message': message.text,
+             'destinations': message.number,
+             }
+            )
+        print data
+        request = urllib2.Request(
+            url='http://%s:%s/sendsms?%s' % (
+                self.host, self.port, data)
+            )
+        response = urllib2.urlopen(request)
+        print response
+        return response
 
 
 class NetbookInterface(CommunicationInterface):
