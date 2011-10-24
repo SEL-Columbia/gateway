@@ -21,7 +21,7 @@ function loadPage(data) {
     {id: "pv ", name: "PV (kw)", field: "pv", sortable: true, width: 100},
     {id: "battery", name: "Battery (kWh)", field: "battery", sortable: true, width: 100},
     {id: "phone", name: "Phone Number", field: "phone", sortable: true, width: 100},
-    {id: "uptime", name: "Meter Uptime (7 Days)", field: "uptime", sortable: true, width: 200}
+    {id: "uptime", name: "Percentage of Hourly Logs Received (7 Days)", field: "uptime", sortable: true, width: 320}
   ]
 
   var dataView = new Slick.Data.DataView();
