@@ -80,12 +80,13 @@ def find_time_different(log):
     """
     if log.circuit.meter.time_zone is not None:
         meter_time_zone = log.circuit.meter.getTimeZone()
-        utc = pytz.timezone('UTC') # for now the gateway server is in UTC... 
-        meter_time_utc = meter_time_zone.localize(log.date).astimezone(utc) 
+        utc = pytz.timezone('UTC')  # for now the gateway server is in UTC...
+        meter_time_utc = meter_time_zone.localize(log.date).astimezone(utc)
         time_diff = utc.localize(log.created) - meter_time_utc
         return '{0:.1f}'.format(((time_diff.seconds + time_diff.days * 24 * 3600) / 3600.00) * 60)
     else:
         return 'Meter lacking timezone'
+
 
 def json_response(data):
     """
@@ -104,11 +105,9 @@ def json_response(data):
 
 def find_last_message_by_meter(meter):
     """
-    Function to find the last message from any circuit on a meter. 
-    Takes a meter object and returns a string repsentation of the time. 
-    
+    Function to find the last message from any circuit on a meter.
+    Takes a meter object and returns a string repsentation of the time.
     XXX TODO, this function is a bit of a mess, clean it up.
-    
     """
     meter_table = Meter.__table__
     circuit = Circuit.__table__
@@ -385,9 +384,6 @@ class ManageHandler(object):
 
     @action(permission='view')
     def show_gaps_json(self):
-
-	# import ipdb
-	# ipdb.set_trace()
 	default_end = datetime.now() + timedelta(days=1)
         end = datetime.strptime(self.request.params.get('end', default_end.strftime("%m/%d/%Y")), '%m/%d/%Y')
 	default_start = end - timedelta(days=7)
@@ -395,7 +391,7 @@ class ManageHandler(object):
 	gap_seconds = int(self.request.params.get('gap', '5400'))
 
 	gap_res_set = PrimaryLog.get_gap_result(start, end, gap_seconds)
-	
+
         gap_rec_list = [ dict(rec) for rec in gap_res_set ]	
 	for i in range(0, len(gap_rec_list)):
 	    gap_rec_list[i]['id'] = i
@@ -551,12 +547,11 @@ class ManageHandler(object):
         session.add(batch)
         session.flush()
         data = simplejson.loads(self.request.body)
-        print '\n\n %s' % self.request.body
-        print '\n\n %s' % data
         if not 'device_id' in data:
             return Response('You must provide an device_id')
         else:
-            device = session.query(Device).filter_by(device_id=data['device_id']).first()
+            device = session.query(Device)\
+                .filter_by(device_id=data['device_id']).first()
             if device:
                 if not 'tokens' in data:
                     return Response('You must provide an amount of tokens')
@@ -569,24 +564,33 @@ class ManageHandler(object):
                         session.flush()
                 return json_response(
                     [{'token_id': int(token.token),
-                      'denomination': float(token.value)} for token in batch.getTokens()])
+                      'denomination':
+                      float(token.value)} for token in batch.getTokens()])
             else:
                 return json_response('Not a valid device')
 
     @action()
     def update_tokens(self):
+        """
+        We need to record these updates to token states and provide a
+        way to view this in the Gateway Interface.
+        """
         session = DBSession()
         data = simplejson.loads(self.request.body)
-        print '\n\n %s' % self.request.body
-        print '\n\n %s' % data
         if not 'device_id' in data:
             return json_response('You must provide an device_id')
-        device = session.query(Device).filter_by(device_id=data['device_id']).first()
-        print device
+        device = session.query(Device)\
+            .filter_by(device_id=data['device_id']).first()
         if device:
             for i in data['tokens']:
-                token = session.query(Token).filter_by(token=i['token_id']).first()
+                token = session.query(Token)\
+                    .filter_by(token=i['token_id']).first()
                 if token:
+                    circuit = session.query(Circuit)\
+                        .filter_by(pin=i['account_id'])
+                    if circuit:
+                        job = AddCredit(token.value, circuit, token)
+                        session.add(job)
                     token.state = 5
                     session.merge(token)
             session.flush()
