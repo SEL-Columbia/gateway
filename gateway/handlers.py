@@ -335,8 +335,9 @@ def find_meter_uptime(meter):
     session = DBSession()
     log_count = session.query(PrimaryLog)\
         .filter_by(circuit=meter.getMainCircuit())\
+        .filter(PrimaryLog.date < now)\
         .filter(PrimaryLog.date > last_week).count()
-    return "{0} %".format(int((log_count / (48 * 7.0)) * 100))
+    return int((log_count / (48 * 7.0)) * 100)
 
 
 class ManageHandler(object):
