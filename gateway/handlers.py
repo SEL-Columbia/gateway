@@ -588,7 +588,7 @@ class ManageHandler(object):
                     .filter_by(token=i['token_id']).first()
                 if token:
                     circuit = session.query(Circuit)\
-                        .filter_by(pin=i['account_id'])
+                        .filter_by(pin=i['account_id']).first()
                     if circuit:
                         job = AddCredit(token.value, circuit, token)
                         session.add(job)
