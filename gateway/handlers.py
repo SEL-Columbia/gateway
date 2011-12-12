@@ -320,15 +320,14 @@ class Dashboard(object):
         return {
             "logged_in": authenticated_userid(self.request)}
 
+
 def find_meter_uptime(meter):
     """
     cs = # of circuits
     actual = number messages it did receive
     possible = Number of messages it should have receive in the last week
-               -> 48 * cs * 7 
-    
-   (* (/ actual possible) 100) 
-
+    -> 48 * cs * 7
+    (* (/ actual possible) 100)
     """
     now = datetime.now()
     last_week = now - timedelta(days=7)
@@ -337,7 +336,7 @@ def find_meter_uptime(meter):
         .filter_by(circuit=meter.getMainCircuit())\
         .filter(PrimaryLog.date < now)\
         .filter(PrimaryLog.date > last_week).count()
-    return int((log_count / (48 * 7.0)) * 100)
+    return int((log_count / (24 * 7.0)) * 100)
 
 
 class ManageHandler(object):
@@ -592,7 +591,7 @@ class ManageHandler(object):
                     if circuit:
                         job = AddCredit(token.value, circuit, token)
                         session.add(job)
-                    token.state = 5
+                    token.state = 'used'
                     session.merge(token)
             session.flush()
             return json_response('ok')
@@ -761,6 +760,9 @@ class MeterHandler(object):
                      get(self.request.matchdict['id'])
         self.breadcrumbs = breadcrumbs[:]
 
+    def show_billing_history(self):
+        return Response('hi')
+
     def getDataListForCircuit(self,
                               circuit_id,
                               dateStart=datetime(2011, 5, 12),
@@ -794,16 +796,17 @@ class MeterHandler(object):
     def show_pculogs(self):
         session = DBSession()
         value = self.request.params.get('pcu-value', 'battery_volts')
-        start = datetime.strptime(self.request.params.get('start', '05/01/2011'), '%m/%d/%Y')
-        end = datetime.strptime(self.request.params.get('end', '07/20/2011'), '%m/%d/%Y')
+        start = datetime.strptime(
+            self.request.params.get('start', '05/01/2011'), '%m/%d/%Y')
+        end = datetime.strptime(
+            self.request.params.get('end', '07/20/2011'), '%m/%d/%Y')
         pculogs = session.query(PCULog)\
             .filter(PCULog.meter == self.meter)\
             .filter(PCULog.timestamp >= start)\
             .filter(PCULog.timestamp <= end)
         return json_response(
-            {'dates': map(lambda x: time.mktime(x.date.timetuple()), pculogs),
-             'values': map(lambda x: getattr(x, value), pculogs)}
-            )
+            {'dates': map(lambda x: time.mktime(x.timestamp.timetuple()), pculogs),
+             'values': map(lambda x: getattr(x, value), pculogs)})
 
     @action(renderer="meter/index.mako", permission="view")
     def index(self):
