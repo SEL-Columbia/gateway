@@ -90,6 +90,9 @@ class Users(Base):
 
 class Device(Base):
     """
+    Devices are the Android applications that allow field vendors to
+    sell credit to consumers without the need for SMS service.
+    
     """
     __tablename__ = 'devices'
     id = Column(Integer, primary_key=True)
@@ -109,11 +112,9 @@ class Device(Base):
 
 class CommunicationInterface(Base):
     """
-    Configures how the Gateway communicates with a Meter
-    Subclasses
-       KannelInterface
-       TwilioInterface
-       Netbook interface
+    Configures how the Gateway communicates with a Meter. Each
+    interface knows to exchange data with an TelCom's system. Some of
+    these are custom, some of these follow more normal standards.
     """
     __tablename__ = 'communication_interface'
     type = Column(String)
@@ -341,7 +342,7 @@ class TimeZone(Base):
 
 class Meter(Base):
     """
-    A class that repsents a meter in the gateway
+    A table holds of all of the configurations the Sharedsolar
     """
     __tablename__ = 'meter'
 
@@ -471,7 +472,9 @@ class MeterChangeSet(Base):
 
 
 class Account(Base):
-    """ Stores account information for each Circuit
+    """
+    Each consumer gets an record in the account table. Each account
+    stores an phone number, an optional name and their pin number.
     """
     __tablename__ = "account"
     id = Column(Integer, primary_key=True)
@@ -493,6 +496,7 @@ class Account(Base):
 
 class Circuit(Base):
     """
+    This table stores the configuration for each circuit or SC20 for meter.
     """
     __tablename__ = "circuit"
 
@@ -540,7 +544,6 @@ class Circuit(Base):
         return session.query(AddCredit)\
            .filter(AddCredit.start >= last_month)\
            .filter(AddCredit.circuit == self).count()
-
 
     def getRawDataListForCircuit(self, quantity, dateStart=None, dateEnd=None):
         """
@@ -767,19 +770,6 @@ class Message(Base):
         return
 
 
-class TestMessage(Base):
-    """Test message
-    """
-    __tablename__ = 'test_message'
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
-    text = Column(Unicode)
-
-    def __init__(self, date, text):
-        self.date = date
-        self.text = text
-
-
 class MeterMessages(Base):
     """
     Join table that assoicated messages with meters.
@@ -833,23 +823,6 @@ class OutgoingMessage(Message):
         self.incoming = incoming
 
 
-class KannelOutgoingMessage(Message):
-    """
-    A class for sending messages to Kannel... Kind of a hack right now
-    In the __init__ function we send a post to the Kannel address
-    """
-    __tablename__ = 'kannel_outgoing_message'
-    __mapper_args__ = {'polymorphic_identity': 'kannel_outgoing_message'}
-    id = Column(Integer, ForeignKey('message.id'), primary_key=True)
-    text = Column(String)
-    incoming = Column(String, nullable=True)
-
-    def __init__(self, number=None, text=None, incoming=None):
-        Message.__init__(self, number, str(uuid.uuid4()))
-        self.text = text
-        self.incoming = incoming
-
-
 class TokenBatch(Base):
     """
     A class that groups tokens based on when they are created
@@ -879,6 +852,7 @@ class TokenBatch(Base):
 
 class Token(Base):
     """
+    Tokens units of value sold to consumer to be claimed later.
     """
     __tablename__ = "token"
 
@@ -985,7 +959,8 @@ class Alert(Base):
     consumer_message = relation(Message,
                                 primaryjoin=consumer_message_id == Message.id)
 
-    def __init__(self, date, meter, circuit=None, origin_message=None, consumer_message=None):
+    def __init__(self, date, meter, circuit=None,
+                 origin_message=None, consumer_message=None):
         self.date = date
         self.meter = meter
         self.circuit = circuit
@@ -1185,10 +1160,13 @@ class PCULog(Log):
     battery_discharge = Column(Float)
     solar_amps = Column(Float)
     solar_volts = Column(Float)
+    battery_temp = Column(Float)
     meter_id = Column(Integer, ForeignKey('meter.id'))
     meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
-    def __init__(self, date, timestamp,
+    def __init__(self,
+                 date,
+                 timestamp,
                  cumulative_khw_solar,
                  cumulative_kwh_battery_charge,
                  cumulative_kwh_discharge,
@@ -1197,6 +1175,7 @@ class PCULog(Log):
                  battery_discharge,
                  solar_amps,
                  solar_volts,
+                 battery_temp,
                  meter):
         Log.__init__(self, date)
         self.timestamp = timestamp
@@ -1208,6 +1187,7 @@ class PCULog(Log):
         self.battery_discharge = battery_discharge
         self.solar_amps = solar_amps
         self.solar_volts = solar_volts
+        self.battery_temp = battery_temp
         self.meter = meter
 
 
@@ -1252,30 +1232,34 @@ class PrimaryLog(Log):
 
     @staticmethod
     def get_gap_result(date_start, date_end, gap_seconds):
-        """ Query logs for meter reporting 'gaps' between date_start
-	    and date_end where the gap is defined as gap_seconds.
-	    Returns resultset with the following keys:
-
-	    meter_name
-	    end_circuit
-	    start_gateway_time 
-	    end_gateway_time
-	    start_meter_time
-	    end_meter_time
-	    gap_seconds
-
-	"""
+        """
+        Query logs for meter reporting 'gaps' between date_start
+        and date_end where the gap is defined as gap_seconds.
+        Returns resultset with the following keys:
+        meter_name
+        end_circuit
+        start_gateway_time
+        end_gateway_time
+        start_meter_time
+        end_meter_time
+        gap_seconds
+        """
         from sqlalchemy.sql import text
-	import sqltext
+        import sqltext
         s = text(sqltext.gap_query)
 
         # Use the union query to assess meters that are "currently down" if
-	# date_end is beyond the current datetime
-	if(date_end > datetime.datetime.now()):
-	    s = text(sqltext.gap_query_union)
+        # date_end is beyond the current datetime
+        if (date_end > datetime.datetime.now()):
+            s = text(sqltext.gap_query_union)
 
         session = DBSession()
-        result = session.connection().execute(s, start_date=date_start, end_date=date_end, gap_seconds=gap_seconds)
+        result = session.connection().execute(
+            s,
+            start_date=date_start,
+            end_date=date_end,
+            gap_seconds=gap_seconds
+            )
         return result
 
     def __str__(self):
@@ -1424,9 +1408,10 @@ def populate():
         viewers = Groups(name='view')
         session.add(viewers)
 
+
 def add_time_zones():
     session = DBSession()
-    map(lambda z: session.add(TimeZone(z)),[
+    map(lambda z: session.add(TimeZone(z)), [
             'Africa/Bamako',
             'Africa/Dar_es_Salaam',
             'Africa/Kampala',
@@ -1437,14 +1422,13 @@ def add_time_zones():
     transaction.commit()
 
 
-
 def initialize_sql(db_string, db_echo=False):
     engine = create_engine(db_string, echo=db_echo)
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
-    try:
-        add_time_zones()
-        #populate()
-    except IntegrityError:
-        pass
+    # try:
+    #     #add_time_zones()
+    #     #populate()
+    # except IntegrityError:
+    #     pass
