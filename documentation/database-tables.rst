@@ -2,25 +2,53 @@
 SSGateway database tables
 ========================= 
 
+TODO migrate these table their plural forms.
+
 This is a guide to the SharedSolar's database tables.
 
 Core tables
 -----------
 
-#. Meter
-   Meters are 
+* Meters
 
-#. Circuits
+  Table name: `meter`
 
-#. Accounts
+  .. autoclass:: gateway.models.Meter
 
-#. Devices
+* Circuits
 
-#. Users
+  Table name: `circuit`
 
-#. Tokens
+  .. autoclass:: gateway.models.Circuit
 
-#. Token Batches
+* Accounts
+
+  Table name: `account`
+  
+  .. autoclass:: gateway.models.Account
+
+* Devices
+
+  Table name: `devices`
+  
+  .. autoclass:: gateway.models.Device
+
+* Users
+  Table name: `user`
+
+  .. autoclass:: gateway.models.Users
+
+* Tokens
+  Table name: `token`
+
+  .. autoclass:: gateway.models.Token
+
+
+* Token Batches
+  Table name: `tokenbatch`
+
+  .. autoclass:: gateway.models.TokenBatch
+
 
 Base tables
 -----------
@@ -31,13 +59,25 @@ done via sqlalchemy, a primary key call id is shared between the
 parent and child table. *Note that we do not use the built in system
 of table inheritance that Postgresql supports*.
 
-#. Communication interface
+* Communication interface
 
-#. Message
+  .. autoclass:: gateway.models.CommunicationInterface
 
-#. Alerts
+* Message
 
-#. Jobs
+  .. autoclass:: gateway.models.Message
+
+* Alerts
+
+  .. autoclass:: gateway.models.Alert
+
+* Jobs
+
+  .. autoclass:: gateway.models.Job
+
+* Logs
+
+  .. autoclass:: gateway.models.Log
 
 
 Child tables
