@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Shared Solar  documentation build configuration file, created by
-# sphinx-quickstart on Mon Dec 20 12:00:35 2010.
+# SharedSolar Gateway documentation build configuration file, created by
+# sphinx-quickstart on Mon Dec 19 08:46:08 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -40,8 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Shared Solar '
-copyright = u'2010, Ivan, Rajesh, Matt'
+project = u'SharedSolar Gateway'
+copyright = u'2011, Ivan Willig'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -164,22 +164,27 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'SharedSolardoc'
+htmlhelp_basename = 'SharedSolarGatewaydoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
 
-# The paper size ('letter' or 'a4').
-#latex_paper_size = 'letter'
+latex_elements = {
+# The paper size ('letterpaper' or 'a4paper').
+#'papersize': 'letterpaper',
 
 # The font size ('10pt', '11pt' or '12pt').
-#latex_font_size = '10pt'
+#'pointsize': '10pt',
+
+# Additional stuff for the LaTeX preamble.
+#'preamble': '',
+}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'SharedSolar.tex', u'Shared Solar  Documentation',
-   u'Ivan, Rajesh, Matt', 'manual'),
+  ('index', 'SharedSolarGateway.tex', u'SharedSolar Gateway Documentation',
+   u'Ivan Willig', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -196,9 +201,6 @@ latex_documents = [
 # If true, show URL addresses after external links.
 #latex_show_urls = False
 
-# Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
-
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
 
@@ -211,18 +213,42 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'sharedsolar', u'Shared Solar  Documentation',
-     [u'Ivan, Rajesh, Matt'], 1)
+    ('index', 'sharedsolargateway', u'SharedSolar Gateway Documentation',
+     [u'Ivan Willig'], 1)
 ]
+
+# If true, show URL addresses after external links.
+#man_show_urls = False
+
+
+# -- Options for Texinfo output ------------------------------------------------
+
+# Grouping the document tree into Texinfo files. List of tuples
+# (source start file, target name, title, author,
+#  dir menu entry, description, category)
+texinfo_documents = [
+  ('index', 'SharedSolarGateway', u'SharedSolar Gateway Documentation',
+   u'Ivan Willig', 'SharedSolarGateway', 'One line description of project.',
+   'Miscellaneous'),
+]
+
+# Documents to append as an appendix to all manuals.
+#texinfo_appendices = []
+
+# If false, no module index is generated.
+#texinfo_domain_indices = True
+
+# How to display URL addresses: 'footnote', 'no', or 'inline'.
+#texinfo_show_urls = 'footnote'
 
 
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'Shared Solar '
-epub_author = u'Ivan, Rajesh, Matt'
-epub_publisher = u'Ivan, Rajesh, Matt'
-epub_copyright = u'2010, Ivan, Rajesh, Matt'
+epub_title = u'SharedSolar Gateway'
+epub_author = u'Ivan Willig'
+epub_publisher = u'Ivan Willig'
+epub_copyright = u'2011, Ivan Willig'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
@@ -237,6 +263,9 @@ epub_copyright = u'2010, Ivan, Rajesh, Matt'
 
 # A unique identification for the text.
 #epub_uid = ''
+
+# A tuple containing the cover image and cover page html template filenames.
+#epub_cover = ()
 
 # HTML files that should be inserted before the pages created by sphinx.
 # The format is a list of tuples containing the path and title.

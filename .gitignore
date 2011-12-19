@@ -9,6 +9,7 @@
 /docs/*
 /dist/*
 
+/documentation/_build/*
 
 /gateway/static/js/SlickGrid/
 /gateway/static/js/openlayers/
