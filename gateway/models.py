@@ -1,5 +1,6 @@
 """
-Models for the Gateway software.
+Database models for the Gateway software.
+
 """
 import random
 import uuid
@@ -14,16 +15,19 @@ import numpy as np
 from mako.template import Template
 import pytz
 import twilio
-from sqlalchemy import create_engine
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import DateTime
-from sqlalchemy import ForeignKey
-from sqlalchemy import String
-from sqlalchemy import Float
-from sqlalchemy import Boolean
-from sqlalchemy import Numeric
-from sqlalchemy import Unicode
+
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    DateTime,
+    ForeignKey,
+    String,
+    Float,
+    Boolean,
+    Numeric,
+    Unicode)
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker, relation
