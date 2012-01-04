@@ -8,6 +8,8 @@ This is a guide to the SharedSolar's database tables.
 
 Core tables
 -----------
+These table repersent 
+
 
 * Meters
 
@@ -34,17 +36,26 @@ Core tables
   .. autoclass:: gateway.models.Device
 
 * Users
+
   Table name: `user`
 
   .. autoclass:: gateway.models.Users
 
+* Group
+
+  Table name: `groups`
+  
+  .. autoclass:: gateway.models.Groups
+
 * Tokens
+
   Table name: `token`
 
   .. autoclass:: gateway.models.Token
 
 
 * Token Batches
+
   Table name: `tokenbatch`
 
   .. autoclass:: gateway.models.TokenBatch
@@ -82,3 +93,116 @@ of table inheritance that Postgresql supports*.
 
 Child tables
 ------------
+
+Child tables inherent columns from their parent classes. This allows
+for the Gateway code to query, for example, all of the jobs assoicated
+with an meter or circuit.
+
+
+CommunicationInterface
+++++++++++++++++++++++
+
+* TwilioInterface
+
+  .. autoclass:: gateway.models.TwilioInterface
+
+* KannelInterface
+
+  .. autoclass:: gateway.models.KannelInterface
+
+* AirtelInterface
+
+  .. autoclass:: gateway.models.AirtelInterface
+
+* YoInterface
+ 
+  .. autoclass:: gateway.models.YoInterface
+
+* NetbookInterface
+
+  .. autoclass:: gateway.models.NetbookInterface
+
+Messages
++++++++++
+
+* IncomingMessage
+
+  .. autoclass:: gateway.models.IncomingMessage
+
+* OutgoingMessage
+
+  .. autoclass:: gateway.models.OutgoingMessage
+
+
+* JobMessage
+
+  .. autoclass:: gateway.models.JobMessage
+
+Alerts
+++++++
+
+* UnresponsiveCircuit
+
+  .. autoclass:: gateway.models.UnresponsiveCircuit
+
+
+* PowerMax 
+
+  .. autoclass:: gateway.models.PowerMax
+
+* EnergyMax
+  
+  .. autoclass:: gateway.models.EnergyMax
+
+* LowCredit
+
+  .. autoclass:: gateway.models.LowCredit
+
+* NoCredit
+
+  .. autoclass:: gateway.models.NoCredit
+
+* UnresponsiveJob
+
+  .. autoclass:: gateway.models.UnresponsiveJob
+
+* PowerOn
+
+  .. autoclass:: gateway.models.PowerOn
+
+
+Logs
+++++
+
+* PCULog 
+
+  .. autoclass:: gateway.models.PCULog
+
+* PrimaryLog 
+
+   .. autoclass:: gateway.models.PrimaryLog
+
+
+Jobs
+++++ 
+
+* AddCredit
+
+  .. autoclass:: gateway.models.AddCredit
+
+* TurnOff
+
+  .. autoclass:: gateway.models.TurnOff
+
+* TurnOn
+
+  .. autoclass:: gateway.models.TurnOn
+
+* Mping
+
+  .. autoclass:: gateway.models.Mping
+
+* Cping
+
+  .. autoclass:: gateway.models.Cping
+

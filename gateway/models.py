@@ -24,7 +24,6 @@ from sqlalchemy import Float
 from sqlalchemy import Boolean
 from sqlalchemy import Numeric
 from sqlalchemy import Unicode
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker, relation
@@ -40,6 +39,9 @@ def get_now():
 
 class Groups(Base):
     """
+    The groups tables assign permissions to Gateway level urls.
+    Please see the Pyramid auth system for more details.
+    TODO, the column name should be changed to level for clarity.
     """
     __tablename__ = 'groups'
 
@@ -52,7 +54,11 @@ class Groups(Base):
 
 class Users(Base):
     """
-    Users
+    The Users table stores information about users that can log onto
+    the Gateway users interface. Users have an relation to a the
+    group.
+
+    These are not consumers that have circuits.
     """
     __tablename__ = 'users'
 
@@ -92,7 +98,6 @@ class Device(Base):
     """
     Devices are the Android applications that allow field vendors to
     sell credit to consumers without the need for SMS service.
-    
     """
     __tablename__ = 'devices'
     id = Column(Integer, primary_key=True)
@@ -156,8 +161,7 @@ class CommunicationInterface(Base):
 
     def sendJob(self, job, incoming=None):
         session = DBSession()
-        msg = JobMessage(job,
-                         incoming=incoming)
+        msg = JobMessage(job, incoming=incoming)
         session.add(msg)
         session.flush()
         self.sendData(msg)
@@ -165,6 +169,14 @@ class CommunicationInterface(Base):
 
 
 class TwilioInterface(CommunicationInterface):
+    """
+    This Communication interface allow for the gateway to communicate
+    with a meter via a Twilio system. Twilio is a system for sending
+    SMS text messages, but they only cover the USA.
+
+    This is subclass of a CommunicationInterface class.
+    """
+
     __tablename__ = 'twilio_interface'
     __mapper_args__ = {'polymorphic_identity': 'twilio_interface'}
 
@@ -205,7 +217,7 @@ class TwilioInterface(CommunicationInterface):
 class KannelInterface(CommunicationInterface):
     """
     Kannel Interface supports sending messages via a Kannel SMPP system.
-    Stores some basic information about where to post url
+    Includes Kannel speific information.
     """
     __tablename__ = 'kannel_interface'
     __mapper_args__ = {'polymorphic_identity': 'kannel_interface'}
@@ -246,6 +258,10 @@ class KannelInterface(CommunicationInterface):
 
 
 class AirtelInterface(CommunicationInterface):
+    """
+    This ComunicationInterface allow us to talk to WIFI, India..
+    Its a mess...
+    """
     __tablename__ = 'airtel_interface'
     __mapper_args__ = {'polymorphic_identity': 'airtel_interface'}
 
@@ -578,7 +594,8 @@ class Circuit(Base):
                 dates - list of date stamps corresponding to data list
                 data - list of reported data
         """
-        dates, created, data = self.getRawDataListForCircuit(quantity, dateStart, dateEnd)
+        dates, created, data = self.getRawDataListForCircuit(
+            quantity, dateStart, dateEnd)
         if len(dates) == 0:
             return [], []
         mask = []
@@ -768,19 +785,6 @@ class Message(Base):
 
     def respond(self):
         return
-
-
-class MeterMessages(Base):
-    """
-    Join table that assoicated messages with meters.
-    Takes a message and a meter.
-    """
-    __tablename__ = 'meter_messages'
-    id = Column(Integer, primary_key=True)
-    message_id = Column(Integer, ForeignKey('message.id'))
-    message = relation(Message, primaryjoin=message_id == Message.id)
-    meter_id = Column(Integer, ForeignKey('meter.id'))
-    meter = relation(Meter, primaryjoin=meter_id == Meter.id)
 
 
 class IncomingMessage(Message):
@@ -1192,6 +1196,9 @@ class PCULog(Log):
 
 
 class PrimaryLog(Log):
+    """
+    Primary logs table stores the hourly log from each circuit.
+    """
     __tablename__ = "primary_log"
     __mapper_args__ = {'polymorphic_identity': 'primary_log'}
     id = Column(Integer, ForeignKey('log.id'), primary_key=True)
@@ -1293,6 +1300,8 @@ class AddCredit(Job):
 
 
 class TurnOff(Job):
+    """
+    """
     __tablename__ = "turnoff"
     __mapper_args__ = {'polymorphic_identity': 'turnoff'}
     description = "This job turns off the circuit on the remote meter"
@@ -1306,6 +1315,8 @@ class TurnOff(Job):
 
 
 class TurnOn(Job):
+    """
+    """
     __tablename__ = "turnon"
     __mapper_args__ = {'polymorphic_identity': 'turnon'}
     description = "This job turns on the circuit off the remote meter"

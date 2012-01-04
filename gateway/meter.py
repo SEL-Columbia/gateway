@@ -53,8 +53,9 @@ def find_job_message(job, session):
 
 def update_circuit(msgDict, circuit, session):
     """
-    Function to update circuit based on message dictionary parsed from job delete.
-    Takes message dictionary, circuit object and session object.
+    Function to update circuit based on message dictionary parsed from
+    job delete.  Takes message dictionary, circuit object and session
+    object.
     """
     circuit.status = int(msgDict.get("status", circuit.status))
     circuit.credit = float(msgDict.get("cr", circuit.credit))
@@ -136,6 +137,7 @@ def make_pcu_logs(message, meter, session):
                  float(data[5]),
                  float(data[6]),
                  float(data[7]),
+                 float(data[8]),
                  meter)
     session.add(log)
     session.flush()
