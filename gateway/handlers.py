@@ -26,29 +26,32 @@ import pytz
 
 from gateway import dispatcher
 from gateway import models
-from gateway.models import DBSession
-from gateway.models import Meter
-from gateway.models import Circuit
-from gateway.models import PrimaryLog
-from gateway.models import Job
-from gateway.models import AddCredit
-from gateway.models import Account
-from gateway.models import TokenBatch
-from gateway.models import Token
-from gateway.models import Message
-from gateway.models import IncomingMessage
-from gateway.models import OutgoingMessage
-from gateway.models import SystemLog
-from gateway.models import Mping
-from gateway.models import MeterConfigKey
-from gateway.models import Users
-from gateway.models import Groups
-from gateway.models import MeterChangeSet
-from gateway.models import CommunicationInterface
-from gateway.models import TwilioInterface
-from gateway.models import Device
-from gateway.models import Alert
-from gateway.models import PCULog
+
+from gateway.models import (
+    DBSession,
+    Meter,
+    Circuit,
+    PrimaryLog,
+    Job,
+    AddCredit,
+    Account,
+    TokenBatch,
+    Token,
+    Message,
+    IncomingMessage,
+    OutgoingMessage,
+    SystemLog,
+    Mping,
+    MeterConfigKey,
+    Users,
+    Groups,
+    MeterChangeSet,
+    CommunicationInterface,
+    TwilioInterface,
+    Device,
+    Alert,
+    PCULog)
+
 # random junk that needs to be cleaned up.
 from gateway.utils import get_fields
 from gateway.utils import model_from_request
