@@ -387,24 +387,24 @@ class ManageHandler(object):
 
     @action(permission='view')
     def show_gaps_json(self):
-	default_end = datetime.now() + timedelta(days=1)
-        end = datetime.strptime(self.request.params.get('end', default_end.strftime("%m/%d/%Y")), '%m/%d/%Y')
-	default_start = end - timedelta(days=7)
+        default_end = datetime.now() + timedelta(days=1)
+        end = datetime.strptime(
+            self.request.params.get('end', default_end.strftime("%m/%d/%Y")), '%m/%d/%Y')
+        default_start = end - timedelta(days=7)
         start = datetime.strptime(self.request.params.get('start', default_start.strftime("%m/%d/%Y")), '%m/%d/%Y')
-	gap_seconds = int(self.request.params.get('gap', '5400'))
+        gap_seconds = int(self.request.params.get('gap', '5400'))
 
-	gap_res_set = PrimaryLog.get_gap_result(start, end, gap_seconds)
+        gap_res_set = PrimaryLog.get_gap_result(start, end, gap_seconds)
 
-        gap_rec_list = [ dict(rec) for rec in gap_res_set ]	
-	for i in range(0, len(gap_rec_list)):
-	    gap_rec_list[i]['id'] = i
+        gap_rec_list = [dict(rec) for rec in gap_res_set]
+        for i in range(0, len(gap_rec_list)):
+            gap_rec_list[i]['id'] = i
 
-	return Response(
-		content_type='application/json', 
-		body=simplejson.dumps(gap_rec_list, 
-		    default = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
-		    )
-		)
+        return Response(
+            content_type='application/json',
+            body=simplejson.dumps(
+                gap_rec_list,
+                default = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None))
 
     @action(renderer='manage/add_meter.mako', permission='admin')
     def add_meter(self):
@@ -442,11 +442,12 @@ class ManageHandler(object):
                 session.add(account)
                 session.flush()
                 # create the circuit
-                circuit = Circuit(meter=meter,
-                                  account=account,
-                                  ip_address=ip_address,
-                                  power_max=self.request.params.get('power-emax'),
-                                  energy_max=self.request.params.get('default-emax'))
+                circuit = Circuit(
+                    meter=meter,
+                    account=account,
+                    ip_address=ip_address,
+                    power_max=self.request.params.get('power-emax'),
+                    energy_max=self.request.params.get('default-emax'))
                 session.add(circuit)
                 session.flush()
             return HTTPFound(location='/manage/show_meters')
