@@ -8,7 +8,7 @@ README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-    'zope.interface==2.8.0'
+    'zope.interface==2.8.0',
     'repoze.errorlog',
     'GitPython',
     'psycopg2',
