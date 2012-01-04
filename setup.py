@@ -21,7 +21,7 @@ requires = [
     'pyramid_handlers',
     'python-dateutil',
     'simplejson',
-    'pyramid',
+    'pyramid==1.2',
     'pyramid_beaker',
     'formalchemy',
     'SQLAlchemy==0.6.8',
@@ -38,7 +38,7 @@ if sys.version_info[:3] < (2, 5, 0):
 setup(name='gateway',
       version='0.0',
       description='gateway',
-      long_description=README + '\n\n' +  CHANGES,
+      long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pylons",
@@ -55,7 +55,7 @@ setup(name='gateway',
       install_requires=requires,
       tests_require=requires,
       test_suite="gateway",
-      entry_points = """\
+      entry_points="""\
       [paste.app_factory]
       main = gateway:main
       """
