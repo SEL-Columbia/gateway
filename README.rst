@@ -3,37 +3,44 @@ gateway README
 Install
 =======
 
-Requirements:: 
+Requirements::
 
-  postgresql-8.4
-  python-psycopg2
-  python-matplotlib
-  python-setuptools
+  postgresql (and development headers)
+  git
+  setuptools
+  numpy
 
-#. Or in one command line on a debian/ubuntu system.:: 
+#. Or in one command line on a debian/ubuntu system. 
 
-  sudo apt-get install postgresql-8.4 python-psycopg2 
-  python-setuptools python-virtualenv git-core
+  Install python::
 
-  sudo apt-get install geos libgeos proj libproj
-  
-#. Create a virtual env.:: 
+   sudo apt-get install postgresql-9.1 git-core 
 
+  Install numpy::
+
+   sudo apt-get install python-numpy 
+
+  Install geos::
+
+   sudo apt-get install libgeos-dev
 
 #. Check out the gateway.::
 
-  git clone git://github.com/modilabs/gateway.git
+    git clone git://github.com/modilabs/gateway.git
+
+  
+#. Create a virtual env via the bootstrap command
+This command should install all of the require dependencies.::
+  
+  python bootstrap.py
 
 
-
-#. Activate the virtualenv:: 
-
-
-#. Install the python requirements::
-
-  python setup.py develop
+#. Activate the virtualenv::
+ 
+    source bin/activate
 
 #. Run the development server.::
  
   paster serve development.ini --reload
+
 
